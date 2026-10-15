@@ -1,0 +1,84 @@
+# Customer-support triage team.
+#
+# A triage lead plans each request on a shared task board, delegates order and
+# billing questions to members (who may consult each other), and hands refund
+# conversations to a refunds agent whose `issue_refund` tool waits for a human.
+#
+#   awa validate examples/blueprints/support_triage.yaml --tools examples/blueprints/support_tools.py
+#   awa show examples/blueprints/support_triage.yaml --mermaid
+#   awa run examples/blueprints/support_triage.yaml "Order 1001 arrived broken, I want my money back." \
+#       --tools examples/blueprints/support_tools.py --stream
+name: support-triage
+description: Answers customer requests about orders, invoices and refunds.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 20
+
+agents:
+  - name: triage
+    description: Receives every customer request, plans the work and writes the final reply.
+    instructions: |
+      You run first-line customer support.
+      1. Work out what the customer needs. For multi-part requests, create one task per
+         part on the task board.
+      2. Delegate order and shipping questions to order_specialist and invoice or payment
+         questions to billing_specialist. Give each a complete brief: customer request,
+         order or invoice numbers, and the answer you need back.
+      3. If the customer asks for a refund, transfer the conversation to refunds.
+      4. Reply to the customer in a friendly, concise message based only on your
+         specialists' findings. Never promise anything they did not confirm.
+    skills: [orchestration-planning, delegation-briefs]
+    capabilities: [triage]
+
+  - name: order_specialist
+    description: Looks up orders and shipments and explains their status.
+    instructions: |
+      Answer questions about orders and deliveries using lookup_order and track_shipment.
+      Report the facts you found, including order status, items and delivery dates.
+      Say plainly when an order cannot be found.
+    tools: [lookup_order, track_shipment]
+    capabilities: [orders, shipping]
+
+  - name: billing_specialist
+    description: Explains invoices, charges and payment status.
+    instructions: |
+      Answer questions about invoices and payments using lookup_invoice. When a charge
+      depends on an order's status, consult order_specialist before answering.
+    tools: [lookup_invoice]
+    capabilities: [billing]
+    skills: [agent-collaboration]
+
+  - name: refunds
+    description: Handles refund requests end to end and talks to the customer about them.
+    instructions: |
+      You handle refund requests.
+      1. Look up the order with lookup_order and check that it is eligible: it must be
+         delivered or damaged, and the refund must not exceed the order total.
+      2. Issue the refund with issue_refund. A human approves every refund; if it is
+         rejected, explain the reason to the customer.
+      3. Confirm the outcome to the customer. Transfer back to triage for anything that
+         is not about a refund.
+    tools: [lookup_order, issue_refund]
+    capabilities: [refunds]
+    skills: [safe-tool-execution]
+
+entrypoint: team
+
+team:
+  orchestrator: triage
+  members: [order_specialist, billing_specialist, refunds]
+  peers:
+    billing_specialist: [order_specialist]
+  handoffs:
+    triage: [refunds]
+    refunds: [triage]
+  task_board: true
+  limits:
+    max_delegation_depth: 3
+    max_calls_per_member: 10
+    max_handoffs: 4
+
+approvals:
+  - tool: issue_refund

@@ -1,0 +1,7 @@
+{
+  "message_id": "<demo-1@example.com>",
+  "from": "anna.keller@brauhaus-keller.example",
+  "date": "2026-10-05",
+  "subject": "Copy of invoice 2026-0412",
+  "text": "Hello, could you send me a copy of invoice 2026-0412? Thanks, Anna"
+}

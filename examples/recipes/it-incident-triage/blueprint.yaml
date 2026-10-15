@@ -1,0 +1,104 @@
+# IT incident triage: severity, paging, diagnosis, status updates and post-incident notes.
+#
+# The incident commander classifies each alert or report against the severity matrix,
+# opens the incident, pages the owning on-call rotation (a SEV1 page waits for the on-duty
+# engineer), and has the diagnostics engineer work through the runbook. The
+# communications lead drafts status updates (public ones wait for approval) and, after
+# resolution, the post-incident notes.
+#
+#   awa validate examples/recipes/it-incident-triage/blueprint.yaml \
+#       --tools examples/recipes/it-incident-triage/tools.py
+#   awa run examples/recipes/it-incident-triage/blueprint.yaml \
+#       "ALERT checkout: error rate 38%, customers cannot pay." \
+#       --tools examples/recipes/it-incident-triage/tools.py --stream
+name: it-incident-triage
+description: Triages IT incidents, pages responders, diagnoses and communicates.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+agents:
+  - name: incident_commander
+    description: Classifies incidents, opens them, pages responders and coordinates diagnosis and updates.
+    instructions: |
+      You are the incident commander for alerts and incident reports.
+      For a new alert or report:
+      1. Look up the service with get_service and set the severity:
+         SEV1 = a tier-1 customer-facing service is down (customers cannot complete its core
+         task, such as paying or logging in), or data loss or a security breach;
+         SEV2 = a tier-1 service is degraded, or a tier-2 service is down;
+         SEV3 = degraded with a workaround, or an internal service is affected;
+         SEV4 = cosmetic. When in doubt, choose the higher severity.
+      2. Open the incident with open_incident.
+      3. SEV1 and SEV2: page the owning rotation with page_responders first, on its own and
+         before any delegation (a SEV1 page waits for the on-duty engineer's approval). SEV3
+         and SEV4: do not page.
+      4. Delegate diagnosis to diagnostics_engineer (service, symptoms, incident id).
+      5. SEV1 and SEV2 on customer-facing services: delegate a public status update to
+         communications_lead with the incident id, impact and the diagnosis.
+      For a resolved incident: read it with get_incident (its id, service and severity stand
+      as recorded) and delegate the post-incident notes to communications_lead.
+      Finish with the incident record; next_steps are concrete actions with the runbook step.
+    tools: [get_service, open_incident, get_incident, page_responders]
+    skills: [escalation-triage, delegation-briefs]
+    output_schema:
+      type: object
+      description: The incident record for the ticketing system.
+      properties:
+        incident_id: {type: string}
+        service: {type: string}
+        severity: {enum: [SEV1, SEV2, SEV3, SEV4]}
+        status: {enum: [investigating, mitigating, resolved]}
+        paged: {type: boolean}
+        likely_cause: {type: string}
+        next_steps:
+          type: array
+          items: {type: string}
+        public_update_posted: {type: boolean}
+      required: [incident_id, service, severity, status, paged, likely_cause, next_steps, public_update_posted]
+
+  - name: diagnostics_engineer
+    description: Diagnoses an incident from health metrics, logs, recent deploys and the runbook.
+    instructions: |
+      Diagnose the incident in your brief. Use get_service_health, query_logs (last 30
+      minutes) and get_recent_deploys for the service, and lookup_runbook for its runbook.
+      Answer in four lines: "Impact:", "Evidence:" (metrics and log lines, with times),
+      "Likely cause:" (say "unknown" rather than guess) and "Mitigation:" (the runbook step
+      to run now, by number). Do not change anything yourself.
+    tools: [get_service_health, query_logs, get_recent_deploys, lookup_runbook]
+    skills: [root-cause-debugging]
+    capabilities: [diagnostics]
+
+  - name: communications_lead
+    acknowledge_ungated: [save_post_incident_notes]  # internal records of this demo; no person needed
+    description: Writes status updates during incidents and the post-incident notes afterwards.
+    instructions: |
+      You write incident communication.
+      - Status update: read the incident with get_incident and post one update with
+        post_status_update. Public updates (audience "public") are read by customers: at
+        most 60 words, what is affected, what we are doing, when the next update comes; no
+        internal names, no speculation about causes. Public updates wait for approval.
+      - Post-incident notes: read the incident with get_incident and save the notes with
+        save_post_incident_notes: summary, impact, timeline, root cause, what went well,
+        action items (each with an owner team and a due date).
+      Answer with what you posted or saved.
+    tools: [get_incident, post_status_update, save_post_incident_notes]
+    skills: [customer-communication, meeting-and-decision-notes]
+    capabilities: [communications]
+
+team:
+  orchestrator: incident_commander
+  members: [diagnostics_engineer, communications_lead]
+  messaging: false
+  limits:
+    max_delegation_depth: 1
+    max_calls_per_member: 2
+    delegation_timeout: 180
+
+approvals:
+  - tool: page_responders
+    when: tools:paging_needs_approval         # SEV1 pages the major-incident rotation
+  - tool: post_status_update
+    when: tools:status_update_needs_approval  # public status page updates

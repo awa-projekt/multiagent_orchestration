@@ -1,0 +1,442 @@
+# The role table: which role every module of src/awa plays (rule R1). Read by the guards GT1 and GT2.
+#
+# Roles
+#   domain       run semantics and pure logic (agents, teams, workflows, tools, memory, tasks, ...).
+#   protocol     a Protocol (or one-method callable) that a domain module needs, owned by its consumer.
+#   backend      the code that touches a driver or implements a backend protocol against a technology (SQLite,
+#                PostgreSQL, a JSON file, HTTP, SMTP); in-memory and file backends are backends too.
+#   backend-kit  helpers shared by the backends of one family (PostgreSQL plumbing); imports no backend.
+#   mixed        a backend protocol and its first backends in one module (legacy; the list only shrinks).
+#   root         where backends are chosen and wired, and the code that drives the library (CLI, HTTP server, UI).
+#   testing      test support that ships with the library (awa.testing).
+#   seam         the upstream anti-corruption layer (awa._internal.upstream, awa._compat for MCP), the only importer of LangChain.
+#   facade       every `__init__.py` (set automatically): re-exports, exempt from the direction rules.
+#
+# A package without an entry in [package] fails GT1, as a package without a layer in .importlinter
+# fails the import contract test.
+# [[override]] entries are checked: a path glob that matches no module, or two entries that match
+# one module, fail GT1, so every module has exactly one role whatever the order.
+
+[package]
+_compat = "seam"
+core = "domain"
+contracts = "domain"
+runtime = "domain"
+models = "domain"
+persistence = "domain"
+errors = "domain"
+_internal = "domain"   # private plumbing; its backends are listed as overrides below
+ext = "domain"       # the door of extension authors (only an `__init__`)
+kernel = "seam"      # the kernel imports LangChain, LangGraph and pydantic directly (not other awa modules)
+config = "domain"      # the public door of the .env loader and the settings registry
+agents = "domain"
+tools = "domain"
+toolkits = "domain"
+skills = "domain"
+memory = "domain"
+data = "domain"        # profiles of the user's files; its readers are backends (overrides below)
+guardrails = "domain"
+team = "domain"
+workflows = "domain"
+messaging = "domain"
+tasks = "domain"
+directory = "domain"
+connectors = "domain"
+mcp = "domain"
+people = "domain"     # the people directory; its readers are backends (overrides below)
+blueprints = "domain"
+quick = "root"
+refine = "domain"     # awa.refine: the refinement hook decorators of a project's refine.py
+evals = "domain"
+server = "root"        # the HTTP server drives the library and is a composition root
+automation = "domain"
+observability = "domain"
+testing = "testing"
+ui = "root"
+cli = "root"
+project_setup = "root" # awa setup: writes .env, runs docker compose for local services
+exporter = "root"      # awa export: reads a blueprint and writes a plain LangGraph project folder
+plugins = "domain"     # awa.plugins: the plugin registry and the component switches
+__main__ = "root"
+checks = "root"       # awa check: the Microsoft 365 checks
+
+[budget_exempt]
+"awa/exporter/__init__.py" = "awa export: renders in a temporary folder to check it, and writes the export folder atomically"
+"awa/exporter/_render.py" = "reads the project's tools and skill folders and the templates it renders"
+"awa/exporter/_refuse.py" = "reads the project's tools.py to refuse imports the export cannot carry"
+"awa/exporter/runtime_src/limits.py" = "copied into exports, which have no awa clock: measures the time of model and tool calls"
+"awa/exporter/runtime_src/skill_loader.py" = "copied into exports: reads the skill folders of the exported project"
+"awa/_internal/sandbox.py" = "the folder sandbox: the file backend of the code-execution toolkit"
+"awa/_internal/filelock.py" = "the lock file next to a file several writers update: waits on the real clock"
+# The importers of existing assets.
+"awa/agents/graph_agent.py" = "from_langgraph: runs a foreign graph, so it owns its run ids and timings"
+"awa/tools/importing.py" = "from_langchain: imports tool sources, reads the files and modules the caller names"
+"awa/skills/importing.py" = "import_skills: reads prompt and skill folders and writes SKILL.md files"
+# Modules that are the source of time or identifiers (GT8 does not count their calls).
+"awa/_internal/ids.py" = "the default id source; every other module asks it"
+"awa/runtime/clock.py" = "SystemClock: the real clock behind the Clock backend protocol"
+"awa/runtime/ids.py" = "UuidIds: the default id source behind the IdSource backend protocol"
+"awa/core/dotenv.py" = "the .env reader and writer: the one module that writes the project .env"
+"awa/core/_envparse.py" = "the .env parser: reads one file; the loader and the registry use it"
+"awa/core/config.py" = "the .env loader: the one place that reads the process environment and the project .env"
+"awa/plugins/_folder.py" = "FolderSource: the one module that reads the project folder for the plugin registry"
+"awa/plugins/switches.py" = "the legacy switch-file reader (read-only from the blueprint switch on)"
+"awa/core/settings_registry.py" = "the settings registry: reads the blueprint names a project declares in *_env keys"
+"awa/people/_file.py" = "PeopleFile: the file backend of config/people.yaml (role backend below; the package also holds domain code)"
+"awa/people/_local.py" = "LocalPeople: the file backend of a local people list (role backend below)"
+
+[[override]]
+path = "awa/exporter/runtime_src/*"
+role = "seam"
+why = "copied into every export, which runs on LangChain and LangGraph without awa: imports them directly like the kernel"
+[[override]]
+path = "awa/contracts/protocols.py"
+role = "protocol"
+why = "AgentLike: the interface a run target must satisfy"
+[[override]]
+path = "awa/runtime/clock.py"
+role = "protocol"
+why = "Clock backend protocol, with the system clock beside it (no driver, no state)"
+[[override]]
+path = "awa/runtime/ids.py"
+role = "protocol"
+why = "IdSource backend protocol, with the uuid source beside it"
+[[override]]
+path = "awa/runtime/engine.py"
+role = "protocol"
+why = "Engine: the execution engine port every agent, team and workflow runs through"
+[[override]]
+path = "awa/runtime/_langgraph.py"
+role = "backend"
+why = "the LangGraph adapter of the engine port"
+
+[[override]]
+path = "awa/connectors/ports.py"
+role = "protocol"
+why = "TokenProvider and Identity: how the connector engine gets a bearer token without knowing how it was obtained"
+[[override]]
+path = "awa/data/ports.py"
+role = "protocol"
+why = "Parser and UploadScanner: the interfaces awa.data is written against"
+
+# --- backends: drivers, files, HTTP, mail, processes ---------------------------------------------
+[[override]]
+path = "awa/plugins/_folder.py"
+role = "backend"
+why = "FolderSource: reads the project folder (tools.py, connectors/, skills/, agents/, plugins.py) for the plugin registry"
+[[override]]
+path = "awa/automation/_postgres.py"
+role = "backend"
+why = "PostgresRunStore, PostgresEventQueue"
+[[override]]
+path = "awa/automation/_sqlite.py"
+role = "backend"
+why = "SqliteRunStore: process runs in the local data file"
+[[override]]
+path = "awa/server/_store_copy.py"
+role = "backend"
+why = "copies the data between the SQLite file and PostgreSQL, table by table (sqlite3)"
+[[override]]
+path = "awa/automation/_trigger_mail.py"
+role = "backend"
+why = "IMAP mailbox trigger (imaplib)"
+[[override]]
+path = "awa/server/mcp.py"
+role = "backend"
+why = "MCP server transport (starlette, uvicorn)"
+[[override]]
+path = "awa/core/dotenv.py"
+role = "backend"
+why = "the .env reader (files, icacls process); the one environment reader besides Settings"
+[[override]]
+path = "awa/project_setup/services.py"
+role = "backend"
+why = "the docker compose backend of awa setup (a subprocess per command, a port bind test)"
+[[override]]
+path = "awa/core/webhooks.py"
+role = "backend"
+why = "signed webhook delivery over urllib"
+[[override]]
+path = "awa/persistence/sqlite.py"
+role = "backend"
+why = "SqliteCheckpointer"
+[[override]]
+path = "awa/persistence/runlog/sqlite.py"
+role = "backend"
+why = "SqliteRunLog: the run log in the local data file (sqlite3)"
+[[override]]
+path = "awa/persistence/runlog/postgres.py"
+role = "backend"
+why = "PostgresRunLog: the run log in PostgreSQL"
+[[override]]
+path = "awa/persistence/ledger.py"
+role = "backend-kit"
+why = "the migration runner of the SQLite and PostgreSQL schemas (sqlite3, psycopg)"
+[[override]]
+path = "awa/persistence/runlog/rows.py"
+role = "backend-kit"
+why = "column lists and row conversions shared by the run log backends"
+[[override]]
+path = "awa/persistence/runlog/protocol.py"
+role = "protocol"
+why = "RunLog: steps, attempts, results and approvals of process runs, with Scope and the records"
+[[override]]
+path = "awa/persistence/cache.py"
+role = "root"
+why = "SqliteCacheStore and InMemoryCacheStore (sqlite3), and open_cache_store and build_cache that choose one from the settings"
+[[override]]
+path = "awa/models/_http.py"
+role = "backend"
+why = "loop-local OpenAI HTTP client"
+[[override]]
+path = "awa/observability/langfuse.py"
+role = "backend"
+why = "Langfuse OTLP/HTTP export"
+[[override]]
+path = "awa/observability/otel.py"
+role = "backend"
+why = "OpenTelemetry export"
+[[override]]
+path = "awa/observability/spans.py"
+role = "backend-kit"
+why = "record_span: the zero-length span helper the domain and the backends share; imports no backend"
+[[override]]
+path = "awa/observability/trace_store.py"
+role = "backend"
+why = "the trace file writer"
+[[override]]
+path = "awa/connectors/_microsoft_auth.py"
+role = "backend"
+why = "the TokenProvider backend of the Microsoft user sign-in: device-code flow, token cache file with an operating-system lock"
+[[override]]
+path = "awa/connectors/_microsoft_cert.py"
+role = "backend"
+why = "the TokenProvider backend of the Microsoft certificate sign-in: reads the key file, signs with cryptography"
+[[override]]
+path = "awa/connectors/_local.py"
+role = "backend"
+why = "SMTP, IMAP and SQL connectors (stdlib drivers)"
+[[override]]
+path = "awa/mcp/_client.py"
+role = "backend"
+why = "MCP client connections"
+[[override]]
+path = "awa/_internal/http.py"
+role = "backend-kit"
+why = "the hardened HTTP client every HTTP backend shares"
+[[override]]
+path = "awa/toolkits/sql.py"
+role = "backend"
+why = "SQL toolkit (sqlite3, PyMySQL, pymssql)"
+[[override]]
+path = "awa/toolkits/_sql_schema.py"
+role = "backend"
+why = "SQL schema reading (sqlite3)"
+[[override]]
+path = "awa/toolkits/communication.py"
+role = "backend"
+why = "e-mail toolkit (smtplib)"
+
+[[override]]
+path = "awa/data/_tabular.py"
+role = "backend"
+why = "parser for delimited text files"
+[[override]]
+path = "awa/data/_excel.py"
+role = "backend"
+why = "parser for Excel workbooks (openpyxl, read lazily)"
+[[override]]
+path = "awa/data/_pdf.py"
+role = "backend"
+why = "parser for PDF files (pypdf, read lazily; runs in the worker process)"
+[[override]]
+path = "awa/data/_docx.py"
+role = "backend"
+why = "parser for Word documents (python-docx, read lazily)"
+[[override]]
+path = "awa/data/_text.py"
+role = "backend"
+why = "parser for plain text, Markdown and log files"
+[[override]]
+path = "awa/data/_mail.py"
+role = "backend"
+why = "parser for e-mail files and mbox archives"
+[[override]]
+path = "awa/data/_json.py"
+role = "backend"
+why = "parser for JSON and JSON Lines files"
+[[override]]
+path = "awa/data/_sqlite.py"
+role = "backend"
+why = "parser for SQLite files (sqlite3, read only)"
+[[override]]
+path = "awa/data/_source_rows.py"
+role = "backend"
+why = "LocalFileReader: the DataReader backend that reads the rows of the profiled files (sqlite3, csv, zip)"
+[[override]]
+path = "awa/data/_values.py"
+role = "backend"
+why = "local_values: reads column values again for the relation checks (the profiled files, through a DataReader)"
+[[override]]
+path = "awa/data/_isolate.py"
+role = "backend"
+why = "runs a parser in a separate, killable process (subprocess)"
+[[override]]
+path = "awa/data/_worker.py"
+role = "backend"
+why = "the child process of _isolate (python -m awa.data._worker)"
+[[override]]
+path = "awa/data/_ingest.py"
+role = "backend"
+why = "copies accepted files under safe names, unpacks archives (writes files)"
+
+# --- backend kits: shared plumbing of one backend family -------------------------------------------
+[[override]]
+path = "awa/persistence/sql.py"
+role = "backend-kit"
+why = "the PostgresTables, connection, pool and setup helpers of every PostgreSQL backend, and SqliteDatabase"
+
+# --- mixed: a backend protocol and its first backends in one module (legacy, shrinks as backend protocols move out) --------
+[[override]]
+path = "awa/persistence/artifacts.py"
+role = "mixed"
+why = "ArtifactRepository + memory, file and PostgreSQL backends"
+[[override]]
+path = "awa/persistence/threads.py"
+role = "mixed"
+why = "ThreadIndex, IdempotencyCache + SQLite and PostgreSQL backends"
+[[override]]
+path = "awa/automation/store.py"
+role = "mixed"
+why = "RunStore + memory and JSON file backends"
+[[override]]
+path = "awa/automation/queues.py"
+role = "mixed"
+why = "EventQueue + memory backend + QueueTrigger"
+[[override]]
+path = "awa/automation/notify.py"
+role = "mixed"
+why = "Notifier + WebhookNotifier"
+[[override]]
+path = "awa/messaging/bus.py"
+role = "mixed"
+why = "MessageBus + in-memory bus"
+[[override]]
+path = "awa/messaging/blackboard.py"
+role = "mixed"
+why = "BaseBlackboard + in-memory blackboard"
+[[override]]
+path = "awa/tasks/board.py"
+role = "mixed"
+why = "BaseTaskBoard + in-memory board"
+[[override]]
+path = "awa/server/_stores.py"
+role = "mixed"
+why = "the in-memory ThreadIndex and IdempotencyCache"
+[[override]]
+path = "awa/server/_limits.py"
+role = "mixed"
+why = "RateLimiter + token bucket"
+[[override]]
+path = "awa/tools/idempotency.py"
+role = "mixed"
+why = "IdempotencyStore + in-memory store (no durable backend yet)"
+[[override]]
+path = "awa/observability/audit.py"
+role = "mixed"
+why = "AuditSink + memory and JSONL backends"
+[[override]]
+path = "awa/toolkits/_search.py"
+role = "mixed"
+why = "SearchProvider + DuckDuckGo backend"
+
+# --- roots: composition and the code that drives the library ---------------------------------------------------------
+[[override]]
+path = "awa/automation/blueprint.py"
+role = "root"
+why = "builds an Automation (stores, queues, triggers) from a blueprint"
+[[override]]
+path = "awa/persistence/checkpointer.py"
+role = "root"
+why = "open_checkpointer: picks the checkpointer backend from Settings"
+[[override]]
+path = "awa/persistence/store.py"
+role = "root"
+why = "open_store: picks the store backend from Settings"
+[[override]]
+path = "awa/evals/runner.py"
+role = "root"
+why = "builds and runs an evaluation"
+[[override]]
+path = "awa/blueprints/_build.py"
+role = "root"
+why = "turns a blueprint into a running system"
+[[override]]
+path = "awa/blueprints/_build_loop.py"
+role = "root"
+why = "the build loop of the blueprint builder"
+[[override]]
+path = "awa/blueprints/_resolve.py"
+role = "root"
+why = "resolves names in a blueprint to objects"
+[[override]]
+path = "awa/blueprints/triggers.py"
+role = "root"
+why = "builds triggers (and their queues) from a blueprint"
+[[override]]
+path = "awa/blueprints/_project.py"
+role = "root"
+why = "project folders: the workspace"
+[[override]]
+path = "awa/blueprints/_project_files.py"
+role = "root"
+why = "project files (SQLite workspace database)"
+[[override]]
+path = "awa/blueprints/_connect.py"
+role = "root"
+why = "connects the systems a blueprint names"
+[[override]]
+path = "awa/blueprints/_declare.py"
+role = "root"
+why = "declares a project's systems: tests them, writes .env and data/SYSTEMS.json"
+[[override]]
+path = "awa/connectors/_structure.py"
+role = "root"
+why = "tests a declared system and reads its structure through the sql and OpenAPI backends"
+[[override]]
+path = "awa/blueprints/scaffold.py"
+role = "root"
+why = "writes new projects"
+
+# --- testing: test support that ships with the library ---------------------------------------------
+[[override]]
+path = "awa/_internal/http_fake.py"
+role = "testing"
+why = "MockTransport / FakeTransport: the in-memory HTTP transport extension authors test with"
+
+# --- people directory -------------------------------------------------------------------------------
+[[override]]
+path = "awa/people/ports.py"
+role = "protocol"
+why = "PeopleDirectory: what the people commands and the recipients need of a directory"
+[[override]]
+path = "awa/people/_entra.py"
+role = "backend"
+why = "EntraPeople: the PeopleDirectory backend over Microsoft Graph (HTTP through the connector engine)"
+[[override]]
+path = "awa/people/_local.py"
+role = "backend"
+why = "LocalPeople: the PeopleDirectory backend over a local CSV or YAML file"
+[[override]]
+path = "awa/people/_file.py"
+role = "backend"
+why = "PeopleFile: reads and writes config/people.yaml and the project's .gitignore"
+[[override]]
+path = "awa/people/_connect.py"
+role = "root"
+why = "wires the people file and the Entra backend into the Microsoft connectors"
+
+[[override]]
+path = "awa/_internal/upstream/*.py"
+role = "seam"
+why = "the upstream seam: the only importer of LangChain and LangGraph"

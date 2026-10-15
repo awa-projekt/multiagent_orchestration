@@ -1,0 +1,26 @@
+# The orchestrator example of the agent spec (docs/develop/agent-spec.md):
+# `system.delegation_brief` is the prompt section, `delegation:` the runtime limit.
+format_version: awa/v1
+name: invoice_process_led
+description: Runs the supplier-invoice process end to end.
+limits: {max_requests: 40}
+agents:
+  - name: invoice_process_lead
+    role: orchestrator
+    description: Runs the supplier-invoice process end to end. Entry point for each new invoice.
+    goal: Each invoice ends approved, blocked or escalated, with a reason.
+    system:
+      delegation_brief: |
+        Each brief states objective, output format, tools and sources to use, and boundaries.
+        Handle single-file lookups yourself; delegate only work matching a member's step.
+        Ask members for summaries, not raw rows.
+      output: "Per invoice: approved, blocked or escalated, and the reason in one sentence."
+    sub_agents: [check_invoice, write_letter]
+    delegation: {max_depth: 2, max_parallel: 4}
+    max_steps: 30
+  - name: check_invoice
+    role: worker
+    description: Checks supplier invoices against the price list. Use for every incoming supplier invoice.
+  - name: write_letter
+    role: worker
+    description: Drafts a letter to a supplier about a price deviation. Use when an invoice line deviates.

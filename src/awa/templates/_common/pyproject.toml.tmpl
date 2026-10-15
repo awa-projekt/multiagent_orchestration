@@ -1,0 +1,22 @@
+[project]
+name = "{{name}}"
+version = "0.1.0"
+description = "{{summary_line}}"
+requires-python = ">=3.11"
+# awa itself is not listed: it comes from the environment this project runs in (installed
+# from your local awa folder), never from a package index.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

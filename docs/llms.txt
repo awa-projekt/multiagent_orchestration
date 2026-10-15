@@ -1,0 +1,94 @@
+# awa
+
+> AI agents for business processes, with hard limits enforced in code, approvals before gated actions, eval cases, and an exit to plain LangGraph for single agents.
+
+## Documentation
+
+- [Home](index.md): awa helps you automate business processes with AI agents that run inside hard limits enforced by code and wait for a person's OK before the steps you choose.
+
+## Start
+
+- [Install](start/install.md): This page gets awa ready on your computer in three steps: install it, connect one model provider, and check the result with awa doctor.
+- [How awa works](start/how-awa-works.md): This page is the overview in pictures: how agents work together in awa, how they talk to each other, where the limits sit, and why the library is built the way it is.
+- [First automation](start/first-automation.md): This page gets a first process running in about ten minutes.
+
+## Guide
+
+- [Guided tour](guide/tour.md): This tour takes one process from a few sentences to a system that runs by itself.
+- [Set up a project](guide/setup.md): awa setup connects a project folder to a model.
+- [Describe a process](guide/describe.md): Tell awa in a few sentences what your process does, and awa drafts the system for you.
+- [Your files](guide/files.md): Use this page when your process works on files: invoices, orders, lists, emails.
+- [Connect systems](guide/connect.md): Use this page when your process must read from or write to one of your systems: a database, a web service, a mailbox or a ticket tool.
+- [Microsoft 365](guide/microsoft-365.md): Use this page when your process works with Microsoft 365 mail, files or Teams.
+- [Agents and teams](guide/agents-and-teams.md): Each step of a process is done by an agent: an AI model with one job, its tools and its rules.
+- [Approvals](guide/approvals.md): An approval makes a tool call wait for a person's decision before it runs.
+- [Test and improve](guide/test.md): Tests tell you, with numbers, whether your process still does the right thing.
+- [Run automatically](guide/run.md): Once your process passes its eval cases, let it work without you.
+- [Keep it running](guide/operate.md): This page is for a process that runs on its own.
+- [Langfuse](guide/langfuse.md): Langfuse is an open-source tracing tool that you can run on your own computer.
+- [The web app](guide/web-app.md): The web app takes you through a process in the browser, one page per step: from your description and your files to a system that you check, test, connect and start.
+- [Your own web frontend](guide/web-frontend.md): Use this page when you build your own web page or app on top of awa.
+- [Examples](guide/examples.md): The examples are small, finished processes you can copy.
+- [Troubleshooting](guide/troubleshooting.md): Use this page when something does not work.
+
+## Develop
+
+- [Quickstart](develop/quickstart.md): awa runs a business process with AI agents: a model does the work, and Python code sets the limits it works in.
+- [Agents](develop/agents.md): An Agent is one model with instructions, tools and limits.
+- [Models](develop/models.md): Every agent needs a chat model.
+- [Tools](develop/tools.md): A tool is a function the model of an agent may call to look something up or to act on a system.
+- [Skills](develop/skills.md): A skill is a folder with instructions for one kind of work, such as "how we handle refunds".
+- [Connectors](develop/connectors.md): A connector gives agents the tools of one external system, such as Jira, a REST API or a database.
+- [Teams and networks](develop/teams.md): Use a team when several agents handle one request together and a model decides who does what next.
+- [Workflows](develop/workflows.md): Use a workflow when you know the order of the steps.
+- [Data](develop/data.md): Before awa designs a process, it reads your files and writes a data profile: the tables, columns, number formats and problems they have.
+- [Memory and persistence](develop/memory.md): awa keeps four kinds of state: conversations and paused runs, what agents learned, facts and decisions, and large payloads.
+- [Safety](develop/safety.md): In awa a model only chooses within what your code allows.
+- [Testing](develop/testing.md): You test an awa system offline: a scripted chat model plays the model, and the real agent loop runs around it.
+- [Observability](develop/observability.md): Observability means you can see what a run did: which agent acted, which model and tool calls it made, what it cost, and where it stopped.
+- [Serving](develop/serving.md): Serving puts a system behind an HTTP API.
+- [Production](develop/production.md): This page shows how to run an awa project for real work: as a service that keeps running, answers requests, fires its triggers and keeps its data safe.
+- [MCP](develop/mcp.md): The Model Context Protocol (MCP) connects tools and assistants.
+- [Extend](develop/extend.md): You can add your own parts to awa without changing awa: tools, skills, connectors, models, agents, parsers and storage backends.
+- [Export](develop/export.md): awa export turns a project with one agent into a standalone LangChain and LangGraph project that runs without awa installed.
+- [Architecture](develop/architecture.md): awa builds on LangChain and LangGraph.
+- [Benchmark](develop/benchmarks.md): The core benchmark measures awa on eight scenarios, from company processes to automation and MCP.
+
+## Develop / Blueprints and settings
+
+- [Blueprints](develop/blueprints.md): A blueprint is one YAML (or JSON) file that describes your whole process: the agents that do the work, their tools and skills, how they work together, and which actions wait for a person.
+- [The project folder](develop/project-folder.md): A project is one plain folder that holds everything a process needs: the blueprint, your tools, your files, the tests and the settings.
+- [Agent spec](develop/agent-spec.md): Instead of one block of free-text instructions, an agent in a blueprint can describe its job in sections: a goal, the context, how to work, the rules.
+- [The process section](develop/process-section.md): The process: section of a blueprint is a line of steps.
+- [Configuration](develop/configuration.md): awa reads a few values from the environment: your model key, which models to use and where to keep state.
+- [Project map](develop/project-map.md): This page is a map of the awa repository: where something lives, what it is for, and where its tests and docs are.
+
+## Reference
+
+- [Reference](reference/index.md): Look up a command, a setting, a tool, a skill, a word or a Python name.
+- [Cheat sheet](reference/cheatsheet.md): Every awa command and the Python calls you use most, on one page.
+- [Command line](reference/cli.md): Every awa command with its options, generated from the CLI.
+- [Settings](reference/settings.md): Every setting awa reads, with its environment variable and default, generated from the code.
+- [Tools](reference/tools.md): Every built-in tool, its approval default and an example call.
+- [Skills](reference/skills.md): Every built-in skill and what it is for: 59 skills, generated from the code.
+- [Glossary](reference/glossary.md): The words used in awa, one sentence each.
+- [Exceptions](reference/exceptions.md): Every error awa raises on purpose, its code and whether a retry can help.
+
+## Reference / Python API
+
+- [Core](reference/api/core.md): The packages every awa program uses: load a blueprint, run it, read the result, choose the models and extend awa.
+- [Agents and tools](reference/api/agents.md): One agent and what it works with: tools, built-in toolkits, skills, memory, guardrails and the tools of MCP servers.
+- [Teams and workflows](reference/api/teams.md): Several agents working together: teams, networks, workflows and the boards, messages and directories they share.
+- [Data and connectors](reference/api/data.md): Your files and systems: file profiles, connectors to external systems, and where awa keeps state.
+- [Serve and operate](reference/api/server.md): Run a system as a web API, an MCP server or a background job, start it from triggers, trace it, evaluate it, test it offline and export it.
+
+## About
+
+- [About awa](about/index.md): awa (Agentic Work Automation) is programmed by cd-bits.
+- [Stability](about/stability.md): awa 1.0.0b1 is a beta.
+- [Why awa](about/why-awa.md): awa gets a business process running with a few AI agents that are tested before they run and controlled while they run.
+- [Roadmap](about/roadmap.md): This page shows where awa is heading: milestones in order, each with its goal and the functions it adds.
+
+## Contribute
+
+- [Web app design](develop/web-app-design.md): Read this page when you change the web app of awa ui.

@@ -1,0 +1,100 @@
+# Market brief from the open web: an orchestrator, a researcher, an analyst and a writer.
+#
+# The researcher finds and reads public pages (keyless web_search, fetch_url), the analyst checks
+# the findings and asks the researcher about the one it trusts least (peer consult), the writer
+# drafts the summary, and the orchestrator answers with a structured brief in which every fact carries
+# the page it came from and a verbatim quote of that page.
+#
+#   awa validate examples/benchmarks/core/01_market_brief/blueprint.yaml
+#   awa run examples/benchmarks/core/01_market_brief/blueprint.yaml --stream \
+#       "Brief on Debian, Ubuntu and Fedora: year of the first release."
+name: market-brief
+description: Researches a short list of products on the web and delivers a sourced brief.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+agents:
+  - name: brief_lead
+    description: Runs the brief from the question to the structured, sourced answer.
+    instructions: |
+      You deliver one sourced brief per request.
+      1. Delegate the research to researcher, naming the items of the request in the order
+         given.
+      2. Read the findings: every quote must contain the item's year and say when the item was
+         first released or first appeared (not a beta, a later version, a date stamp or a
+         header). If any does not, delegate to researcher once more, naming only those items and
+         asking for such a quote from the item's encyclopedia page, its history section or its
+         version-history page ("not found" only if none has it); merge the reply into the
+         findings and keep the year of the first release or appearance. Send back once per
+         request, never again.
+      3. Send the researcher's findings to analyst for a check.
+      4. Send the findings and the analyst's check to writer for the executive summary.
+      5. Answer with the structured brief: one item per requested item, in the order of the
+         request; name, key_fact, year, evidence and source_url copied unchanged from the
+         researcher's findings (fix a year only when the analyst proved it wrong); sources lists
+         every page used; gaps lists what could not be found.
+    output_schema:
+      type: object
+      description: The sourced brief.
+      properties:
+        topic: {type: string}
+        executive_summary: {type: string}
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name: {type: string}
+              key_fact: {type: string, description: One sentence stating the fact.}
+              year: {type: integer, description: Year of the first release or first appearance.}
+              evidence: {type: string, description: Verbatim quote (at most 25 words) from the page.}
+              source_url: {type: string}
+            required: [name, key_fact, year, evidence, source_url]
+        sources: {type: array, items: {type: string}}
+        gaps: {type: array, items: {type: string}}
+      required: [topic, executive_summary, items, sources, gaps]
+
+  - name: researcher
+    description: Finds public pages about the requested items and reads them.
+    instructions: |
+      Research every item of the brief on the web. Search with web_search (at most three
+      searches; prefer the encyclopedia page of each item), read the pages with fetch_url (at
+      most two pages per item) and report one bullet per item: name; the key fact; the year of
+      the first release or first appearance; the page URL; and a verbatim quote of at most 25
+      words from the fetched page that contains the year and states the release itself (never
+      a bare date stamp or page header). Quote only text you fetched. If the page has no such
+      sentence, fetch the item's encyclopedia page; write "not found" instead of guessing.
+    tools: [builtin:web_search, builtin:fetch_url]
+    capabilities: [research]
+
+  - name: analyst
+    description: Checks research findings for gaps and contradictions.
+    instructions: |
+      Check the findings you receive: every item has a year, a page URL and a quote that states
+      the year. Pick the item you trust least and confirm its year with the researcher using
+      consult_peer, then list every item as "confirmed" or "doubtful" with one sentence why.
+    capabilities: [analysis]
+
+  - name: writer
+    description: Writes the executive summary of a brief.
+    instructions: |
+      Write the executive summary from the findings and the check you receive: at most four
+      sentences that name every item with its year. State only what the findings say.
+    capabilities: [writing]
+
+team:
+  orchestrator: brief_lead
+  members: [researcher, analyst, writer]
+  peers: {analyst: [researcher]}
+  messaging: false
+  limits:
+    max_delegation_depth: 2
+    max_calls_per_member: 3
+    delegation_timeout: 180
+
+# fetch_url only reads public pages and no agent here holds private data to leak through a URL.
+tool_risks:
+  builtin:fetch_url: {external_action: false}

@@ -1,0 +1,111 @@
+# Customer support desk: triage, specialists, refunds with a human gate, shared memory.
+#
+# Triage identifies the customer, answers how-to questions from the knowledge base and
+# hands billing, technical and returns conversations to specialists, who hand back when
+# the topic changes. Refunds above 50.00 wait for a support lead. What the desk learns
+# about a customer (preferences, open promises) is remembered for the next conversation.
+#
+#   awa validate examples/recipes/customer-support-desk/blueprint.yaml \
+#       --tools examples/recipes/customer-support-desk/tools.py
+#   awa chat examples/recipes/customer-support-desk/blueprint.yaml \
+#       --tools examples/recipes/customer-support-desk/tools.py
+name: customer-support-desk
+description: Answers customer requests end to end, with specialists, refunds and human escalation.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+agents:
+  - name: triage
+    description: First contact; identifies the customer, answers how-to questions and routes the rest.
+    instructions: |
+      You are the first contact of the support desk.
+      1. Identify the customer with lookup_customer (ask for the customer number if it is
+         missing). Check what you already know about them with recall.
+      2. Answer how-to questions yourself from search_knowledge_base; quote the steps.
+      3. Transfer the conversation: billing, charges and invoices -> billing_specialist;
+         bugs, outages and sync problems -> technical_specialist; orders, returns and
+         damaged items -> returns_specialist.
+      4. Escalate with escalate_to_human when the customer asks for a person, mentions a
+         lawyer or a complaint to an authority, or has contacted us three times about the
+         same problem. Give the ticket number and the reply time.
+      5. Remember lasting facts with remember, always starting with the customer number
+         (for example "C-1001: prefers email, no phone calls").
+      Reply in the customer's language, in at most 120 words; never promise what a tool
+      did not confirm.
+    tools: [lookup_customer, search_knowledge_base, escalate_to_human]
+    skills: [customer-communication, handoff-protocol]
+    capabilities: [triage]
+    memory: {scope: team, auto_recall: 3}
+    compaction: {max_tokens: 12000, keep_last_messages: 12}
+
+  - name: billing_specialist
+    description: Explains charges and invoices, refunds duplicate or wrong charges.
+    instructions: |
+      You resolve billing questions.
+      1. Check the customer's payments with lookup_invoices before you answer.
+      2. A duplicate or wrong charge is refunded with issue_refund (reason "duplicate
+         charge" or "billing error"); refunds above 50.00 wait for a support lead.
+      3. Explain what happened and when the money arrives, citing the invoice number.
+      4. Remember the outcome (starting with the customer number) and transfer back to
+         triage for anything that is not about billing.
+    tools: [lookup_invoices, issue_refund, escalate_to_human]
+    skills: [customer-communication, safe-tool-execution]
+    capabilities: [billing]
+    memory: {scope: team, auto_recall: 3}
+    compaction: {max_tokens: 12000, keep_last_messages: 12}
+
+  - name: technical_specialist
+    description: Diagnoses product problems, known outages and sync issues.
+    instructions: |
+      You solve technical problems.
+      1. Check get_service_status for the affected component first. During an incident,
+         give the incident id, what is affected and the time of the next update, and do
+         not start troubleshooting.
+      2. Otherwise use search_knowledge_base and walk the customer through the steps one
+         at a time.
+      3. Escalate with escalate_to_human (priority "high") if the steps do not help.
+      4. Transfer back to triage for anything that is not technical.
+    tools: [get_service_status, search_knowledge_base, escalate_to_human]
+    skills: [customer-communication, root-cause-debugging]
+    capabilities: [technical]
+    memory: {scope: team, auto_recall: 3}
+    compaction: {max_tokens: 12000, keep_last_messages: 12}
+
+  - name: returns_specialist
+    acknowledge_ungated: [create_return_label]  # internal records of this demo; no person needed
+    description: Handles orders, returns, damaged items and their refunds.
+    instructions: |
+      You handle orders and returns.
+      1. Look up the order with lookup_order and check that it belongs to the customer.
+      2. Damaged items: refund the full order total with issue_refund (reason "damaged
+         on delivery"), no return needed. Other returns within 30 days of delivery:
+         create_return_label; the refund follows when the item arrives.
+      3. Refunds above 50.00 wait for a support lead. If a refund is rejected, explain the
+         reviewer's reason and offer escalate_to_human.
+      4. Remember the outcome (starting with the customer number) and transfer back to
+         triage for anything that is not about an order.
+    tools: [lookup_order, create_return_label, issue_refund, escalate_to_human]
+    skills: [customer-communication, safe-tool-execution]
+    capabilities: [returns]
+    memory: {scope: team, auto_recall: 3}
+    compaction: {max_tokens: 12000, keep_last_messages: 12}
+
+team:
+  orchestrator: triage
+  members: [billing_specialist, technical_specialist, returns_specialist]
+  delegates: {}
+  handoffs:
+    triage: [billing_specialist, technical_specialist, returns_specialist]
+    billing_specialist: [triage]
+    technical_specialist: [triage]
+    returns_specialist: [triage]
+  messaging: false
+  limits:
+    max_handoffs: 3
+
+approvals:
+  - tool: issue_refund
+    when: tools:refund_needs_approval     # above 50.00; smaller refunds run directly

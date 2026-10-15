@@ -1,0 +1,7 @@
+supplier_id,name,category,email,status,note
+S-100,Alpina Office Supplies GmbH,office,orders@alpina-office.example,approved,Framework contract 2026
+S-101,Kern IT Distribution AG,it-hardware,sales@kern-it.example,approved,Framework contract 2026
+S-102,Nordwind Maschinenbau GmbH,machinery,vertrieb@nordwind-maschinen.example,approved,
+S-103,BlitzParts Trading Ltd,it-hardware,hello@blitzparts.example,blocked,Failed sanctions screening
+S-104,Hartmann Catering KG,catering,kontakt@hartmann-catering.example,approved,
+S-105,Pixel Print Studio,marketing,studio@pixelprint.example,pending,Onboarding not finished

@@ -1,0 +1,12 @@
+invoice,supplier,category,amount_eur,month
+R-001,Nordwind GmbH,steel,12000.50,2024-07
+R-002,Nordwind GmbH,steel,11230.00,2024-08
+R-003,Nordwind GmbH,steel,13500.00,2024-09
+R-004,Nordwind GmbH,tooling,11500.00,2024-09
+R-005,Alpha Logistik,freight,9800.00,2024-07
+R-006,Alpha Logistik,freight,10250.75,2024-08
+R-007,Alpha Logistik,freight,8900.00,2024-09
+R-008,Kowalski Stahl,steel,15400.00,2024-08
+R-009,Kowalski Stahl,steel,7300.00,2024-09
+R-010,Lyon Emballages,packaging,4100.25,2024-07
+R-011,Lyon Emballages,packaging,3950.00,2024-09

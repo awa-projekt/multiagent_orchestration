@@ -1,0 +1,151 @@
+site_name: awa
+site_description: AI agents for business processes, with hard limits enforced in code, approvals before gated actions, eval cases, and an exit to plain LangGraph for single agents.
+site_author: cd-bits
+copyright: Copyright &copy; 2026 cd-bits. Released under the MIT license.
+docs_dir: docs
+strict: true
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            filters: ["!^_"]
+            heading_level: 2
+
+nav:
+  - Home: index.md
+  - Start:
+      - Install: start/install.md
+      - How awa works: start/how-awa-works.md
+      - First automation: start/first-automation.md
+  - Guide:
+      - Guided tour: guide/tour.md
+      - Set up a project: guide/setup.md
+      - Describe a process: guide/describe.md
+      - Your files: guide/files.md
+      - Connect systems: guide/connect.md
+      - Microsoft 365: guide/microsoft-365.md
+      - Agents and teams: guide/agents-and-teams.md
+      - Approvals: guide/approvals.md
+      - Test and improve: guide/test.md
+      - Run automatically: guide/run.md
+      - Keep it running: guide/operate.md
+      - Langfuse: guide/langfuse.md
+      - The web app: guide/web-app.md
+      - Your own web frontend: guide/web-frontend.md
+      - Examples: guide/examples.md
+      - Troubleshooting: guide/troubleshooting.md
+  - Develop:
+      - Quickstart: develop/quickstart.md
+      - Agents: develop/agents.md
+      - Models: develop/models.md
+      - Tools: develop/tools.md
+      - Skills: develop/skills.md
+      - Connectors: develop/connectors.md
+      - Teams and networks: develop/teams.md
+      - Workflows: develop/workflows.md
+      - Data: develop/data.md
+      - Memory and persistence: develop/memory.md
+      - Safety: develop/safety.md
+      - Testing: develop/testing.md
+      - Observability: develop/observability.md
+      - Serving: develop/serving.md
+      - Production: develop/production.md
+      - MCP: develop/mcp.md
+      - Extend: develop/extend.md
+      - Export: develop/export.md
+      - Architecture: develop/architecture.md
+      - Benchmark: develop/benchmarks.md
+      - Blueprints and settings:
+          - Blueprints: develop/blueprints.md
+          - The project folder: develop/project-folder.md
+          - Agent spec: develop/agent-spec.md
+          - The process section: develop/process-section.md
+          - Configuration: develop/configuration.md
+          - Project map: develop/project-map.md
+  - Reference:
+      - reference/index.md
+      - Cheat sheet: reference/cheatsheet.md
+      - Command line: reference/cli.md
+      - Settings: reference/settings.md
+      - Tools: reference/tools.md
+      - Skills: reference/skills.md
+      - Glossary: reference/glossary.md
+      - Exceptions: reference/exceptions.md
+      - Python API:
+          - Core: reference/api/core.md
+          - Agents and tools: reference/api/agents.md
+          - Teams and workflows: reference/api/teams.md
+          - Data and connectors: reference/api/data.md
+          - Serve and operate: reference/api/server.md
+  - About:
+      - About awa: about/index.md
+      - Stability: about/stability.md
+      - Why awa: about/why-awa.md
+      - Roadmap: about/roadmap.md
+  - Contribute:
+      - Web app design: develop/web-app-design.md

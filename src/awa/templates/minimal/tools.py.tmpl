@@ -1,0 +1,36 @@
+"""Tools for blueprint.yaml, backed by small in-memory sample data.
+
+Every documented function listed in `__all__` is a tool: its signature is the
+argument schema and its docstring the description the model reads. Replace the
+sample data with calls to your own systems.
+"""
+
+from __future__ import annotations
+
+import json
+
+ACCOUNTS: dict[str, dict[str, object]] = {
+    "A-100": {"name": "Acme GmbH", "plan": "Pro", "open_invoices": 0, "owner": "dana"},
+    "A-200": {"name": "Globex Ltd", "plan": "Starter", "open_invoices": 2, "owner": "sam"},
+}
+TICKETS: list[dict[str, str]] = []
+
+
+def lookup_account(account_id: str) -> str:
+    """Return the name, plan, open invoices and owner of a customer account."""
+
+    account = ACCOUNTS.get(account_id)
+    return json.dumps(account) if account else f"No account {account_id!r} found."
+
+
+def create_ticket(account_id: str, summary: str) -> str:
+    """Open a follow-up ticket for an account. Requires human approval."""
+
+    if account_id not in ACCOUNTS:
+        return f"No account {account_id!r} found."
+    ticket_id = f"T-{len(TICKETS) + 1:03d}"
+    TICKETS.append({"id": ticket_id, "account": account_id, "summary": summary})
+    return f"Opened ticket {ticket_id} for {account_id}."
+
+
+__all__ = ["create_ticket", "lookup_account"]

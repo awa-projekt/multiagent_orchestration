@@ -1,0 +1,68 @@
+# {{name}}: a lead plans tasks on a board; teammates work on them concurrently.
+#
+# The campaign lead breaks a launch request into tasks with dependencies. The market
+# analyst and the copywriter each claim the ready tasks that match their capability and
+# hand their results back; the lead then writes the summary. Scheduling a post waits
+# for a human: the task is parked, everything else goes on, and the run pauses until
+# the decision comes in.
+#
+#   awa validate blueprint.yaml
+#   awa show blueprint.yaml --mermaid
+#   awa run blueprint.yaml "Launch the analytics add-on for small businesses."
+name: {{name}}
+description: Plans and prepares product launch posts with an analyst and a copywriter.
+version: 0.1.0
+
+defaults:
+  model: {{model}}
+  max_steps: 10
+
+agents:
+  - name: campaign_lead
+    description: Plans each launch on the task board and summarizes the result.
+    instructions: |
+      Plan the launch in one create_tasks call:
+      1. key "audience", "Profile the audience", required_capabilities [analysis]: the
+         description names the product and the segment from the request.
+      2. key "post", "Write and schedule the post", required_capabilities [copy],
+         depends_on ["audience"]: the description names the product and the channel
+         (linkedin unless the request names another).
+      When the results come back, answer with a short launch summary: the audience in
+      one line, the post, and whether it is scheduled.
+    capabilities: [coordination]
+
+  - name: market_analyst
+    description: Profiles the audience segment of a launch.
+    instructions: |
+      Look up the segment named in your task with lookup_segment and answer with its
+      needs and the tone that works, in two lines.
+    tools: [lookup_segment]
+    capabilities: [analysis]
+
+  - name: copywriter
+    description: Writes launch posts and schedules them.
+    instructions: |
+      Write a post of at most 60 words for the product and audience in your task, then
+      schedule it with schedule_post on the channel your task names. Answer with the
+      post and the scheduling result.
+    tools: [schedule_post]
+    capabilities: [copy]
+
+network:
+  lead: campaign_lead
+  teammates: [market_analyst, copywriter]
+  peers: all
+  limits:
+    max_tasks: 6
+    max_lead_turns: 6
+    run_timeout: 600
+
+approvals:
+  - tool: schedule_post          # every post waits for a human
+
+# The most one run may use, also a run a trigger starts. Options such as
+# `awa run --max-requests` can only tighten it.
+limits:
+  max_requests: 50
+  max_total_tokens: 200000
+  max_duration: 5m

@@ -1,0 +1,18 @@
+# Cases of benchmark scenario 5 (agent network). Expected values come from data/spend.csv and
+# data/deliveries.json: Nordwind GmbH has the highest spend (48,230.50 EUR), Alpha Logistik the
+# highest average delay (19 days over 3 deliveries, 6.33 days). `metadata.checks` names code
+# scorers (scorers.py): all tasks completed, handbacks received, the memo task finished after the
+# two analyses, the blackboard used.
+name: supplier-risk-network
+cases:
+  - id: q3-supplier-risk-memo
+    input: Supplier risk memo for Q3, from the invoice file (spend.csv) and the delivery file (deliveries.json).
+    tags: [network, task-board, blackboard]
+    metadata:
+      checks: [tasks_completed, dependency_order, blackboard_used]
+    scorers:
+      - "regex:Nordwind GmbH"
+      - "regex:48[.,]?230[.,]50"
+      - "regex:Alpha Logistik"
+      - "regex:6[.,]3"
+      - "judge:The memo combines the highest-spend supplier and the slowest supplier, names the risk that follows from the combination and gives one next step, using only the figures of the analyses."

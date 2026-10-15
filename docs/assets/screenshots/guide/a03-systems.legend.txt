@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. The ledger, under the name you gave it.
+2. Live: the design reads the real ledger, read-only.
+3. What awa read: the table and its columns. No rows.
+4. Where the address is saved: in .env, never shown again.

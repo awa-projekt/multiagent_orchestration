@@ -1,0 +1,16 @@
+# Eval cases for blueprint.yaml, run against the real model:
+#
+#   awa eval blueprint.yaml evals/cases.yaml
+#
+# Scorers: contains, json_fields (structured-output fields equal `expected`),
+# tool:<name>, no_tool:<name>, max_tokens:<n>, "judge:<criteria>".
+name: {{name}}
+cases:
+  - id: retention-breach
+    input: Review document DOC-7.
+    expected: {verdict: revise}
+    scorers: [json_fields, "tool:fetch_document", "tool:lookup_policy"]
+
+  - id: unknown-document
+    input: Review document DOC-404.
+    scorers: ["tool:fetch_document", "max_tokens:60000"]

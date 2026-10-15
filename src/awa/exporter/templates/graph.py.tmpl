@@ -1,0 +1,36 @@
+"""${title}: exported from an awa blueprint (see NOTICE.md).
+
+The graph is plain LangChain and LangGraph. Edit it freely; nothing syncs back to awa.
+"""
+
+from __future__ import annotations
+
+${imports}
+
+${constants}
+
+
+def build_graph(model: BaseChatModel | None = None, checkpointer: Any = None) -> Any:
+    """Build the agent graph.
+
+    Args:
+        model: A chat model that replaces the configured one (tests pass a scripted model).
+        checkpointer: A LangGraph checkpointer. Approvals pause the run and need one.
+    """
+
+    if model is None:
+        # Created on first use, so importing this module needs no credentials.
+        model = init_chat_model(MODEL, configurable_fields=("model",), **MODEL_KWARGS)
+${tools}
+${middleware}
+    return create_agent(
+        model,
+        tools,
+        system_prompt=PROMPT,
+        middleware=middleware,${response_format}
+        checkpointer=checkpointer,
+        name="${agent}",
+    )
+
+
+graph = build_graph()

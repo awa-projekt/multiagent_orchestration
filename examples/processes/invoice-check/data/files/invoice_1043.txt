@@ -1,0 +1,6 @@
+Invoice RE-1043
+Supplier: ACME GmbH
+Date: 2026-10-01
+Lines:
+- A-200 Toner cartridge, quantity 2, unit price 85.00
+Total: 170.00

@@ -1,0 +1,16 @@
+# Settings for {{name}}. Copy to .env and fill in what you use; never commit .env.
+# awa reads the environment and a .env file in the working directory.
+
+# Provider credentials: only the provider(s) your models point at.
+ANTHROPIC_API_KEY=
+# OPENAI_API_KEY=
+
+# Model profiles ("provider:model"). Agents use the model named in
+# blueprint.yaml (defaults.model); the built-in profiles are:
+# AWA_DEFAULT_MODEL=anthropic:claude-sonnet-5-5
+# AWA_FAST_MODEL=anthropic:claude-haiku-5-5
+# AWA_STRONG_MODEL=anthropic:claude-opus-5-5
+
+# Runtime: local, test, staging or production.
+AWA_ENV=local
+AWA_LOG_LEVEL=INFO

@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The count: files, tables, rows, warnings and errors.
+2. One line for each file: what it is and what awa read.
+3. A column of the purchase orders. awa found that it holds decimal numbers.

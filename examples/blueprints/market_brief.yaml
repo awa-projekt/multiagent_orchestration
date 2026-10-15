@@ -1,0 +1,105 @@
+# A role tree: an orchestrator, a researcher with a sub-agent, a writer that a judge gates and two
+# reviewers that read once. See docs/develop/teams.md.
+#
+#   awa validate examples/blueprints/market_brief.yaml
+#   awa show examples/blueprints/market_brief.yaml
+#   awa eval examples/blueprints/market_brief.yaml examples/evals/market_brief_cases.yaml
+#   awa eval examples/blueprints/market_brief.yaml examples/evals/market_brief_judge_cases.yaml \
+#       --agent fact_judge
+#
+# What the roles build (names are generated from the agents):
+#   lead                     the team of the blueprint, led by the orchestrator `lead`
+#   |- researcher_team       `researcher` leading its sub-agent `citation_checker`
+#   `- brief_writer_checked  `brief_writer`, gated by `fact_judge` (at most 3 rounds), then read
+#                            once by `privacy_reviewer` and `tone_reviewer`
+format_version: awa/v1
+name: market_brief
+description: Researches a market question and delivers a short brief with sources that a judge checked and two reviewers read.
+version: 1.0.0
+
+defaults:
+  model: fast
+  max_steps: 20
+
+# The web tools read only these hosts, so the judge and the reviewers stay read-only
+# (a tool that can reach any URL can also send data out). Replace them with your sources.
+toolkits:
+  web:
+    allowed_hosts: ["en.wikipedia.org"]
+
+# A role tree runs several agents and a judge loop; cap the whole run.
+limits:
+  max_requests: 120
+  max_total_tokens: 600000
+  max_tool_calls: 100
+
+agents:
+  - name: lead
+    role: orchestrator
+    description: Plans the brief, delegates research and writing, and reports the outcome.
+    instructions: |
+      You coordinate market briefs. You do no research and no writing yourself.
+      1. Delegate fact finding to researcher_team with one precise question and the output you expect.
+      2. Delegate drafting to brief_writer_checked with the facts and their source URLs.
+      3. If the result starts with ESCALATED or NOT ACCEPTED, stop and tell the user what is
+         unresolved and why. Otherwise deliver the draft and list every reviewer finding the
+         REVIEWS section marks as BLOCKER or MAJOR.
+    skills: [orchestration-planning, delegation-briefs]
+    sub_agents: [researcher, brief_writer]
+    max_iterations: 3          # how often the judge may send the brief back
+
+  - name: researcher
+    role: worker
+    description: Finds facts on the web and returns them with source URLs.
+    instructions: |
+      Search, open the sources and return at most eight facts, each with its URL.
+      Ask citation_checker to verify every quote you rely on. Say plainly when nothing is found.
+    tools: [builtin:web_search, builtin:fetch_url]
+    skills: [research-synthesis, source-verification]
+    sub_agents: [citation_checker]
+
+  - name: citation_checker
+    role: worker
+    description: Checks that a quoted passage really appears in its source.
+    instructions: Given a quote and a URL, confirm or refute it. Return the exact matching passage, or say that it is absent.
+    tools: [builtin:verify_quote]
+
+  - name: brief_writer
+    role: worker
+    description: Writes a brief of at most 150 words from the facts it is given, citing each source.
+    instructions: |
+      Write the brief only from the facts you are given. Put the source URL after every claim.
+      If you receive feedback, fix exactly the criteria that failed and keep the rest.
+    skills: [writing, report-generation]
+
+  - name: fact_judge
+    role: judge
+    judges: brief_writer
+    model: strong
+    description: Decides whether the brief may be delivered.
+    instructions: |
+      Open the cited sources yourself with your tools; do not trust the writer's summary.
+      Report one result per criterion with the evidence you found.
+    rubric:
+      - Every factual claim is followed by a URL that supports it.
+      - No claim contradicts what the cited page says, checked by opening the page.
+      - The brief has at most 150 words.
+    tools: [builtin:fetch_url, builtin:verify_quote]
+
+  - name: privacy_reviewer
+    role: reviewer
+    reviews: brief_writer
+    description: Reads the final brief for personal data and unsupported superlatives.
+    rubric:
+      - The brief names no private person and contains no contact data.
+      - Words such as leading or best are backed by a cited figure.
+    skills: [security-review]
+
+  - name: tone_reviewer
+    role: reviewer
+    reviews: brief_writer
+    description: Reads the final brief for tone and clarity for a business reader.
+    rubric:
+      - The tone is neutral and professional, without marketing wording.
+      - A reader outside the field can follow each sentence without a glossary.
+    skills: [quality-review]

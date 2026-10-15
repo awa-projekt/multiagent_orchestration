@@ -1,0 +1,41 @@
+name: Set up awa
+description: >-
+  Python, a pinned uv and the environment from uv.lock (the given extras) on the job's
+  interpreter, with the environment's scripts on PATH.
+
+inputs:
+  python-version:
+    description: Python version of the job.
+    default: "3.13"
+  extras:
+    description: Extras to install from uv.lock, separated by spaces.
+    default: "dev docs"
+  install-project:
+    description: Install awa itself from the checkout (false installs its dependencies only).
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - id: python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+        allow-prereleases: true
+    - uses: astral-sh/setup-uv@v7
+      with:
+        version: "0.11.3"
+        enable-cache: true
+        cache-dependency-glob: uv.lock
+    - name: Sync the locked environment
+      shell: bash
+      run: |
+        args=()
+        for extra in ${{ inputs.extras }}; do args+=(--extra "$extra"); done
+        if [ "${{ inputs.install-project }}" = "false" ]; then args+=(--no-install-project); fi
+        uv sync --frozen "${args[@]}" --python "${{ steps.python.outputs.python-path }}"
+        if [ "$RUNNER_OS" = "Windows" ]; then
+          echo "$GITHUB_WORKSPACE\\.venv\\Scripts" >> "$GITHUB_PATH"
+        else
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+        fi

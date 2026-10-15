@@ -1,0 +1,16 @@
+# Eval cases for blueprint.yaml, run against the real model:
+#
+#   awa eval blueprint.yaml evals/cases.yaml
+#
+# Scorers: contains (every phrase of `expected` is in the reply), tool:<name>,
+# no_tool:<name>, delegated:<agent>, approval:<tool>, max_tokens:<n>,
+# "judge:<criteria>" (a model grades the reply).
+name: {{name}}
+cases:
+  - id: small-business-launch
+    input: Launch the analytics add-on for small businesses.
+    scorers: ["delegated:market_analyst", "tool:lookup_segment", "approval:schedule_post"]
+
+  - id: enterprise-launch
+    input: Launch the analytics add-on for enterprises on the newsletter.
+    scorers: ["delegated:market_analyst", "tool:lookup_segment", "approval:schedule_post"]

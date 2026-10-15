@@ -1,0 +1,80 @@
+# Supplier risk memo by an agent network: a lead and three teammates on a shared task board.
+#
+# The lead plans three tasks with a dependency: the spend analysis and the delivery analysis
+# run at the same time, the memo depends on both. Teammates claim the tasks that match their
+# capability, share their findings on the blackboard and hand their results back to the lead,
+# who writes the final answer once every handback is in.
+#
+#   awa validate examples/benchmarks/core/05_agent_network/blueprint.yaml
+#   awa run examples/benchmarks/core/05_agent_network/blueprint.yaml --stream \
+#       "Supplier risk memo for Q3."
+name: supplier-risk-network
+description: Combines spend and delivery data into a supplier risk memo.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 10
+
+toolkits:
+  files: {root: ./data}
+
+agents:
+  - name: risk_lead
+    description: Plans the supplier risk memo on the task board and writes the final answer.
+    instructions: |
+      You lead one supplier risk memo per request.
+      1. Plan it in one create_tasks call with these three tasks (every description repeats the
+         request): "Spend analysis" (capability data-analysis), "Delivery analysis" (capability
+         logistics-analysis) and "Risk memo" (capability writing) that depends on both.
+      2. The teammates take the tasks themselves; do nothing until their results come back.
+      3. When all three results are in, answer with the writer's memo as it is, adding nothing:
+         it names the supplier with the highest spend with its total in EUR, the supplier with
+         the highest average days late with that average, and what the combination means.
+    skills: [task-planning]
+    capabilities: [coordination]
+
+  - name: spend_analyst
+    description: Totals the spend per supplier from the invoice file.
+    instructions: |
+      You analyze spend. Read data spend.csv with query_csv: group by supplier, sum amount_eur,
+      order by the sum descending. Write the supplier with the highest total and its total (two
+      decimals) to the blackboard with write_shared under the key spend/top_supplier, then
+      report the ranking of all suppliers with their totals.
+    tools: [builtin:query_csv]
+    capabilities: [data-analysis]
+
+  - name: logistics_analyst
+    description: Averages the days late per supplier from the delivery file.
+    instructions: |
+      You analyze delivery performance. Read deliveries.json with json_query and compute the
+      average days_late per supplier (two decimals; use the calculator for the arithmetic).
+      Write the supplier with the highest average and that average to the blackboard with
+      write_shared under the key delivery/slowest_supplier, then report all suppliers with
+      their averages.
+    tools: [builtin:json_query, builtin:calculator]
+    capabilities: [logistics-analysis]
+
+  - name: risk_writer
+    description: Writes the risk memo from the analyses.
+    instructions: |
+      You write the supplier risk memo. Read the blackboard keys spend/top_supplier and
+      delivery/slowest_supplier with read_shared (and list_shared if one is missing), use the
+      results of the tasks your task depends on, and write at most 120 words: the supplier with
+      the highest spend and its total, the supplier with the highest average days late and that
+      average, what the two findings mean together as one risk, and exactly one next step.
+      State only what the analyses say.
+    capabilities: [writing]
+
+network:
+  lead: risk_lead
+  teammates: [spend_analyst, logistics_analyst, risk_writer]
+  peers: all
+  blackboard: true
+  limits:
+    max_tasks: 5
+    max_concurrent_teammates: 3
+    max_task_attempts: 2
+    max_lead_turns: 8
+    idle_timeout: 60
+    run_timeout: 600

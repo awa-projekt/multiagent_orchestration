@@ -1,0 +1,4 @@
+# The image needs only the wheel in dist/ and the entrypoint; nothing else reaches the build.
+*
+!dist/
+!deploy/entrypoint.sh

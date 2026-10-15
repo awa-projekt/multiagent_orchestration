@@ -1,0 +1,8 @@
+*In the picture:*
+
+1. The five steps of the build. Each one is ticked when it is done.
+2. Every eval case and whether it passes.
+3. The result in plain words: what was built and what passes.
+4. Where the data comes from: your ledger is live.
+5. Opens the next step, Review.
+6. The technical details, for your IT team.

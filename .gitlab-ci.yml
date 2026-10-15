@@ -1,0 +1,301 @@
+# CI for awa (GitLab, docker executor).
+# The gate is the list of commands in CONTRIBUTING.md (tests, types, lint and format,
+# mkdocs strict, coverage); run the same commands locally before you push.
+# The only downloads are third-party dependencies (locked by uv.lock, except in the compat-* jobs,
+# which resolve the newest or the lowest allowed versions on purpose) and the pinned tools; awa
+# itself is always installed from this checkout, never from an index. The release jobs at the end
+# run only by hand on a version tag, and the publishing job stays off until PyPI is configured.
+
+stages: [lint, types, test, docs, package, scheduled, release]
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never # the merge request pipeline already covers this branch
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"
+  UV_LINK_MODE: copy
+  UV_VERSION: "0.11.3"
+  PYTHONUTF8: "1"
+  # Property tests: 100 derandomized examples each (see tests/property/conftest.py).
+  HYPOTHESIS_PROFILE: ci
+  # Tag-pinned images (minor version + Debian release). To pin by digest, append @sha256:<digest>
+  # after reading it once from your registry; the tags below are the only place to change.
+  PYTHON_IMAGE_TAG: slim-bookworm
+  POSTGRES_IMAGE: "postgres:17-bookworm"
+
+default:
+  interruptible: true
+  retry:
+    max: 1
+    when: [runner_system_failure, stuck_or_timeout_failure]
+  cache:
+    key: "pip-uv-$CI_JOB_NAME_SLUG"
+    paths: [.cache/pip, .cache/uv]
+
+# Python environment from uv.lock (dev and docs extras) on the job's interpreter.
+.python:
+  image: python:${PYTHON_VERSION}-${PYTHON_IMAGE_TAG}
+  variables:
+    PYTHON_VERSION: "3.13"
+  before_script:
+    - python -m pip install --quiet "uv==${UV_VERSION}"
+    - uv sync --frozen --extra dev --extra docs --python "$(command -v python)"
+    - export PATH="$CI_PROJECT_DIR/.venv/bin:$PATH"
+
+lint:
+  extends: .python
+  stage: lint
+  timeout: 15m
+  script:
+    - uv lock --check
+    - python -m ruff check .
+    - python -m ruff format --check src tests examples scripts
+    - lint-imports --no-cache
+
+types:
+  extends: .python
+  stage: types
+  timeout: 30m
+  script:
+    - python -m mypy src
+    - python -m mypy examples/*.py
+    - python -m mypy tests/typing
+
+# Offline by construction: fake models, real model requests are blocked. Tests marked `postgres`
+# use the service below; coverage fails under `fail_under` in pyproject.toml.
+test:
+  extends: .python
+  stage: test
+  timeout: 60m
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.11", "3.12", "3.13", "3.14"]
+  services:
+    - name: $POSTGRES_IMAGE
+      alias: postgres
+      variables:
+        POSTGRES_USER: awa
+        POSTGRES_PASSWORD: awa # throwaway database of this job only
+        POSTGRES_DB: awa
+  variables:
+    AWA_TEST_POSTGRES_DSN: "postgresql://awa:awa@postgres:5432/awa"
+    AWA_TEST_REQUIRE_BROWSER: "1" # the web app tests drive a headless Chromium
+  script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends chromium
+    - python -m pytest -q -rs -n 2 --ignore=tests/docs --cov --cov-report=term --cov-report=xml:coverage.xml
+  coverage: '/^TOTAL\s+.*?(\d+(?:\.\d+)?)%$/'
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths: [coverage.xml]
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# The same offline checks on Windows, blocking like the Linux matrix. Needs a runner with the tag
+# below (GitLab.com shared Windows runner); change the tag to match your own Windows runner, or set
+# the CI/CD variable AWA_WINDOWS_RUNNER to "off" on an instance without one.
+test-windows:
+  stage: test
+  tags: [saas-windows-medium-amd64]
+  rules:
+    - if: $AWA_WINDOWS_RUNNER == "off"
+      when: never
+    - when: on_success
+  timeout: 60m
+  variables:
+    PYTHONUTF8: "1"
+  script:
+    - python -m pip install --quiet "uv==$env:UV_VERSION"
+    - uv sync --frozen --extra dev --python python
+    - .venv\Scripts\python.exe -m pytest -q -rs -n 2 --ignore=tests/docs
+
+# The checks of the README and the documentation run apart, so a drifted page or a missing
+# screenshot never hides a code failure in the test job.
+docs-tests:
+  extends: .python
+  stage: docs
+  timeout: 30m
+  script:
+    - python -m pytest -q -rs -n 2 tests/docs
+
+docs:
+  extends: .python
+  stage: docs
+  timeout: 45m # mkdocstrings renders the API reference slowly
+  script:
+    - python -m mkdocs build --strict -d site
+  artifacts:
+    expire_in: 1 week
+    paths: [site]
+
+# Build the sdist and the wheel, check the metadata, install both into clean environments from
+# the files (outside the checkout, so the source tree cannot be imported by accident).
+package:
+  image: python:3.13-${PYTHON_IMAGE_TAG}
+  stage: package
+  timeout: 20m
+  script:
+    - python -m pip install --quiet "build==1.6.1" "twine==7.0.0"
+    - python -m build
+    - python -m twine check --strict dist/*
+    - python -m venv /tmp/wheel-env
+    - /tmp/wheel-env/bin/pip install --quiet dist/*.whl
+    - cd /tmp && /tmp/wheel-env/bin/python -c "import awa; print('wheel', awa.__version__)"
+    - /tmp/wheel-env/bin/awa --version
+    - cd "$CI_PROJECT_DIR"
+    - python -m venv /tmp/sdist-env
+    - /tmp/sdist-env/bin/pip install --quiet dist/*.tar.gz
+    - cd /tmp && /tmp/sdist-env/bin/awa --version
+  artifacts:
+    expire_in: 1 week
+    paths: [dist/]
+
+# The install tests the test job leaves out (markers packaging, core_install and first_run), run
+# against the wheel of the package job (AWA_TEST_WHEEL): the wheel read back, installed into a
+# core-only environment and through the keyless first run. They need uv and the package index.
+install-tests:
+  extends: .python
+  stage: package
+  needs: [package]
+  timeout: 45m
+  before_script:
+    - python -m pip install --quiet "uv==${UV_VERSION}"
+    - uv sync --frozen --extra dev --no-install-project --python "$(command -v python)"
+    - export PATH="$CI_PROJECT_DIR/.venv/bin:$PATH"
+    - uv pip install --python .venv/bin/python dist/*.whl
+    - export AWA_TEST_WHEEL="$(ls "$CI_PROJECT_DIR"/dist/*.whl)"
+  script:
+    - python -m pytest -q -rs -m "packaging or core_install or first_run"
+
+# Upstream compatibility (docs/about/stability.md, Python, LangChain and LangGraph).
+.compat:
+  stage: scheduled
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  timeout: 60m
+  script:
+    - python -m pip install --quiet "uv==${UV_VERSION}"
+    - uv venv .venv-compat --python "$(command -v python)"
+    - uv pip install --python .venv-compat/bin/python $RESOLUTION -e ".[dev]"
+    - .venv-compat/bin/python -c "import json, awa._internal.upstream as u; print(json.dumps(u.upstream_versions(), indent=2))"
+    - .venv-compat/bin/python -m pytest -q tests/upstream
+    - .venv-compat/bin/python -m pytest -q -n 2
+
+compat-lowest:
+  extends: .compat
+  image: python:3.11-${PYTHON_IMAGE_TAG}
+  variables:
+    RESOLUTION: "--resolution lowest-direct"
+
+# The newest allowed upstream versions also run, blocking, on every merge request and on main.
+compat-latest:
+  extends: .compat
+  stage: test
+  image: python:3.13-${PYTHON_IMAGE_TAG}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  variables:
+    RESOLUTION: "--upgrade"
+
+compat-prerelease:
+  extends: .compat
+  image: python:3.13-${PYTHON_IMAGE_TAG}
+  allow_failure: true # reported, not blocking
+  variables:
+    RESOLUTION: "--upgrade --prerelease allow"
+
+# LangChain and LangGraph from their git main branches (reported, not blocking). Needs git in the image.
+compat-upstream-main:
+  stage: scheduled
+  image: python:3.13-${PYTHON_IMAGE_TAG}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  allow_failure: true
+  timeout: 60m
+  script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git
+    - python -m pip install --quiet "uv==${UV_VERSION}"
+    - uv venv .venv-main --python "$(command -v python)"
+    - uv pip install --python .venv-main/bin/python -e ".[dev]"
+    - >-
+      uv pip install --python .venv-main/bin/python
+      "langchain-core @ git+https://github.com/langchain-ai/langchain#subdirectory=libs/core"
+      "langchain @ git+https://github.com/langchain-ai/langchain#subdirectory=libs/langchain_v1"
+      "langgraph @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/langgraph"
+      "langgraph-prebuilt @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/prebuilt"
+      "langgraph-checkpoint @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/checkpoint"
+    - .venv-main/bin/python -m pytest -q tests/upstream
+    - .venv-main/bin/python -m pytest -q -n 2
+
+# Release: only on a tag `vX.Y.Z`, and only when started by hand from the
+# tag's pipeline. The build and audit jobs keep their files as job artifacts; nothing is uploaded.
+.release:
+  image: python:3.13-${PYTHON_IMAGE_TAG}
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d/
+      when: manual
+  before_script:
+    - python -m pip install --quiet "uv==${UV_VERSION}"
+
+release-build:
+  extends: .release
+  timeout: 20m
+  script:
+    - uv build
+    - uvx "twine==7.0.0" check --strict dist/*
+    - (cd dist && sha256sum *.whl *.tar.gz > SHA256SUMS.txt)
+  artifacts:
+    expire_in: 1 year
+    paths: [dist/]
+
+release-audit:
+  extends: .release
+  timeout: 20m
+  script:
+    # The locked runtime dependencies, without awa itself.
+    - uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements.txt
+    - uvx "pip-audit>=2.9,<3" --requirement requirements.txt --no-deps --disable-pip
+    - uvx --from "cyclonedx-bom>=6,<8" cyclonedx-py requirements requirements.txt --of JSON -o sbom.cdx.json
+  artifacts:
+    expire_in: 1 year
+    paths: [requirements.txt, sbom.cdx.json]
+
+# Publishing to PyPI with trusted publishing: GitLab issues a short-lived OIDC token (audience
+# `pypi`) that PyPI exchanges for a one-time upload token; no token is stored in CI variables.
+# Inactive until a maintainer (1) registers this GitLab project, the file `.gitlab-ci.yml` and the
+# environment `pypi` as a trusted publisher of the PyPI project `awa-agents`, and (2) sets the
+# CI/CD variable AWA_PYPI_PUBLISH to `true`. Without that variable the job is not created.
+release-publish:
+  extends: .release
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d/ && $AWA_PYPI_PUBLISH == "true"
+      when: manual
+  needs: [release-build, release-audit]
+  environment: pypi
+  timeout: 15m
+  id_tokens:
+    PYPI_ID_TOKEN:
+      aud: pypi
+  script:
+    - >-
+      export TWINE_PASSWORD="$(python -c 'import json, os, urllib.request;
+      body = json.dumps({"token": os.environ["PYPI_ID_TOKEN"]}).encode();
+      request = urllib.request.Request("https://pypi.org/_/oidc/mint-token", data=body, method="POST");
+      print(json.load(urllib.request.urlopen(request, timeout=30))["token"])')"
+    - test -n "$TWINE_PASSWORD"
+    - uvx "twine==7.0.0" upload --non-interactive --username __token__ dist/*.whl dist/*.tar.gz

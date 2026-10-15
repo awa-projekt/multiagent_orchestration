@@ -1,0 +1,9 @@
+category,limit_eur,receipt_required_above_eur,unit,note
+meals,60,25,person and day,Alcohol is not reimbursable.
+taxi,80,25,ride,
+hotel,160,0,night,Breakfast included.
+train,500,0,ticket,Second class.
+flight,800,0,ticket,Economy.
+office,100,25,item,
+training,1500,0,event,Needs the manager's approval anyway.
+software,0,0,item,Not reimbursable: software is bought with a purchase order.

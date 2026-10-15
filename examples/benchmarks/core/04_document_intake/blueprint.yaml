@@ -1,0 +1,59 @@
+# Document intake: PDF, Word and Excel invoices from an inbox folder to booked or held.
+#
+# The clerk reads each document with the builtin document and data tools, validates the fields
+# against the vendor master and purchase orders (tools.py), books clean invoices (a manager
+# approves bookings above 10,000 EUR) and puts everything else on hold with the reasons. A
+# scanned PDF has no text layer: it is held for manual entry, never guessed.
+#
+#   awa validate examples/benchmarks/core/04_document_intake/blueprint.yaml \
+#       --tools examples/benchmarks/core/04_document_intake/tools.py
+name: document-intake
+description: Extracts, validates and books supplier invoices that arrive as PDF, Word or Excel.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+toolkits:
+  files: {root: ./data}
+
+agents:
+  - name: intake_clerk
+    description: Reads one inbox document, validates it and books or holds it.
+    instructions: |
+      You process one supplier invoice document of the inbox folder per request.
+      1. Read it: extract_pdf_text for .pdf, extract_docx_text for .docx, read_excel for .xlsx
+         (an invoice workbook has the sheets "Kopf" (header, read it with header_row 0) and
+         "Leistungen"). The documents are German: amounts like "1.428,00" mean 1428.00 and dates
+         like 20.09.2024 mean 2024-09-20. If a page has no text layer (a scan) you cannot read
+         the document: hold it with the reason "no text layer, manual entry needed" and never
+         validate or book guessed values.
+      2. Validate the fields with validate_invoice.
+      3. When it is valid, book it with book_invoice. Invoices above 10,000 EUR are booked the
+         same way: the call itself waits for a manager's approval, so never hold an invoice for
+         that reason. When the approval is rejected, hold the invoice with the reviewer's note.
+      4. When it is not valid, hold it with hold_invoice and one reason per violated rule (rule
+         id and one sentence).
+      Never change amounts and never book twice.
+    tools:
+      - builtin:extract_pdf_text
+      - builtin:extract_docx_text
+      - builtin:read_excel
+      - validate_invoice
+      - book_invoice
+      - hold_invoice
+    output_schema:
+      type: object
+      properties:
+        document: {type: string}
+        invoice_number: {type: ["string", "null"]}
+        vendor_id: {type: ["string", "null"]}
+        gross_amount: {type: ["number", "null"]}
+        decision: {enum: [booked, on_hold]}
+        reasons: {type: array, items: {type: string}}
+      required: [document, invoice_number, decision, reasons]
+
+approvals:
+  - tool: book_invoice
+    when: "gross_amount > 10000"

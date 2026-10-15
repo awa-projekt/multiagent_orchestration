@@ -1,0 +1,6 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-09-15,hotel,Hotel Alpenblick,2 nights trade fair,2,345.00,EXP-2002-1.pdf
+2,2026-09-15,meals,Wirtshaus am Dom,Dinner with client incl. 2 bottles of wine,1,118.60,EXP-2002-2.pdf
+3,2026-09-16,taxi,Isar Taxi,Hotel to fair grounds,1,95.00,EXP-2002-3.pdf
+4,2026-09-16,meals,Messe Catering,Lunch,1,64.00,
+5,2026-09-16,taxi,Isar Taxi,Hotel to fair grounds,1,95.00,EXP-2002-3.pdf

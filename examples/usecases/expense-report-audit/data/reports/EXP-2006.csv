@@ -1,0 +1,3 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-10-01,train,Nordwind Rail,Berlin-Leipzig return,1,420.00,EXP-2006-1.pdf
+2,2026-10-01,taxi,Leipzig Taxi,Station to supplier and back,1,80.00,EXP-2006-2.pdf

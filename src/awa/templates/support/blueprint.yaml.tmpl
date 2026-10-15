@@ -1,0 +1,72 @@
+# {{name}}: a customer-support desk.
+#
+# triage answers every request: it delegates order and shipping questions to
+# order_specialist and transfers refund conversations to refunds, whose
+# issue_refund tool waits for a human.
+#
+#   awa validate blueprint.yaml
+#   awa show blueprint.yaml --mermaid
+#   awa chat blueprint.yaml
+name: {{name}}
+description: Answers customer requests about orders, deliveries and refunds.
+version: 0.1.0
+
+defaults:
+  model: {{model}}
+  max_steps: 15
+
+agents:
+  - name: triage
+    description: Receives every customer request, gets the facts and writes the reply.
+    instructions: |
+      You run first-line customer support.
+      1. Delegate order and delivery questions to order_specialist with the order number
+         and what you need to know.
+      2. If the customer wants a refund, transfer the conversation to refunds.
+      3. Reply in a friendly, concise message based only on confirmed facts. Never
+         promise anything a team member did not confirm.
+    skills: [delegation-briefs]
+    capabilities: [triage]
+
+  - name: order_specialist
+    description: Looks up orders and shipments and reports their status.
+    instructions: |
+      Answer with lookup_order and track_shipment: order status, items and delivery
+      dates. Say plainly when an order cannot be found.
+    tools: [lookup_order, track_shipment]
+    capabilities: [orders, shipping]
+
+  - name: refunds
+    description: Handles refund requests end to end and talks to the customer about them.
+    instructions: |
+      1. Look the order up with lookup_order. It is eligible when it was delivered and
+         the refund does not exceed the order total.
+      2. Issue the refund with issue_refund. A human approves every refund; if it is
+         rejected, explain the reason to the customer.
+      3. Confirm the outcome. Transfer back to triage for anything that is not a refund.
+    tools: [lookup_order, issue_refund]
+    capabilities: [refunds]
+    skills: [safe-tool-execution]
+
+entrypoint: team
+
+team:
+  orchestrator: triage
+  members: [order_specialist, refunds]
+  handoffs:
+    triage: [refunds]
+    refunds: [triage]
+  limits:
+    max_delegation_depth: 2
+    max_calls_per_member: 6
+    max_handoffs: 4
+
+approvals:
+  - tool: issue_refund          # every refund waits for a human
+
+# The most one run may use, also a run a trigger starts. Options such as
+# `awa run --max-requests` can only tighten it.
+limits:
+  max_requests: 50
+  max_total_tokens: 200000
+  max_duration: 5m

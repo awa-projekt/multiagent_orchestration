@@ -1,0 +1,1890 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "ColumnProfile": {
+      "additionalProperties": false,
+      "description": "One column of a table, with the decisions the profiler took about its values.",
+      "properties": {
+        "name": {
+          "description": "The header cell as written (or `A`, `B`, ... without header).",
+          "title": "Name",
+          "type": "string"
+        },
+        "key": {
+          "description": "`column_key(name)`, made unique within the table.",
+          "title": "Key",
+          "type": "string"
+        },
+        "index": {
+          "description": "0-based position in the table.",
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "type": {
+          "default": "text",
+          "enum": [
+            "text",
+            "integer",
+            "decimal",
+            "date",
+            "datetime",
+            "time",
+            "bool",
+            "id",
+            "enum",
+            "empty",
+            "mixed"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "declared_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Type declared by the source (SQLite).",
+          "title": "Declared Type"
+        },
+        "nullable": {
+          "default": false,
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "null_share": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Null Share",
+          "type": "number"
+        },
+        "distinct": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distinct"
+        },
+        "unique": {
+          "default": false,
+          "title": "Unique",
+          "type": "boolean"
+        },
+        "format": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NumberFormat"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "date_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pattern such as `DD.MM.YYYY`.",
+          "title": "Date Format"
+        },
+        "ambiguous": {
+          "default": false,
+          "description": "True when no value rules out the other reading.",
+          "title": "Ambiguous",
+          "type": "boolean"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Unit hint from the header (`EUR`, `kg`, `%`).",
+          "title": "Unit"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        },
+        "top": {
+          "items": {
+            "$ref": "#/$defs/TopValue"
+          },
+          "title": "Top",
+          "type": "array"
+        },
+        "examples": {
+          "description": "Values as written in the file.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Examples",
+          "type": "array"
+        },
+        "pii": {
+          "$ref": "#/$defs/PiiInfo"
+        },
+        "flags": {
+          "description": "Codes of the flags that concern this column.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Flags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "key",
+        "index"
+      ],
+      "title": "ColumnProfile",
+      "type": "object"
+    },
+    "DocxInfo": {
+      "additionalProperties": false,
+      "description": "Facts of a Word document: outline, tables, review marks and an excerpt.",
+      "properties": {
+        "paragraphs": {
+          "default": 0,
+          "title": "Paragraphs",
+          "type": "integer"
+        },
+        "text_length": {
+          "default": 0,
+          "title": "Text Length",
+          "type": "integer"
+        },
+        "headings": {
+          "items": {
+            "$ref": "#/$defs/Heading"
+          },
+          "title": "Headings",
+          "type": "array"
+        },
+        "tables": {
+          "items": {
+            "$ref": "#/$defs/DocxTable"
+          },
+          "title": "Tables",
+          "type": "array"
+        },
+        "headers_footers": {
+          "default": false,
+          "title": "Headers Footers",
+          "type": "boolean"
+        },
+        "tracked_changes": {
+          "default": 0,
+          "title": "Tracked Changes",
+          "type": "integer"
+        },
+        "comments": {
+          "default": 0,
+          "title": "Comments",
+          "type": "integer"
+        },
+        "images": {
+          "default": 0,
+          "title": "Images",
+          "type": "integer"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "excerpt": {
+          "default": "",
+          "description": "Text at the start; untrusted data.",
+          "title": "Excerpt",
+          "type": "string"
+        }
+      },
+      "title": "DocxInfo",
+      "type": "object"
+    },
+    "DocxTable": {
+      "additionalProperties": false,
+      "description": "A table inside a Word document.",
+      "properties": {
+        "rows": {
+          "default": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "default": 0,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "header": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Header",
+          "type": "array"
+        }
+      },
+      "title": "DocxTable",
+      "type": "object"
+    },
+    "FileProfile": {
+      "additionalProperties": false,
+      "description": "One file: identity, status, the tables found and one facts block for its kind.\n\n`status` is `ok`, `partial` (a limit cut the profile), `error` (see `flags`) or `unsupported`.\n`path` is relative to the profiled root; `source` is the path the file was read from.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size": {
+          "minimum": 0,
+          "title": "Size",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "csv",
+            "xlsx",
+            "pdf",
+            "docx",
+            "mail",
+            "json",
+            "sqlite",
+            "text",
+            "image",
+            "zip",
+            "unknown"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "detected_by": {
+          "default": "content",
+          "enum": [
+            "content",
+            "extension"
+          ],
+          "title": "Detected By",
+          "type": "string"
+        },
+        "status": {
+          "default": "ok",
+          "enum": [
+            "ok",
+            "partial",
+            "error",
+            "unsupported"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "role_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Hint"
+        },
+        "mtime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mtime"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TextInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tables": {
+          "items": {
+            "$ref": "#/$defs/TableProfile"
+          },
+          "title": "Tables",
+          "type": "array"
+        },
+        "xlsx": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/XlsxInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pdf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PdfInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "docx": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocxInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mail": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MailInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "json_doc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JsonInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sqlite": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SqliteInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "children": {
+          "description": "Profiles of embedded files (mail attachments).",
+          "items": {
+            "$ref": "#/$defs/FileProfile"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/Relation"
+          },
+          "title": "Relations",
+          "type": "array"
+        },
+        "flags": {
+          "items": {
+            "$ref": "#/$defs/Flag"
+          },
+          "title": "Flags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "sha256",
+        "size",
+        "kind"
+      ],
+      "title": "FileProfile",
+      "type": "object"
+    },
+    "Flag": {
+      "additionalProperties": false,
+      "description": "A fact or decision the profiler wants a person (or a validator) to know about.\n\n`code` is `DF-<family>-<NAME>`; the severity follows the family, so build flags with\n`make_flag`.",
+      "properties": {
+        "code": {
+          "pattern": "^DF-[IWE]-[A-Z0-9]+(?:-[A-Z0-9]+)*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "where": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Id of the file, table or column concerned.",
+          "title": "Where"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "Flag",
+      "type": "object"
+    },
+    "ForeignKey": {
+      "additionalProperties": false,
+      "description": "A declared foreign key of a SQLite database.",
+      "properties": {
+        "table": {
+          "title": "Table",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "ref_table": {
+          "title": "Ref Table",
+          "type": "string"
+        },
+        "ref_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ref Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "table",
+        "columns",
+        "ref_table",
+        "ref_columns"
+      ],
+      "title": "ForeignKey",
+      "type": "object"
+    },
+    "Heading": {
+      "additionalProperties": false,
+      "description": "One heading of a Word document.",
+      "properties": {
+        "level": {
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "level",
+        "text"
+      ],
+      "title": "Heading",
+      "type": "object"
+    },
+    "JsonField": {
+      "additionalProperties": false,
+      "description": "A path of a JSON document with the types and optionality seen over the records.",
+      "properties": {
+        "path": {
+          "description": "`lines[].sku`: `[]` marks array items.",
+          "title": "Path",
+          "type": "string"
+        },
+        "types": {
+          "description": "`string`, `number`, `null`, ...",
+          "items": {
+            "type": "string"
+          },
+          "title": "Types",
+          "type": "array"
+        },
+        "optional_share": {
+          "default": 0.0,
+          "description": "Share of records without it.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Optional Share",
+          "type": "number"
+        },
+        "enum": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Enum",
+          "type": "array"
+        },
+        "format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "`iso_datetime`, `epoch_ms`, ...",
+          "title": "Format"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "JsonField",
+      "type": "object"
+    },
+    "JsonInfo": {
+      "additionalProperties": false,
+      "description": "Schema inferred over the records of a JSON or JSONL file.",
+      "properties": {
+        "top_level": {
+          "default": "object",
+          "enum": [
+            "object",
+            "array",
+            "jsonl",
+            "scalar"
+          ],
+          "title": "Top Level",
+          "type": "string"
+        },
+        "records": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Records"
+        },
+        "depth": {
+          "default": 0,
+          "title": "Depth",
+          "type": "integer"
+        },
+        "sampled": {
+          "default": false,
+          "title": "Sampled",
+          "type": "boolean"
+        },
+        "paths": {
+          "items": {
+            "$ref": "#/$defs/JsonField"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "key_variants": {
+          "description": "Spellings of one name, `customerId` and `customer_id`.",
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Key Variants",
+          "type": "array"
+        }
+      },
+      "title": "JsonInfo",
+      "type": "object"
+    },
+    "KeyValue": {
+      "additionalProperties": false,
+      "description": "A recognized field of a document: an IBAN, a date, an amount, an invoice number.",
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "title": "KeyValue",
+      "type": "object"
+    },
+    "Limits": {
+      "additionalProperties": false,
+      "description": "What the profiler may spend per run; zero or negative values raise `ValidationError`.",
+      "properties": {
+        "max_files": {
+          "default": 500,
+          "description": "Most files in one run.",
+          "minimum": 1,
+          "title": "Max Files",
+          "type": "integer"
+        },
+        "max_file_bytes": {
+          "default": 100000000,
+          "description": "Largest single file.",
+          "minimum": 1,
+          "title": "Max File Bytes",
+          "type": "integer"
+        },
+        "max_total_bytes": {
+          "default": 1000000000,
+          "description": "Largest sum of all files.",
+          "minimum": 1,
+          "title": "Max Total Bytes",
+          "type": "integer"
+        },
+        "max_rows_exact": {
+          "default": 200000,
+          "description": "Up to here rows are counted exactly.",
+          "minimum": 1,
+          "title": "Max Rows Exact",
+          "type": "integer"
+        },
+        "sample_rows": {
+          "default": 5000,
+          "description": "Reservoir sample beyond max_rows_exact.",
+          "minimum": 1,
+          "title": "Sample Rows",
+          "type": "integer"
+        },
+        "max_sheets": {
+          "default": 50,
+          "description": "Most sheets profiled per workbook.",
+          "minimum": 1,
+          "title": "Max Sheets",
+          "type": "integer"
+        },
+        "max_pdf_pages_profiled": {
+          "default": 50,
+          "description": "Pages analyzed in detail.",
+          "minimum": 1,
+          "title": "Max Pdf Pages Profiled",
+          "type": "integer"
+        },
+        "max_pdf_pages": {
+          "default": 2000,
+          "description": "Larger PDFs are refused.",
+          "minimum": 1,
+          "title": "Max Pdf Pages",
+          "type": "integer"
+        },
+        "max_chars_per_cell": {
+          "default": 200,
+          "description": "Longer values are cut.",
+          "minimum": 1,
+          "title": "Max Chars Per Cell",
+          "type": "integer"
+        },
+        "parse_timeout_s": {
+          "default": 30.0,
+          "description": "Seconds per file.",
+          "exclusiveMinimum": 0,
+          "title": "Parse Timeout S",
+          "type": "number"
+        },
+        "max_zip_entries": {
+          "default": 500,
+          "description": "Most entries in an archive.",
+          "minimum": 1,
+          "title": "Max Zip Entries",
+          "type": "integer"
+        },
+        "max_zip_ratio": {
+          "default": 100,
+          "description": "Largest unpack ratio of one entry.",
+          "minimum": 1,
+          "title": "Max Zip Ratio",
+          "type": "integer"
+        }
+      },
+      "title": "Limits",
+      "type": "object"
+    },
+    "ListValidation": {
+      "additionalProperties": false,
+      "description": "A dropdown list of a worksheet: the allowed values are a free enum definition.",
+      "properties": {
+        "range": {
+          "title": "Range",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "range",
+        "values"
+      ],
+      "title": "ListValidation",
+      "type": "object"
+    },
+    "MailAttachment": {
+      "additionalProperties": false,
+      "description": "An attachment of a message; its own profile is a child of the mail file.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "content_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Type"
+        },
+        "size": {
+          "default": 0,
+          "title": "Size",
+          "type": "integer"
+        },
+        "file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Id of the child FileProfile, if profiled.",
+          "title": "File Id"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "MailAttachment",
+      "type": "object"
+    },
+    "MailInfo": {
+      "additionalProperties": false,
+      "description": "Facts of a mail file: the messages (at most a sample of a large mailbox).",
+      "properties": {
+        "messages_total": {
+          "default": 0,
+          "title": "Messages Total",
+          "type": "integer"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/MailMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "sampled": {
+          "default": false,
+          "title": "Sampled",
+          "type": "boolean"
+        }
+      },
+      "title": "MailInfo",
+      "type": "object"
+    },
+    "MailMessage": {
+      "additionalProperties": false,
+      "description": "One message of an `.eml` or `.mbox` file. Header values and the body are untrusted.",
+      "properties": {
+        "index": {
+          "minimum": 1,
+          "title": "Index",
+          "type": "integer"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "from, to, cc, subject, date, message_id, in_reply_to",
+          "title": "Headers",
+          "type": "object"
+        },
+        "content_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Type"
+        },
+        "body_kind": {
+          "default": "none",
+          "enum": [
+            "plain",
+            "html",
+            "both",
+            "none"
+          ],
+          "title": "Body Kind",
+          "type": "string"
+        },
+        "attachments": {
+          "items": {
+            "$ref": "#/$defs/MailAttachment"
+          },
+          "title": "Attachments",
+          "type": "array"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "excerpt": {
+          "default": "",
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "injection_suspected": {
+          "default": false,
+          "title": "Injection Suspected",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "index"
+      ],
+      "title": "MailMessage",
+      "type": "object"
+    },
+    "NumberFormat": {
+      "additionalProperties": false,
+      "description": "How the numbers of a column are written.",
+      "properties": {
+        "decimal": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Decimal separator, `,` or `.`.",
+          "title": "Decimal"
+        },
+        "thousands": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Thousands separator, if any.",
+          "title": "Thousands"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "percent": {
+          "default": false,
+          "title": "Percent",
+          "type": "boolean"
+        },
+        "negative": {
+          "default": "minus",
+          "enum": [
+            "minus",
+            "parentheses",
+            "trailing_minus"
+          ],
+          "title": "Negative",
+          "type": "string"
+        }
+      },
+      "title": "NumberFormat",
+      "type": "object"
+    },
+    "PdfInfo": {
+      "additionalProperties": false,
+      "description": "Facts of a PDF: text layer versus scan, per-page figures, an excerpt, key values.",
+      "properties": {
+        "pages": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Pages",
+          "type": "integer"
+        },
+        "per_page": {
+          "description": "Only profiled pages.",
+          "items": {
+            "$ref": "#/$defs/PdfPage"
+          },
+          "title": "Per Page",
+          "type": "array"
+        },
+        "document_class": {
+          "default": "empty",
+          "enum": [
+            "born_digital",
+            "scanned",
+            "mixed",
+            "empty"
+          ],
+          "title": "Document Class",
+          "type": "string"
+        },
+        "encrypted": {
+          "default": false,
+          "title": "Encrypted",
+          "type": "boolean"
+        },
+        "fonts_embedded": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fonts Embedded"
+        },
+        "form_fields": {
+          "default": 0,
+          "title": "Form Fields",
+          "type": "integer"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Producer, title, ...",
+          "title": "Metadata",
+          "type": "object"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "excerpt": {
+          "default": "",
+          "description": "Reading-order text at the start; untrusted data.",
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "key_values": {
+          "items": {
+            "$ref": "#/$defs/KeyValue"
+          },
+          "title": "Key Values",
+          "type": "array"
+        }
+      },
+      "title": "PdfInfo",
+      "type": "object"
+    },
+    "PdfPage": {
+      "additionalProperties": false,
+      "description": "One page of a PDF.",
+      "properties": {
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "chars": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Chars",
+          "type": "integer"
+        },
+        "text_layer": {
+          "default": false,
+          "title": "Text Layer",
+          "type": "boolean"
+        },
+        "image_only": {
+          "default": false,
+          "title": "Image Only",
+          "type": "boolean"
+        },
+        "tables_hint": {
+          "default": 0,
+          "description": "Ruled table candidates, not extracted.",
+          "minimum": 0,
+          "title": "Tables Hint",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page"
+      ],
+      "title": "PdfPage",
+      "type": "object"
+    },
+    "PiiInfo": {
+      "additionalProperties": false,
+      "description": "Personal data found in a column: which kinds, and the share of non-empty values.",
+      "properties": {
+        "kinds": {
+          "items": {
+            "enum": [
+              "email",
+              "iban",
+              "card",
+              "ip",
+              "phone",
+              "name",
+              "address",
+              "tax_id",
+              "birthdate"
+            ],
+            "type": "string"
+          },
+          "title": "Kinds",
+          "type": "array"
+        },
+        "share": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Share",
+          "type": "number"
+        }
+      },
+      "title": "PiiInfo",
+      "type": "object"
+    },
+    "Privacy": {
+      "additionalProperties": false,
+      "description": "What a model may see: masking and how many sample values leave the profile.\n\n`mask` applies to model-facing text only; files and statistics are never changed.",
+      "properties": {
+        "mask": {
+          "default": "none",
+          "enum": [
+            "none",
+            "placeholders",
+            "drop"
+          ],
+          "title": "Mask",
+          "type": "string"
+        },
+        "max_sample_rows": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Max Sample Rows",
+          "type": "integer"
+        },
+        "max_cell_chars": {
+          "default": 80,
+          "minimum": 1,
+          "title": "Max Cell Chars",
+          "type": "integer"
+        },
+        "include_samples": {
+          "default": true,
+          "title": "Include Samples",
+          "type": "boolean"
+        },
+        "kinds": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "email",
+                  "iban",
+                  "card",
+                  "ip",
+                  "phone",
+                  "name",
+                  "address",
+                  "tax_id",
+                  "birthdate"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PII kinds to mask; None masks every detected kind.",
+          "title": "Kinds"
+        }
+      },
+      "title": "Privacy",
+      "type": "object"
+    },
+    "Relation": {
+      "additionalProperties": false,
+      "description": "A likely link between two columns (a join candidate). Use it only above 0.8 confidence.",
+      "properties": {
+        "from_column": {
+          "description": "Column id `f1.t1.supplier`.",
+          "title": "From Column",
+          "type": "string"
+        },
+        "to_column": {
+          "title": "To Column",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "foreign_key",
+            "value_overlap",
+            "name_match"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "overlap": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Overlap"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "unmatched": {
+          "description": "A few values of `from_column` that have no counterpart in `to_column` (sample values: `without_samples` removes them).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Unmatched",
+          "type": "array"
+        }
+      },
+      "required": [
+        "from_column",
+        "to_column",
+        "kind",
+        "confidence"
+      ],
+      "title": "Relation",
+      "type": "object"
+    },
+    "SheetInfo": {
+      "additionalProperties": false,
+      "description": "One worksheet of a workbook, also when it holds no table (hidden, empty, notes).",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "visible": {
+          "default": true,
+          "title": "Visible",
+          "type": "boolean"
+        },
+        "used_range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Recomputed from the cells, not trusted.",
+          "title": "Used Range"
+        },
+        "rows": {
+          "default": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "default": 0,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "tables": {
+          "description": "Ids of the tables found.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tables",
+          "type": "array"
+        },
+        "merged_ranges": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Merged Ranges",
+          "type": "array"
+        },
+        "hidden_rows": {
+          "default": 0,
+          "title": "Hidden Rows",
+          "type": "integer"
+        },
+        "hidden_columns": {
+          "default": 0,
+          "title": "Hidden Columns",
+          "type": "integer"
+        },
+        "formulas": {
+          "default": 0,
+          "title": "Formulas",
+          "type": "integer"
+        },
+        "formulas_without_cache": {
+          "default": 0,
+          "description": "Formulas whose value was never saved.",
+          "title": "Formulas Without Cache",
+          "type": "integer"
+        },
+        "comments": {
+          "default": 0,
+          "title": "Comments",
+          "type": "integer"
+        },
+        "validations": {
+          "items": {
+            "$ref": "#/$defs/ListValidation"
+          },
+          "title": "Validations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "SheetInfo",
+      "type": "object"
+    },
+    "SqliteInfo": {
+      "additionalProperties": false,
+      "description": "Facts of a SQLite database beyond its tables (opened read-only).",
+      "properties": {
+        "foreign_keys": {
+          "items": {
+            "$ref": "#/$defs/ForeignKey"
+          },
+          "title": "Foreign Keys",
+          "type": "array"
+        },
+        "views": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Views",
+          "type": "array"
+        },
+        "indexes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Indexes",
+          "type": "array"
+        }
+      },
+      "title": "SqliteInfo",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "description": "Counts over the whole profile, always recomputed from `files`.",
+      "properties": {
+        "files": {
+          "default": 0,
+          "title": "Files",
+          "type": "integer"
+        },
+        "tables": {
+          "default": 0,
+          "title": "Tables",
+          "type": "integer"
+        },
+        "rows": {
+          "default": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "warnings": {
+          "default": 0,
+          "description": "Flags of severity warning on the profile and on each top-level file.",
+          "title": "Warnings",
+          "type": "integer"
+        },
+        "errors": {
+          "default": 0,
+          "description": "Top-level files with status error.",
+          "title": "Errors",
+          "type": "integer"
+        }
+      },
+      "title": "Summary",
+      "type": "object"
+    },
+    "TableProfile": {
+      "additionalProperties": false,
+      "description": "A table: a CSV file, a sheet (or a block of a sheet), a SQLite table.\n\n`rows` is exact when `rows_exact`; `sampled` means the statistics come from `rows_seen` rows.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "sheet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Worksheet name (xlsx).",
+          "title": "Sheet"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Table name (SQLite).",
+          "title": "Name"
+        },
+        "range": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cell range of the table on its sheet, `A4:F28`.",
+          "title": "Range"
+        },
+        "header_row": {
+          "default": 1,
+          "description": "1-based row of the column names; 0: none.",
+          "minimum": 0,
+          "title": "Header Row",
+          "type": "integer"
+        },
+        "header_confidence": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Header Confidence",
+          "type": "number"
+        },
+        "data_start_row": {
+          "default": 2,
+          "minimum": 1,
+          "title": "Data Start Row",
+          "type": "integer"
+        },
+        "rows": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "rows_exact": {
+          "default": true,
+          "title": "Rows Exact",
+          "type": "boolean"
+        },
+        "sampled": {
+          "default": false,
+          "title": "Sampled",
+          "type": "boolean"
+        },
+        "rows_seen": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rows Seen"
+        },
+        "totals_rows": {
+          "description": "1-based; not in statistics.",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Totals Rows",
+          "type": "array"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/ColumnProfile"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "key_candidates": {
+          "description": "Column keys that are unique and never empty.",
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Key Candidates",
+          "type": "array"
+        },
+        "primary_key": {
+          "description": "Declared key (SQLite).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Key",
+          "type": "array"
+        },
+        "sample_rows": {
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "title": "Sample Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "TableProfile",
+      "type": "object"
+    },
+    "TextInfo": {
+      "additionalProperties": false,
+      "description": "How a text file is encoded and laid out (CSV, plain text, Markdown, logs).",
+      "properties": {
+        "encoding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "`utf-8`, `utf-8-sig`, `cp1252`, ...",
+          "title": "Encoding"
+        },
+        "newline": {
+          "anyOf": [
+            {
+              "enum": [
+                "lf",
+                "crlf",
+                "cr",
+                "mixed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Newline"
+        },
+        "delimiter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delimiter"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "bom": {
+          "default": false,
+          "title": "Bom",
+          "type": "boolean"
+        },
+        "lines": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lines"
+        },
+        "head": {
+          "description": "First lines (text kind).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Head",
+          "type": "array"
+        },
+        "tail": {
+          "description": "Last lines (text kind).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tail",
+          "type": "array"
+        }
+      },
+      "title": "TextInfo",
+      "type": "object"
+    },
+    "TopValue": {
+      "additionalProperties": false,
+      "description": "One frequent value of a low-cardinality column.",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "value",
+        "count"
+      ],
+      "title": "TopValue",
+      "type": "object"
+    },
+    "XlsxInfo": {
+      "additionalProperties": false,
+      "description": "Workbook-level facts of an Excel file.",
+      "properties": {
+        "sheets": {
+          "items": {
+            "$ref": "#/$defs/SheetInfo"
+          },
+          "title": "Sheets",
+          "type": "array"
+        },
+        "date_system": {
+          "default": "1900",
+          "enum": [
+            "1900",
+            "1904"
+          ],
+          "title": "Date System",
+          "type": "string"
+        },
+        "defined_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Defined Names",
+          "type": "array"
+        },
+        "macros": {
+          "default": false,
+          "description": "The file carries a macro project (never run).",
+          "title": "Macros",
+          "type": "boolean"
+        }
+      },
+      "title": "XlsxInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The profile of a set of files (JSON schema `awa.data/profile/v1`).\n\nExample:\n    ```python\n    p = profile([\"orders.csv\"])\n    assert DataProfile.from_json(p.to_json()) == p\n    print(p.find_column(\"orders.csv\", \"Amount\").format.decimal)\n    ```",
+  "properties": {
+    "schema": {
+      "const": "awa.data/profile/v1",
+      "default": "awa.data/profile/v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "awa_version": {
+      "title": "Awa Version",
+      "type": "string"
+    },
+    "created": {
+      "description": "UTC time of the run, ISO 8601.",
+      "title": "Created",
+      "type": "string"
+    },
+    "limits": {
+      "$ref": "#/$defs/Limits"
+    },
+    "privacy": {
+      "$ref": "#/$defs/Privacy"
+    },
+    "files": {
+      "items": {
+        "$ref": "#/$defs/FileProfile"
+      },
+      "title": "Files",
+      "type": "array"
+    },
+    "relations": {
+      "items": {
+        "$ref": "#/$defs/Relation"
+      },
+      "title": "Relations",
+      "type": "array"
+    },
+    "flags": {
+      "items": {
+        "$ref": "#/$defs/Flag"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    }
+  },
+  "required": [
+    "awa_version",
+    "created"
+  ],
+  "title": "DataProfile",
+  "type": "object"
+}

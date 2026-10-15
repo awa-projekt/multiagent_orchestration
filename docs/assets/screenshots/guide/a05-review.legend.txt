@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. How the work flows: the checker hands over to the clerk.
+2. A tool that asks you first: it waits for a person.
+3. The ledger is live: the design reads your real ledger.
+4. Per agent: what it reads and writes, and with which tool.
+5. The eval cases: each with its input and what it expects.

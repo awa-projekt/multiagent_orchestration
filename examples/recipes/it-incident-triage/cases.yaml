@@ -1,0 +1,52 @@
+# Eval cases for the it-incident-triage recipe.
+#
+# The cases check the severity, who was paged (and that a SEV1 page and every public update
+# wait for a human), that the runbook was used, and the post-incident notes.
+#
+#   awa eval examples/recipes/it-incident-triage/blueprint.yaml \
+#       examples/recipes/it-incident-triage/cases.yaml \
+#       --tools examples/recipes/it-incident-triage/tools.py
+name: it-incident-triage
+cases:
+  - id: checkout-down-is-sev1
+    input: "ALERT checkout: error rate 38%, customers cannot pay."
+    tags: [sev1, approval]
+    metadata:
+      why: A SEV1 page wakes the major-incident rotation; the on-duty engineer confirms it.
+    scorers:
+      - tool:get_service
+      - tool:open_incident
+      - approval:page_responders
+
+  - id: payments-latency-is-sev2
+    input: "ALERT payments-api: p95 latency 1.8 s, 2% errors."
+    tags: [sev2, approval]
+    metadata:
+      why: A SEV2 page goes out directly; the public status update waits for approval.
+    scorers:
+      - tool:page_responders
+      - delegated:diagnostics_engineer
+      - tool:lookup_runbook
+      - delegated:communications_lead
+      - approval:post_status_update
+
+  - id: internal-reporting-is-sev3
+    input: "Ticket from finance: the internal reporting dashboard takes minutes to load."
+    expected: {severity: SEV3, paged: false, public_update_posted: false}
+    tags: [sev3]
+    scorers:
+      - json_fields
+      - delegated:diagnostics_engineer
+      - no_tool:page_responders
+      - no_tool:post_status_update
+      - "judge:The next steps name the runbook step to run and the likely cause is a long-running query, not a guess."
+
+  - id: post-incident-notes
+    input: INC-7001 is resolved. Please write the post-incident notes.
+    expected: {incident_id: INC-7001, status: resolved, severity: SEV2}
+    tags: [post-incident]
+    scorers:
+      - json_fields
+      - delegated:communications_lead
+      - tool:save_post_incident_notes
+      - no_tool:page_responders

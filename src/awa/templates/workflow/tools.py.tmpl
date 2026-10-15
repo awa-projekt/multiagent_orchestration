@@ -1,0 +1,35 @@
+"""Tools for blueprint.yaml, backed by small in-memory sample data.
+
+Every documented function listed in `__all__` is a tool: its signature is the
+argument schema and its docstring the description the model reads. Replace the
+sample data with calls to your own systems.
+"""
+
+from __future__ import annotations
+
+DOCUMENTS: dict[str, str] = {
+    "DOC-7": (
+        "Supplier agreement. The supplier stores customer names for 10 years. "
+        "Invoices are payable within 90 days."
+    ),
+}
+POLICIES: dict[str, str] = {
+    "retention": "Personal data is kept for at most 6 years.",
+    "payment": "Supplier invoices are paid within 30 to 60 days.",
+}
+
+
+def fetch_document(document_id: str) -> str:
+    """Return the full text of a document by its id."""
+
+    return DOCUMENTS.get(document_id, f"No document {document_id!r} found.")
+
+
+def lookup_policy(topic: str) -> str:
+    """Return the company policy on a topic: retention or payment."""
+
+    policy = POLICIES.get(topic.strip().lower())
+    return policy or f"No policy on {topic!r}; known topics: {', '.join(sorted(POLICIES))}."
+
+
+__all__ = ["fetch_document", "lookup_policy"]

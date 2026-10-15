@@ -1,0 +1,121 @@
+# Market research report: researchers, an analyst and a writer, with a quality-review loop.
+#
+# The research lead plans the study on a task board: market and competitor research run in
+# parallel, the analyst turns the findings into figures, the writer drafts a sourced report
+# and the reviewer checks every claim against the sources. A "REVISE" verdict gets one
+# revision round. The approved report is saved to the knowledge base. The roles run as an
+# agent network: both researchers work at the same time, each claiming the ready tasks
+# that match its capability.
+#
+#   awa validate examples/recipes/market-research-report/blueprint.yaml \
+#       --tools examples/recipes/market-research-report/tools.py
+#   awa run examples/recipes/market-research-report/blueprint.yaml --stream \
+#       "Market research report: predictive maintenance software for mid-sized manufacturers in DACH." \
+#       --tools examples/recipes/market-research-report/tools.py
+name: market-research-report
+description: Produces a sourced, reviewed market research report.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 10
+
+agents:
+  - name: research_lead
+    acknowledge_ungated: [save_report_to_knowledge_base]  # internal records of this demo; no person needed
+    description: Plans each study on the task board and delivers the approved report.
+    instructions: |
+      You lead one market research study per request and deliver a sourced report.
+      1. Plan the study in one create_tasks call. Every description repeats the question,
+         the market and the region; route with required_capabilities:
+         - "Market research" (market-research): size, growth, adoption, drivers, barriers.
+         - "Competitor research" (competitor-research): main competitors, share, focus.
+         - "Market analysis" (data-analysis), depends on both research tasks.
+         - "Draft report" (report-writing), depends on every task before it.
+         - "Review report" (quality-review), depends on the draft.
+         For a question about competitors only, leave out market research and analysis.
+      2. Teammates claim the tasks themselves as soon as their dependencies are done.
+      3. When a review says "VERDICT: REVISE", create "Revise report" (report-writing,
+         depends on the draft and the review; the description lists the reviewer's issues)
+         and "Review revision" (quality-review, depends on the revision). One revision
+         round at most.
+      4. When the last review says "VERDICT: APPROVED", or the revision round is used up,
+         save the latest report with save_report_to_knowledge_base and answer with that
+         report, unchanged and complete, followed by the knowledge-base link. Say so if the
+         review never approved it.
+    tools: [save_report_to_knowledge_base]
+    skills: [task-planning]
+    capabilities: [coordination]
+
+  - name: market_researcher
+    description: Finds and reads sources on market size, growth, adoption, drivers and barriers.
+    instructions: |
+      Research the market in your brief. Find sources with search_sources and read the
+      relevant ones with read_source. Report market size, growth, adoption, demand drivers
+      and barriers as bullets, each ending with its source id in brackets, e.g. [S-1].
+      Write "no source found" instead of estimating. Search at most three times: a source
+      counts only when its title is about the market in your brief; when none is, stop
+      searching and report "no source found".
+    tools: [search_sources, read_source]
+    skills: [research-synthesis, source-verification]
+    capabilities: [market-research]
+
+  - name: competitor_researcher
+    description: Profiles the main competitors of a market with share and positioning.
+    instructions: |
+      Profile the competitors of the market in your brief with get_competitor_profiles and,
+      for positioning, search_sources. One bullet per competitor: name, share, focus, and
+      the source id in brackets. Write "no source found" instead of estimating. Search at
+      most three times, and use only sources whose title is about the market in your brief.
+    tools: [get_competitor_profiles, search_sources]
+    skills: [research-synthesis]
+    capabilities: [competitor-research]
+
+  - name: analyst
+    description: Turns research results and market statistics into figures and implications.
+    instructions: |
+      Analyze the market in your brief with get_market_statistics and the research results
+      you received. Give market size, growth, segment split and the size projected from the
+      growth rate (show the calculation and label it as a projection), then three
+      implications for a vendor targeting this market. Cite source ids in brackets.
+    tools: [get_market_statistics]
+    skills: [data-analysis]
+    capabilities: [data-analysis]
+
+  - name: writer
+    description: Writes the report from the research and analysis results.
+    instructions: |
+      Write the report from the results in your brief, in Markdown, with exactly these
+      "##" sections: Executive summary (three bullets), Market, Competitors, Outlook, Risks
+      and data gaps, and Sources (id, title, publisher, date). Cite every figure with its
+      source id in brackets; a calculated figure or projection cites the ids of its inputs.
+      Cite only the source ids the results give (such as S-1): your teammates' results are
+      not sources, so never number them as sources. Write the words "no reliable data" where
+      the results have no source, and "none" under Sources when there is none. For "Revise
+      report", fix every issue the reviewer lists and return the full revised report.
+    skills: [report-generation, writing]
+    capabilities: [report-writing]
+
+  - name: reviewer
+    description: Checks a report's claims against its sources before it is saved.
+    instructions: |
+      Review the report in your brief. Check that every figure carries a source id, that
+      every cited source exists and says what the report claims (read_source), that no
+      claim goes beyond the sources, and that all sections are present. Answer
+      "VERDICT: APPROVED" or "VERDICT: REVISE" on the first line, then numbered issues with
+      the exact sentence and the fix.
+    tools: [read_source]
+    skills: [quality-review, source-verification]
+    capabilities: [quality-review]
+
+network:
+  lead: research_lead
+  teammates: [market_researcher, competitor_researcher, analyst, writer, reviewer]
+  peers: {}                             # teammates hand their results to the lead via the board
+  limits:
+    max_tasks: 8                        # five tasks per study, two for the revision round, one spare
+    max_concurrent_teammates: 3
+    max_task_attempts: 2
+    max_lead_turns: 10
+    idle_timeout: 60
+    run_timeout: 1200

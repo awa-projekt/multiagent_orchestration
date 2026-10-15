@@ -1,0 +1,263 @@
+# Import contracts of the awa package, checked by `lint-imports` (import-linter) and by
+# tests/architecture/test_import_contracts.py.
+#
+# The layers run from the top (may import everything below) to the bottom (imports nothing
+# above). Siblings joined by `|` are independent of each other; siblings joined by `:` may
+# import each other.
+# Imports inside functions count; imports under `if TYPE_CHECKING:` do not.
+#
+# Each `ignore_imports` list is the recorded baseline: an import listed there is a known
+# violation that may only disappear. A new violation breaks the contract, and so does a listed
+# import that no longer exists (delete its line in the same commit).
+
+[importlinter]
+root_packages =
+    awa
+exclude_type_checking_imports = True
+contract_types =
+    private_modules: tests.architecture.import_contracts.PrivateModulesContract
+    outer_boundary: tests.architecture.outer_contract.OuterBoundaryContract
+
+[importlinter:contract:layers]
+name = Layers (interfaces, compiler, integrations, orchestration, runtime, foundation; top to bottom)
+type = layers
+layers =
+    awa.cli : awa.checks : awa.__main__
+    awa.testing
+    awa.ui | awa.project_setup
+    awa.server
+    awa.automation | awa.people
+    awa.exporter | awa.ext
+    awa.blueprints : awa.quick
+    awa.refine
+    awa.evals
+    awa.connectors | awa.data
+    awa.toolkits | awa.mcp
+    awa.team
+    awa.workflows
+    awa.tasks | awa.messaging
+    awa.directory
+    awa.agents : awa.guardrails
+    awa.memory | awa.skills
+    awa.tools
+    awa.persistence
+    awa.observability
+    awa.models
+    awa.runtime
+    awa.plugins
+    awa.config : awa.core
+    awa.contracts
+    awa._compat : awa._internal
+    awa.errors
+    awa.kernel
+ignore_imports =
+    awa.blueprints._automation -> awa.automation.templates
+    awa.blueprints._project_files -> awa.automation.templates
+    awa.blueprints.triggers -> awa.automation.blueprint
+    awa.blueprints.triggers -> awa.automation.queues
+    awa.connectors._saas_microsoft_outlook -> awa.people
+    awa.connectors._saas_microsoft_outlook -> awa.people._connect
+    awa.connectors._saas_microsoft_teams -> awa.people
+    awa.connectors._saas_microsoft_teams -> awa.people._connect
+
+[importlinter:contract:private]
+name = A package's private modules are imported only from inside that package
+type = private_modules
+shared =
+    awa._compat
+    awa._internal
+ignore_imports =
+    awa.agents.agent -> awa.runtime._run
+    awa.agents.graph_agent -> awa.runtime._run
+    awa.agents.graph_agent -> awa.runtime._streaming
+    awa.automation.automation -> awa.runtime._run
+    awa.automation.blueprint -> awa.blueprints._automation
+    awa.blueprints._build_process -> awa.workflows._step_checks
+    awa.blueprints._check -> awa.connectors._catalog
+    awa.blueprints._check_data -> awa.data._validate
+    awa.blueprints._check_process -> awa.data._validate
+    awa.blueprints._connect -> awa.connectors._catalog
+    awa.blueprints._data_files -> awa.data._paths
+    awa.blueprints._data_map -> awa.connectors._catalog
+    awa.blueprints._data_project -> awa.data._paths
+    awa.blueprints._data_project -> awa.data._validate
+    awa.blueprints._declare -> awa.connectors._catalog
+    awa.blueprints._declare -> awa.connectors._local
+    awa.blueprints._declare -> awa.connectors._structure
+    awa.blueprints._fit -> awa.data._validate
+    awa.blueprints._resolve -> awa.connectors._catalog
+    awa.blueprints._risk -> awa.connectors._engine
+    awa.blueprints._schema_process -> awa.workflows._step_flow
+    awa.blueprints._systems -> awa.connectors._engine
+    awa.blueprints.schema -> awa.workflows._special_cases
+    awa.checks.connect -> awa.connectors._microsoft_auth
+    awa.checks.connect -> awa.connectors._microsoft_errors
+    awa.checks.microsoft -> awa.connectors._catalog
+    awa.checks.microsoft -> awa.connectors._engine
+    awa.checks.microsoft -> awa.connectors._microsoft_auth
+    awa.checks.microsoft -> awa.connectors._microsoft_cert
+    awa.checks.microsoft -> awa.connectors._microsoft_errors
+    awa.checks.microsoft -> awa.connectors._saas_microsoft_teams
+    awa.checks.microsoft -> awa.models._azure
+    awa.cli._automation -> awa.automation._decision
+    awa.cli._automation -> awa.automation._time
+    awa.cli._automation -> awa.blueprints._resolve
+    awa.cli._automation -> awa.server._data_store
+    awa.cli._blueprint -> awa.blueprints._connect
+    awa.cli._blueprint -> awa.blueprints._data_project
+    awa.cli._blueprint -> awa.blueprints._declare
+    awa.cli._blueprint -> awa.blueprints._diagram_roles
+    awa.cli._blueprint -> awa.blueprints._lint
+    awa.cli._blueprint -> awa.blueprints._resolve
+    awa.cli._blueprint -> awa.blueprints._roles
+    awa.cli._blueprint -> awa.blueprints._schema_process
+    awa.cli._blueprint -> awa.connectors._engine
+    awa.cli._blueprint -> awa.skills._lint
+    awa.cli._chat -> awa.blueprints._resolve
+    awa.cli._check -> awa.checks._env
+    awa.cli._check -> awa.checks._render
+    awa.cli._common -> awa.blueprints._resolve
+    awa.cli._connectors -> awa.blueprints._resolve
+    awa.cli._connectors -> awa.connectors._catalog
+    awa.cli._data -> awa.blueprints._data_project
+    awa.cli._data -> awa.blueprints._systems
+    awa.cli._data_run -> awa.blueprints._resolve
+    awa.cli._data_run -> awa.blueprints._run_data
+    awa.cli._data_systems -> awa.blueprints._declare
+    awa.cli._data_systems -> awa.blueprints._systems
+    awa.cli._doctor -> awa.models._azure
+    awa.cli._eval -> awa.blueprints._resolve
+    awa.cli._mcp -> awa.blueprints._mcp
+    awa.cli._new -> awa.blueprints._resolve
+    awa.cli._people -> awa.people._ref
+    awa.cli._plugins -> awa.plugins._kinds
+    awa.cli._serve -> awa.server._app
+    awa.cli._serve -> awa.server._blueprint_app
+    awa.cli._skills -> awa.blueprints._resolve
+    awa.cli._ui -> awa.server._app
+    awa.cli._ui -> awa.ui._examples
+    awa.cli._ui -> awa.ui._security
+    awa.connectors._engine -> awa.toolkits._common
+    awa.connectors._local -> awa.toolkits._common
+    awa.connectors._saas_microsoft_outlook -> awa.people._connect
+    awa.connectors._saas_microsoft_teams -> awa.people._connect
+    awa.evals.runner -> awa.runtime._run
+    awa.people._entra -> awa.connectors._catalog
+    awa.people._entra -> awa.connectors._engine
+    awa.people._entra -> awa.connectors._microsoft_auth
+    awa.people._entra -> awa.connectors._microsoft_errors
+    awa.people._entra -> awa.connectors._saas_microsoft
+    awa.people._entra -> awa.connectors._spec
+    awa.project_setup.data_store -> awa.server._data_store
+    awa.project_setup.data_store -> awa.server._store_copy
+    awa.quick -> awa.blueprints._build
+    awa.quick -> awa.blueprints._resolve
+    awa.server._blueprint_app -> awa.blueprints._resolve
+    awa.server._data_api -> awa.data._model
+    awa.server._data_blueprints -> awa.blueprints._project_files
+    awa.server._data_blueprints -> awa.blueprints._resolve
+    awa.team._network_state -> awa.workflows._base
+    awa.team.network -> awa.runtime._run
+    awa.team.network -> awa.workflows._base
+    awa.team.team -> awa.runtime._run
+    awa.team.team -> awa.workflows._base
+    awa.testing.plugin_contract -> awa.connectors._catalog
+    awa.testing.plugin_contract -> awa.data._parse
+    awa.testing.plugin_contract -> awa.toolkits._sql_guard
+    awa.tools.idempotency -> awa.runtime._run
+    awa.ui._app -> awa.server._serialize
+    awa.ui._cases -> awa.blueprints._project_files
+    awa.ui._connections -> awa.blueprints._connect
+    awa.ui._connections -> awa.blueprints._project_files
+    awa.ui._connections -> awa.connectors._catalog
+    awa.ui._data_folder -> awa.data._model
+    awa.ui._diagram -> awa.blueprints._diagram
+    awa.ui._examples -> awa.blueprints._catalog
+    awa.ui._operate -> awa.automation._time
+    awa.ui._operate -> awa.blueprints._resolve
+    awa.ui._project -> awa.automation._decision
+    awa.ui._project -> awa.automation._time
+    awa.ui._project -> awa.blueprints._data_map
+    awa.ui._project -> awa.blueprints._declare
+    awa.ui._project -> awa.blueprints._project_files
+    awa.ui._project -> awa.blueprints._resolve
+    awa.ui._project -> awa.server._builds
+    awa.ui._security -> awa.server._web
+    awa.ui._systems -> awa.blueprints._declare
+    awa.ui._systems -> awa.blueprints._systems
+    awa.ui._try -> awa.server._serialize
+    awa.workflows._base -> awa.runtime._run
+    awa.workflows._base -> awa.runtime._streaming
+
+# The outer parts build on the core: the automation and serving stack, the web app, the builder
+# modules of blueprints, the people directory, the connectors and checks for Microsoft 365, the
+# agent network and the contract suites of the application backends. An entry names a module and
+# everything below it; an entry ending in `*` is a name prefix. Every other module is core and
+# imports none of them. This boundary is about dependencies, not stability: which parts are
+# preview is set by `__stability__` and docs/about/version-plan.md.
+[importlinter:contract:outer]
+name = The core never imports an outer part
+type = outer_boundary
+resolve_lazy_imports = True
+outer =
+    awa.automation
+    awa.checks
+    awa.people
+    awa.server
+    awa.ui
+    awa.project_setup.data_store
+    awa.team.network
+    awa.team._network_*
+    awa.connectors._microsoft_*
+    awa.connectors._saas_microsoft*
+    awa.connectors._sharepoint_excel
+    awa.blueprints._brief
+    awa.blueprints._build_loop
+    awa.blueprints._catalog
+    awa.blueprints._connect
+    awa.blueprints._data_design
+    awa.blueprints._data_files
+    awa.blueprints._data_map
+    awa.blueprints._declare
+    awa.blueprints._fit
+    awa.blueprints._patterns
+    awa.blueprints._project*
+    awa.blueprints._refine_stage
+    awa.blueprints._run_data
+    awa.blueprints._systems
+    awa.blueprints.architect
+    awa.blueprints.ports
+    awa.blueprints.triggers
+    awa.blueprints.wizard
+    awa.cli._automation
+    awa.cli._brief
+    awa.cli._check
+    awa.cli._data*
+    awa.cli._people
+    awa.cli._serve
+    awa.cli._setup
+    awa.cli._store
+    awa.cli._ui
+    awa.testing.people_contract
+    awa.testing.contracts.build_store
+    awa.testing.contracts.event_queue
+    awa.testing.contracts.file_store
+    awa.testing.contracts.notifier
+    awa.testing.contracts.run_store
+    awa.testing.contracts.upload_store
+ignore_imports =
+    awa.blueprints._automation -> awa.automation.templates
+    awa.blueprints._build -> awa.team.network
+    awa.blueprints._check -> awa.blueprints.triggers
+    awa.blueprints._check_data -> awa.blueprints._project_data
+    awa.blueprints._data_project -> awa.blueprints._project_data
+    awa.blueprints._schema_data -> awa.blueprints.ports
+    awa.cli._add -> awa.blueprints.triggers
+    awa.cli._blueprint -> awa.blueprints._connect
+    awa.cli._blueprint -> awa.blueprints._declare
+    awa.cli._blueprint -> awa.blueprints.triggers
+    awa.cli._blueprint -> awa.checks.connect
+    awa.cli._mcp -> awa.server.mcp
+    awa.cli._new -> awa.blueprints.wizard
+    awa.cli._preflight -> awa.automation.blueprint
+    awa.cli._preflight -> awa.automation.queues

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>awa</title>
+<link rel="icon" href="data:,">
+<style nonce="{{nonce}}">
+{{style}}
+</style>
+</head>
+<body>
+<svg hidden>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4.2h-4.2"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 5v11M7.5 11.5L12 16l4.5-4.5M5 19.5h14"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v11a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5zM14 3.5V8h4.5"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l2 2.5h7A1.5 1.5 0 0 1 20 10v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/></symbol>
+<symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3.5v4M15 3.5v4M6.5 7.5h11v3a5.5 5.5 0 0 1-11 0zM12 16v4.5"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 4c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/></symbol>
+<symbol id="i-flow" viewBox="0 0 24 24"><rect x="3.5" y="4" width="6" height="5" rx="1.5"/><rect x="14.5" y="15" width="6" height="5" rx="1.5"/><path d="M9.5 6.5H12a3 3 0 0 1 3 3V15"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9.5 4h5M10.5 4v5.5L5.5 18a1.5 1.5 0 0 0 1.3 2.2h10.4a1.5 1.5 0 0 0 1.3-2.2l-5-8.5V4"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5V16h-.5A2.5 2.5 0 0 1 5 13.5z"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M20 4L10.5 13.5M20 4l-6 16-3.5-6.5L4 10z"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3.5L6 13.5h5l-1 7 7-10h-5z"/></symbol>
+<symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3.5l7 2.5v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6zM9 12l2.2 2.2L15.2 10"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13l2.2-7A1.5 1.5 0 0 1 7.6 5h8.8a1.5 1.5 0 0 1 1.4 1L20 13v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5zM4 13h4.5a3.5 3.5 0 0 0 7 0H20"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 2.8 0l.2.2a2 2 0 0 1 0 2.8L8 19zM14.5 6.5l3 3"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M7 7l.8 11.5a1.5 1.5 0 0 0 1.5 1.4h5.4a1.5 1.5 0 0 0 1.5-1.4L17 7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<div class="top">
+<header>
+  <span class="brand">awa</span>
+  <span class="folder-chip" title="Your folder"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span id="folder-chip"></span></span>
+  <span class="spacer" aria-hidden="true"></span>
+  <button id="theme" class="ghost icon-only" type="button" aria-pressed="false" aria-label="Dark mode"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
+</header>
+<nav aria-label="Steps">
+  <ol>
+    <li><a href="#setup"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span>Set up</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#data"><svg class="ic" aria-hidden="true"><use href="#i-database"/></svg><span>Data</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#describe"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg><span>Describe</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#review"><svg class="ic" aria-hidden="true"><use href="#i-flow"/></svg><span>Review</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#connect"><svg class="ic" aria-hidden="true"><use href="#i-plug"/></svg><span>Connect</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#test"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg><span>Test</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#run"><svg class="ic" aria-hidden="true"><use href="#i-chat"/></svg><span>Try it</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#deploy"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg><span>Use it</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#inbox"><svg class="ic" aria-hidden="true"><use href="#i-inbox"/></svg><span>Approvals</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+    <li><a href="#assistant"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><span>Assistant</span><svg class="ic done" aria-hidden="true"><use href="#i-check"/></svg></a></li>
+  </ol>
+</nav>
+</div>
+<div id="toasts" role="status" aria-live="polite"></div>
+<main id="main">
+
+<section id="setup" hidden aria-labelledby="setup-title">
+  <h1 id="setup-title" tabindex="-1">Set up</h1>
+  <p class="lead">awa needs an AI model to work, and access to the systems your process uses.
+    What you enter is saved in the file <code>.env</code> in your project folder, on this computer
+    only. awa never shows a saved value again; it only tells you whether it is set.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> you tell awa which AI model to use and how to reach your external systems. Everything is saved on this computer only, in the file .env of your project folder.</span></p>
+  <p class="hint">Project folder: <code id="setup-folder"></code></p>
+  <div id="setup-status" role="status" aria-live="polite"></div>
+  <h2>AI model</h2>
+  <p class="hint">One provider is enough. Enter the key of the one your organization uses.</p>
+  <div id="providers"></div>
+  <div class="card">
+    <label for="model">Which model should awa use? <span class="hint">(optional: the provider, a colon
+      and the model, for example <code>anthropic:claude-sonnet-5-5</code>)</span></label>
+    <input id="model" type="text" autocomplete="off" spellcheck="false" data-env="AWA_DEFAULT_MODEL">
+    <p class="hint" id="model-state"></p>
+  </div>
+  <div id="project-settings"></div>
+  <h2>External systems</h2>
+  <p class="hint">Systems awa can connect to. To design your process on a database or an API, add
+    it under <a href="#data">Your data</a>, External systems: there awa tests it and reads its
+    tables or operations. Here you only enter settings; everything else can wait.</p>
+  <div id="connectors"></div>
+  <div class="actions"><button class="primary" id="save-setup" type="button">Save and continue</button></div>
+</section>
+
+<section id="data" hidden aria-labelledby="data-title">
+  <h1 id="data-title" tabindex="-1">Your data</h1>
+  <p class="lead">Show awa what your process works on: the files it reads, and the external
+    systems (databases, APIs) it reaches. awa then designs the process on your real data instead
+    of inventing some.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> a file is copied into your project and read
+    there; your original is never changed. A system is tested with one read-only call, its settings
+    are saved in the file .env on this computer only and never shown again, and awa reads its
+    structure (tables and columns, or the operations of an API), not its rows unless you allow
+    example rows. You can skip this step.</span></p>
+  <details class="card" id="example-box">
+    <summary>Start from an example</summary>
+    <p class="hint">Opens a shipped example in a new project folder, the way you would start your
+      own process: its data files are copied under Files and its process description is filled in
+      on Describe. Its eval cases are on Test. Your current folder is not changed.</p>
+    <div class="row">
+      <div><label for="example-pick">Example</label><select id="example-pick"></select></div>
+    </div>
+    <p class="hint" id="example-about"></p>
+    <div class="actions"><button id="open-example" type="button">Open the example</button></div>
+  </details>
+  <div id="example-status" role="status" aria-live="polite"></div>
+  <label class="check"><input id="mask" type="checkbox"><span>Hide personal data from the AI
+    <span class="hint">(names, IBANs, email addresses and the like become placeholders in what the
+    design model reads of your files and example rows; agents that read your data at run time see
+    it unmasked)</span></span></label>
+  <p class="hint" id="mask-state" role="status"></p>
+  <h2 id="files-title">Files</h2>
+  <p class="hint" id="data-limits"></p>
+  <div class="dropzone" id="dropzone" aria-describedby="dropzone-help">
+    <svg class="ic big" aria-hidden="true"><use href="#i-upload"/></svg><p id="dropzone-help"><strong>Drop files or a folder here</strong>, or choose them:</p>
+    <div class="actions">
+      <button id="choose-files" type="button"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>Choose files</button>
+      <button id="choose-folder" type="button"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg>Choose a folder</button>
+    </div>
+    <input type="file" id="pick-files" multiple hidden>
+    <input type="file" id="pick-folder" webkitdirectory hidden>
+  </div>
+  <ul class="uploads" id="upload-list" aria-live="polite"></ul>
+  <div id="data-status" role="status" aria-live="polite"></div>
+  <div class="actions"><button id="analyse-again" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>Analyze all again</button></div>
+  <div id="data-cards"></div>
+  <h2 id="systems-title">External systems</h2>
+  <p class="hint">A database or an API your process reads. The design then uses its real tables or
+    operations, live and read-only, and the test runs read it too. Systems you do not add here get a
+    stand-in: a small local copy with sample records awa writes from your description.</p>
+  <div id="system-cards"></div>
+  <details class="card system-form" id="add-system">
+    <summary>Add an external system<svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></summary>
+    <div class="row">
+      <div><label for="system-type">Kind of system</label><select id="system-type"></select></div>
+      <div><label for="system-name">Your name for it <span class="hint">(for example Invoice ledger)</span></label>
+        <input id="system-name" type="text" autocomplete="off" spellcheck="false" maxlength="80"></div>
+    </div>
+    <div id="system-database-row" hidden><label for="system-database">Which database?</label>
+      <select id="system-database"></select></div>
+    <details id="system-help" hidden><summary>Help for this kind of system</summary>
+      <p class="hint" id="system-setup"></p></details>
+    <div id="system-fields"></div>
+    <label class="check"><input id="system-samples" type="checkbox"><span>Read up to 3 example rows per
+      table <span class="hint">(they help the design; columns that look like passwords or keys are
+      never read, and personal data is hidden like in your files when you chose that above)</span></span></label>
+    <div class="actions">
+      <button id="test-system" type="button">Test connection</button>
+      <button id="save-system" type="button">Test and save</button>
+    </div>
+    <div id="system-result" role="status" aria-live="polite"></div>
+  </details>
+  <div class="actions"><a class="button primary" id="data-next" href="#describe">Continue to Describe</a></div>
+</section>
+
+<section id="describe" hidden aria-labelledby="describe-title">
+  <h1 id="describe-title" tabindex="-1">Describe your process</h1>
+  <p class="lead">Write down in your own words what happens: what comes in, who checks or decides
+    what, which systems are involved, and what should come out at the end. A few sentences are
+    enough. awa designs the agents, eval cases and connection steps from it.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> awa reads your description, writes eval cases first, designs the agents against them and repairs the design in a few rounds, until the cases pass or the limits are reached. The cases come from your description, so you must still check them. This usually takes a few minutes; the result shows whether the target was reached.</span></p>
+  <div id="describe-note"></div>
+  <div id="describe-files"></div>
+  <label for="process">Your process</label>
+  <textarea id="process" rows="10" placeholder="Example: Customers email us about their orders. First look up the order in our shop system. Answer questions about delivery directly. Refunds over 100 euros need a manager's OK before they are booked."></textarea>
+  <label class="check"><input id="thorough" type="checkbox" checked> Test and repair it
+    automatically (recommended; usually takes a few minutes)</label>
+  <div class="actions"><button class="primary" id="create" type="button"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg>Create my system</button></div>
+  <div class="card" id="patterns-panel">
+    <h2>Suggest patterns</h2>
+    <p class="hint">Not sure how the agents should work together? awa suggests up to three ways from your description, and can test them side by side.</p>
+    <label class="check"><input id="patterns-model" type="checkbox"> Let my model rank them (one model call, costs tokens)</label>
+    <div class="actions"><button id="suggest-patterns" type="button"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg>Suggest patterns</button></div>
+    <div id="patterns-result" aria-live="polite"></div>
+  </div>
+  <div id="build-view" hidden>
+    <h2 id="build-title">Progress</h2>
+    <ol class="stages" id="stages" aria-labelledby="build-title"></ol>
+    <div id="build-cases"></div>
+    <details class="card" id="build-details"><summary>Details</summary>
+      <ol class="log" id="progress" aria-live="off"></ol></details>
+  </div>
+  <div id="describe-result" role="status"></div>
+</section>
+
+<section id="review" hidden aria-labelledby="review-title">
+  <h1 id="review-title" tabindex="-1">Review</h1>
+  <p class="lead" id="review-lead">What awa designed for your process. Check that it matches how
+    the work is really done.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> you check what awa designed before anything runs: who does what, which systems are involved, and which eval cases exist. You can change it.</span></p>
+  <div id="review-body"></div>
+</section>
+
+<section id="connect" hidden aria-labelledby="connect-title">
+  <h1 id="connect-title" tabindex="-1">Connect</h1>
+  <p class="lead">Connect the systems that still work on a stand-in, so the complete result runs on
+    your real data. A stand-in is a small local copy with sample records awa wrote from your
+    description, so you can test before connecting.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> for each system awa shows what it needs. Keys are
+    saved in the file .env on this computer and never shown again. <em>Test connection</em> makes one
+    small, read-only call; <em>Save and connect</em> saves, tests and then switches the system from the
+    stand-in to the live system.</span></p>
+  <div id="connect-body" aria-live="polite"></div>
+</section>
+
+<section id="test" hidden aria-labelledby="test-title">
+  <h1 id="test-title" tabindex="-1">Test</h1>
+  <p class="lead">awa runs every eval case against your system and checks the result. Systems that
+    are not connected yet answer from their stand-in, so you can test before connecting them.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> awa runs every eval case against your system and shows which ones passed and why a failed one failed. You can change what a case sends (and so which of your files it uses) and run it again.</span></p>
+  <div class="actions"><button class="primary" id="run-tests" type="button"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Run all tests</button></div>
+  <div id="test-summary" role="status" aria-live="polite"></div>
+  <div id="test-results"></div>
+</section>
+
+<section id="run" hidden aria-labelledby="run-title">
+  <h1 id="run-title" tabindex="-1">Try it</h1>
+  <p class="lead">Talk to your system the way you would talk to a colleague. Before a step that is
+    marked 'asks you first' (see Review), it shows you what will happen and asks you here. Check
+    that list before you rely on it.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> you ask, the system works, and you see each
+    step it takes in plain words. Steps marked 'asks you first' on the Review page wait for your OK. Everything else runs without asking.</span></p>
+  <div id="run-notice"></div>
+  <div id="run-controls">
+    <div id="examples"></div>
+    <div class="card conversation" id="conversation" role="log" aria-live="polite"
+      aria-label="Conversation"></div>
+    <div id="working" class="working" hidden><span class="spinner" aria-hidden="true"></span>
+      <span id="working-text"></span></div>
+    <p class="sr" id="run-state" role="status" aria-live="polite"></p>
+    <div id="approvals"></div>
+    <div id="composer">
+      <label for="message">Your message</label>
+      <textarea id="message" rows="3"></textarea>
+    </div>
+    <div class="actions">
+      <button class="primary" id="send" type="button"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg>Send</button>
+      <button id="stop" type="button" hidden><svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg>Stop</button>
+      <button id="new-chat" type="button">New thread</button>
+    </div>
+  </div>
+</section>
+
+<section id="deploy" hidden aria-labelledby="deploy-title">
+  <h1 id="deploy-title" tabindex="-1">Use it</h1>
+  <p class="lead">Put the system to work: see what starts it by itself, try it once on a sample,
+    follow what it did and decide what waits for your OK. Your system is a folder of plain files:
+    download it to hand it to your IT team.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> you see whether the system is running, what
+    starts it, the runs so far and the approvals that wait for you, and you learn the one command
+    that keeps it running after you close this window.</span></p>
+  <div class="actions">
+    <a class="button primary" id="download" href="/api/export" download><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Download the project (.zip)</a>
+  </div>
+  <p class="hint">The download never contains your <code>.env</code> file with the saved keys.</p>
+  <div id="deploy-body"></div>
+</section>
+
+<section id="inbox" hidden aria-labelledby="inbox-title">
+  <h1 id="inbox-title" tabindex="-1">Approvals</h1>
+  <p class="lead">Runs of this project that wait for a person. Your answer is saved in the
+    project folder; the running <code>awa serve</code> or <code>awa worker</code> continues the run,
+    or you continue it here when nothing runs.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> runs that started by themselves and wait for a person show up here as cards: what will happen, the values, and why you are asked. The same cards are on the Use it step.</span></p>
+  <div class="actions"><button id="refresh-inbox" type="button"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button></div>
+  <div id="inbox-body" aria-live="polite"></div>
+</section>
+
+<section id="assistant" hidden aria-labelledby="assistant-title">
+  <h1 id="assistant-title" tabindex="-1">Hand to a coding assistant</h1>
+  <p class="lead">A written brief for a coding assistant: your process, the agents, ready prompts, templates and the commands that check the result. Copy it into the assistant, or save it as BRIEF.md in your project folder.</p>
+  <p class="help"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span><strong>What happens here:</strong> the brief is written from the files in your project folder, so it always matches what exists. It never contains the values of your settings. Create or change your system first; then come back to get a new brief.</span></p>
+  <div id="assistant-note" role="status"></div>
+  <div id="assistant-empty" hidden></div>
+  <div id="assistant-body" hidden>
+    <div class="actions">
+      <button class="primary" id="copy-brief" type="button"><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg>Copy the brief</button>
+      <button id="download-brief" type="button"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>Download</button>
+      <button id="save-brief" type="button"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg>Save as BRIEF.md</button>
+    </div>
+    <pre id="brief-text" class="card" tabindex="0" aria-label="The brief"></pre>
+  </div>
+</section>
+
+</main>
+<script nonce="{{nonce}}">
+{{script}}
+</script>
+</body>
+</html>

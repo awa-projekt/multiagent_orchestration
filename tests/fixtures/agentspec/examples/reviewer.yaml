@@ -1,0 +1,28 @@
+# The reviewer example of the agent spec (docs/develop/agent-spec.md): `reviews:` is set on the
+# reviewer.
+format_version: awa/v1
+name: supplier_letters
+description: Drafts letters to suppliers about invoice deviations.
+limits: {max_requests: 40}
+agents:
+  - name: letters_lead
+    role: orchestrator
+    description: Runs the drafting of supplier letters. Entry point for each deviation.
+    sub_agents: [write_letter]
+  - name: write_letter
+    role: worker
+    description: Drafts a letter to a supplier about a price deviation. Use when an invoice line deviates.
+    goal: Draft a short, factual letter that names the deviating lines and asks for a corrected invoice.
+    system:
+      output: "The letter: subject line, then the body in plain sentences."
+  - name: write_letter_reviewer
+    role: reviewer
+    reviews: write_letter
+    description: Reviews the drafted supplier letter for accuracy and tone. Use before any letter is sent.
+    goal: List every finding in the draft, most serious first.
+    system:
+      rules: ["Report every finding, including minor ones, because filtering happens in a separate pass."]
+      output: "Findings: severity, quote, issue, suggested fix."
+    skills:
+      - quality-review
+    max_steps: 15

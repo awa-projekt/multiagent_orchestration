@@ -1,0 +1,4 @@
+*In the picture:*
+
+1. Where awa keeps the runs and the waiting approvals.
+2. The run stopped at the approval. Its id starts with proc_.

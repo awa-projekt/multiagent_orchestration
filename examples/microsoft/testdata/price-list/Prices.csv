@@ -1,0 +1,7 @@
+product_no,name,unit_price,currency,price_basis,tax_class,valid_from,valid_to
+P-1001,Office chair Ergo,199.90,EUR,net,standard,2026-01-01,2026-12-31
+P-2002,Desk Flex 160,349.00,EUR,net,standard,2026-01-01,2026-06-30
+P-3003,Stool Round,59.00,EUR,net,standard,2026-01-01,2026-12-31
+P-3003,Stool Round,55.00,EUR,net,standard,2026-09-01,2026-12-31
+P-4004,Shelf Wide,120.00,EUR,gross,standard,2026-01-01,2026-12-31
+P-5005,Lamp Desk Mini,24.50,EUR,net,reduced,2026-01-01,2026-12-31

@@ -1,0 +1,9 @@
+Bestellnr;Lieferant;Land;Betrag_EUR;Wunschliefertermin;Status
+B-1001;Kowalski Stahl Sp. z o.o.;PL;4.250,00;11.11.2024;offen
+B-1002;Müller & Söhne KG;DE;5.980,50;03.10.2024;offen
+B-1003;Müller & Söhne KG;DE;1.200,00;04.10.2024;offen
+B-1004;Kowalski Stahl Sp. z o.o.;PL;23.400,00;16.11.2024;offen
+B-1005;Société Lyonnaise SARL;FR;880,75;11.11.2024;offen
+B-1006;Nordwind GmbH;DE;7.150,00;31.10.2024;offen
+B-1007;Nordwind GmbH;DE;3.300,00;14.11.2024;offen
+B-1008;Nordwind GmbH;DE;9.900,00;25.12.2024;storniert

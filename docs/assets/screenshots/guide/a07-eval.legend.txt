@@ -1,0 +1,4 @@
+*In the picture:*
+
+1. The share of eval cases that passed.
+2. The case with 7,450 EUR: the approval was asked for and answered.

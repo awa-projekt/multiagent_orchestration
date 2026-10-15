@@ -1,0 +1,26 @@
+"""Tests for the `{{name}}` connector: the awa contract suite and one call offline."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from awa.testing.plugin_contract import verify  # noqa: E402
+from awa.connectors import MockTransport, connector_tools, mock_response  # noqa: E402
+
+from {{name}}_connector import CONNECTOR  # noqa: E402
+
+ENV = {"{{env}}_URL": "https://api.example.com", "{{env}}_TOKEN": "test-token"}
+
+
+def test_it_passes_the_contract_of_connector_{{name}}() -> None:
+    result = verify("connector.{{name}}", CONNECTOR)
+    assert result.passed, result.summary()
+
+
+def test_get_record_calls_the_api() -> None:
+    transport = MockTransport({"GET /records/R-1": mock_response(json={"id": "R-1"})})
+    [get_record] = connector_tools(CONNECTOR, env=ENV, transport=transport)
+    assert "R-1" in str(get_record.invoke({"record_id": "R-1"}))

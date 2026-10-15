@@ -1,0 +1,7 @@
+payment_id,date,customer_id,reference,amount_eur
+PAY-001,2026-07-29,C-10,INV-3001 Mueller,4800.00
+PAY-002,2026-08-20,C-10,RE 3002 abzgl. Bankgebuehr,2487.50
+PAY-003,2026-07-18,C-20,INV-3005,1900.00
+PAY-004,2026-07-02,C-30,inv 3008 part payment,1000.00
+PAY-005,2026-09-20,C-40,INV-3010,1500.00
+PAY-006,2026-09-25,C-20,Anzahlung?,450.00

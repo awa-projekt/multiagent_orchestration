@@ -1,0 +1,52 @@
+{
+  "suppliers": [
+    {
+      "id": "S-01",
+      "name": "Kowalski Stahl Sp. z o.o.",
+      "country": "PL",
+      "annual_spend_eur": 61200
+    },
+    {
+      "id": "S-02",
+      "name": "Müller & Söhne KG",
+      "country": "DE",
+      "annual_spend_eur": 48230
+    },
+    {
+      "id": "S-03",
+      "name": "Société Lyonnaise SARL",
+      "country": "FR",
+      "annual_spend_eur": 12400
+    },
+    {
+      "id": "S-04",
+      "name": "Tokyo Precision KK",
+      "country": "JP",
+      "annual_spend_eur": 87650
+    },
+    {
+      "id": "S-05",
+      "name": "Zürcher Präzision AG",
+      "country": "CH",
+      "annual_spend_eur": 33100
+    },
+    {
+      "id": "S-06",
+      "name": "Maple Fasteners Inc.",
+      "country": "CA",
+      "annual_spend_eur": 9800
+    },
+    {
+      "id": "S-07",
+      "name": "Nordwind GmbH",
+      "country": "DE",
+      "annual_spend_eur": 27500
+    },
+    {
+      "id": "S-08",
+      "name": "Lone Star Logistics LLC",
+      "country": "US",
+      "annual_spend_eur": 19900
+    }
+  ]
+}

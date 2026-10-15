@@ -1,0 +1,77 @@
+"""Runtime layer: event subscribers, the OpenTelemetry bridge, the audit trail and run traces."""
+
+from awa.kernel.redaction import (
+    PII_PATTERNS,
+    SECRET_PATTERNS,
+    SECRETS_REDACTOR,
+    RedactionMatch,
+    RedactionPattern,
+    Redactor,
+    RegexRedactor,
+    redact_mapping,
+    redact_secrets,
+)
+from awa.observability.audit import (
+    ACTOR_METADATA_KEY,
+    DEFAULT_AUDIT_EVENT_TYPES,
+    GENESIS_HASH,
+    REQUEST_ID_METADATA_KEY,
+    TENANT_METADATA_KEY,
+    AuditChainError,
+    AuditLog,
+    AuditLogSink,
+    AuditRecord,
+    AuditSink,
+    ChainVerification,
+    InMemoryAuditSink,
+    JsonlAuditSink,
+    audit_node,
+    read_audit_file,
+    sort_audit_trail,
+    verify_chain,
+)
+from awa.observability.events import EventLogger, EventRecorder, build_trace_tags, describe_event
+from awa.observability.langfuse import LangfuseConnection, connect_langfuse
+from awa.observability.otel import OpenTelemetrySubscriber
+from awa.observability.trace_store import TraceRecorder, TraceStore, read_trace
+from awa.observability.trace_view import render_trace
+
+__all__ = [
+    "ACTOR_METADATA_KEY",
+    "DEFAULT_AUDIT_EVENT_TYPES",
+    "GENESIS_HASH",
+    "PII_PATTERNS",
+    "REQUEST_ID_METADATA_KEY",
+    "SECRETS_REDACTOR",
+    "SECRET_PATTERNS",
+    "TENANT_METADATA_KEY",
+    "AuditChainError",
+    "AuditLog",
+    "AuditLogSink",
+    "AuditRecord",
+    "AuditSink",
+    "ChainVerification",
+    "EventLogger",
+    "EventRecorder",
+    "InMemoryAuditSink",
+    "JsonlAuditSink",
+    "LangfuseConnection",
+    "OpenTelemetrySubscriber",
+    "RedactionMatch",
+    "RedactionPattern",
+    "Redactor",
+    "RegexRedactor",
+    "TraceRecorder",
+    "TraceStore",
+    "audit_node",
+    "build_trace_tags",
+    "connect_langfuse",
+    "describe_event",
+    "read_audit_file",
+    "read_trace",
+    "redact_mapping",
+    "redact_secrets",
+    "render_trace",
+    "sort_audit_trail",
+    "verify_chain",
+]

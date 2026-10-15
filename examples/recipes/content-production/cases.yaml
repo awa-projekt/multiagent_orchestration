@@ -1,0 +1,47 @@
+# Eval cases for the content-production recipe.
+#
+# The cases check that approved content is saved as a CMS draft and waits for the content
+# owner before it is published, and that compliance stops guarantees and customer names
+# without consent (nothing is saved or published then).
+#
+#   awa eval examples/recipes/content-production/blueprint.yaml \
+#       examples/recipes/content-production/cases.yaml \
+#       --tools examples/recipes/content-production/tools.py
+name: content-production
+cases:
+  - id: blog-post-cleared-and-waits-for-the-owner
+    input: Produce content request REQ-201.
+    tags: [blog]
+    scorers:
+      - tool:get_product_facts
+      - tool:save_cms_draft
+      - approval:publish_article
+
+  - id: editing-loop-uses-the-brand-rules
+    input: Produce content request REQ-201.
+    tags: [brand]
+    metadata:
+      why: The first draft says "revolutionary"; the editor sends it back once.
+    scorers:
+      - tool:get_brand_guidelines
+      - approval:publish_article
+
+  - id: guarantee-claim-blocked
+    input: Produce content request REQ-202.
+    expected: ["Not published", "CR-1"]
+    tags: [compliance, social]
+    scorers:
+      - contains
+      - no_tool:save_cms_draft
+      - no_tool:publish_article
+      - "judge:The issues cite the no-guarantees rule and propose a compliant rewording based on the pilot results."
+
+  - id: customer-named-without-consent
+    input: Produce content request REQ-203.
+    expected: ["Not published", "CR-4"]
+    tags: [compliance, newsletter]
+    scorers:
+      - contains
+      - tool:check_reference_consent
+      - no_tool:save_cms_draft
+      - no_tool:publish_article

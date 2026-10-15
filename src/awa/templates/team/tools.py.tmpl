@@ -1,0 +1,41 @@
+"""Tools for blueprint.yaml, backed by small in-memory sample data.
+
+Every documented function listed in `__all__` is a tool: its signature is the
+argument schema and its docstring the description the model reads. Replace the
+sample data with calls to your own systems.
+"""
+
+from __future__ import annotations
+
+import json
+
+ARTICLES: dict[str, dict[str, str]] = {
+    "KB-1": {"title": "Heat pumps", "text": "Heat pumps move heat instead of burning fuel."},
+    "KB-2": {"title": "Heat pump costs", "text": "A heat pump costs 30% less to run than gas."},
+    "KB-3": {"title": "Solar panels", "text": "Panels on a south roof yield the most power."},
+}
+PUBLISHED: list[dict[str, str]] = []
+
+
+def search_knowledge_base(query: str, limit: int = 3) -> str:
+    """Search the knowledge base; returns matching articles with their ids as JSON."""
+
+    words = {word.lower() for word in query.split()}
+    hits = [
+        {"id": article_id, **article}
+        for article_id, article in ARTICLES.items()
+        if words & set(f"{article['title']} {article['text']}".lower().split())
+    ]
+    return json.dumps(hits[:limit]) if hits else f"No articles match {query!r}."
+
+
+def publish_brief(title: str, body: str) -> str:
+    """Publish a brief to the intranet. Irreversible: requires human approval."""
+
+    if not title.strip() or not body.strip():
+        return "Not published: a brief needs a title and a body."
+    PUBLISHED.append({"title": title, "body": body})
+    return f"Published {title!r} ({len(body.split())} words)."
+
+
+__all__ = ["publish_brief", "search_knowledge_base"]

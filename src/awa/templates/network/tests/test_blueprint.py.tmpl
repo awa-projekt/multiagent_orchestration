@@ -1,0 +1,86 @@
+"""Offline tests for blueprint.yaml: scripted models, no API key needed."""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+from awa import Blueprint
+from awa.testing import tool_call
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+PLAN = tool_call(
+    "create_tasks",
+    {
+        "tasks": [
+            {
+                "key": "audience",
+                "title": "Profile the audience",
+                "description": "Analytics add-on, segment: small businesses.",
+                "required_capabilities": ["analysis"],
+            },
+            {
+                "key": "post",
+                "title": "Write and schedule the post",
+                "description": "Analytics add-on, channel: linkedin.",
+                "required_capabilities": ["copy"],
+                "depends_on": ["audience"],
+            },
+        ]
+    },
+)
+POST = "Reports in minutes, no data team needed: meet the analytics add-on."
+
+
+@pytest.fixture(autouse=True)
+def _fresh_data() -> Iterator[None]:
+    tools.SCHEDULED.clear()
+    yield
+    tools.SCHEDULED.clear()
+
+
+def test_blueprint_is_valid() -> None:
+    issues = Blueprint.from_yaml(BLUEPRINT).check(tools=TOOLS)
+    assert [issue for issue in issues if issue.severity == "error"] == []
+
+
+def test_segment_lookup() -> None:
+    assert "reporting" in tools.lookup_segment("Small businesses")
+
+
+def test_the_network_pauses_for_the_post_and_finishes_after_approval(build_offline) -> None:
+    offline = build_offline(
+        {
+            # plan, acknowledge the plan, acknowledge the first result, summarize
+            "campaign_lead": [PLAN, "Planned.", "Noted.", "Launch ready: the post is scheduled."],
+            "market_analyst": [
+                tool_call("lookup_segment", {"segment": "small businesses"}),
+                "Small businesses want to save time; keep it practical.",
+            ],
+            "copywriter": [
+                tool_call("schedule_post", {"channel": "linkedin", "text": POST}),
+                f"{POST} (scheduled on linkedin)",
+            ],
+        }
+    )
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Launch the analytics add-on for small businesses.")
+        assert paused.is_interrupted
+        [pending] = paused.interrupts
+        assert pending["agent"] == "copywriter"
+        assert pending["value"]["tool"] == "schedule_post"
+        assert tools.SCHEDULED == []  # nothing is scheduled before a human decides
+
+        done = await offline.system.resume(paused.thread_id, {"action": "approve"})
+        assert done.output == "Launch ready: the post is scheduled."
+        assert done.metadata["tasks"]["completed"] == 2
+
+    asyncio.run(scenario())
+    assert [post["channel"] for post in tools.SCHEDULED] == ["linkedin"]

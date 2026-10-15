@@ -1,0 +1,116 @@
+# Content production: brief, draft and edit until approved, compliance check, publication.
+#
+# The strategist turns a marketing request into a brief; the writer drafts and the editor
+# reviews in a loop until the editor approves (at most three rounds); the compliance
+# reviewer checks the approved text against the marketing rules and saves it to the CMS
+# as "ready_for_publication"; the publisher then publishes it. Publishing waits for the
+# content owner: the workflow pauses at that step and resumes there once the owner
+# decides, without redoing the brief, the drafts or the compliance check.
+#
+#   awa validate examples/recipes/content-production/blueprint.yaml \
+#       --tools examples/recipes/content-production/tools.py
+#   awa run examples/recipes/content-production/blueprint.yaml "Produce content request REQ-201." \
+#       --tools examples/recipes/content-production/tools.py
+name: content-production
+description: Turns marketing requests into edited, compliance-checked, published articles.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 8
+
+agents:
+  - name: strategist
+    description: Turns a marketing request into a one-page content brief.
+    instructions: |
+      Turn the marketing request into a brief. Read it with get_content_request and the
+      brand rules with get_brand_guidelines. Answer with exactly these lines:
+      "Request: <id>", "Channel:", "Audience:", "Goal:", "Key message:" (one sentence),
+      "Must include:" (keywords), "Product:", "Length:", "Call to action:", and "Customer:"
+      for customer stories. If the request does not exist, answer "REQUEST NOT FOUND".
+    tools: [get_content_request, get_brand_guidelines]
+    skills: [writing]
+
+  - name: writer
+    description: Drafts and revises the piece from the brief and the approved product facts.
+    instructions: |
+      Write the piece described in the brief, or revise it when you receive the editor's
+      feedback (fix every point and keep what was approved). Claim only what
+      get_product_facts returns for the product. Answer with the title on the first line
+      ("Title: ..."), then the body. Keep the brief's length and end with its call to action.
+    tools: [get_product_facts]
+    skills: [writing]
+
+  - name: editor
+    description: Reviews each draft against the brief and the brand guidelines.
+    instructions: |
+      Review the latest draft against the brief and get_brand_guidelines: audience, key
+      message, length, call to action, banned words, headline rules, clarity.
+      Answer in this format, always including the full brief and the full current draft:
+      "VERDICT: APPROVED" or "VERDICT: REVISE" on the first line; "Feedback:" with numbered
+      points (empty when approved); "## Brief" with the brief unchanged; "## Draft" with the
+      draft (title line and body). Check product claims against get_product_facts: a claim
+      the facts support is approved content, not a point of feedback.
+    tools: [get_brand_guidelines, get_product_facts]
+    skills: [quality-review]
+
+  - name: compliance_reviewer
+    acknowledge_ungated: [save_cms_draft]  # internal records of this demo; no person needed
+    description: Checks approved content against the marketing compliance rules and saves it to the CMS.
+    instructions: |
+      Check the approved draft against get_compliance_rules for its channel. For a named
+      customer, check_reference_consent. Add the CR-3 closing sentence yourself when it is
+      missing; any other violation means status "changes_required" with the rule id, the
+      passage and a compliant rewording built only from get_product_facts, and nothing is
+      saved. Check the rules also when the editor's verdict is not APPROVED (the brief itself
+      may break a rule): the status is then "changes_required", with every rule violation and
+      the editor's open points. When everything complies, save the final text with
+      save_cms_draft and return status "cleared" with the draft id.
+    tools: [get_compliance_rules, get_product_facts, check_reference_consent, save_cms_draft]
+    skills: [policy-compliance-check, structured-output]
+    output_schema:
+      type: object
+      description: The compliance result for the marketing team.
+      properties:
+        request_id: {type: string}
+        status: {enum: [cleared, changes_required]}
+        title: {type: string}
+        draft_id: {type: ["string", "null"]}
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              rule: {type: string}
+              passage: {type: string}
+              fix: {type: string}
+            required: [rule, passage, fix]
+      required: [request_id, status, title, issues]
+
+  - name: publisher
+    description: Publishes the cleared CMS draft after the content owner's approval.
+    instructions: |
+      Publish the content the compliance review cleared; you receive its result as JSON.
+      If its status is "cleared", read the draft with get_cms_draft (its draft_id) and
+      publish it with publish_article only if the draft's status is
+      "ready_for_publication"; the content owner approves every publication. Answer with
+      the public URL, or with the reason it was not published (wrong status, rejected by
+      the owner and their note). If the status is "changes_required", publish nothing and
+      answer "Not published:" with the request id and every issue (rule, passage and fix).
+    tools: [get_cms_draft, publish_article]
+    skills: [safe-tool-execution]
+
+workflow:
+  sequential:
+    - strategist
+    - loop:
+        sequential: [writer, editor]
+        carry: all                     # the editor sees the writer's input and the draft
+      until_contains: "VERDICT: APPROVED"
+      max_iterations: 3
+      name: draft-and-edit
+    - compliance_reviewer
+    - publisher
+
+approvals:
+  - tool: publish_article      # every publication waits for the content owner

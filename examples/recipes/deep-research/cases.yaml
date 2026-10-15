@@ -1,0 +1,67 @@
+# Eval cases for the deep-research recipe.
+#
+# The cases check what the process promises: researchers search and read pages, the report is
+# cited from quotes that were checked against the pages, nothing is cited without evidence, the
+# loop of extra research rounds stops at its bound, and saving the report waits for a person.
+# Decisions answer the approval of the save. They run on the open web (keyless search); the
+# questions ask for facts that do not change.
+#
+#   awa eval examples/recipes/deep-research/blueprint.yaml \
+#       examples/recipes/deep-research/cases.yaml
+name: deep-research
+cases:
+  - id: three-languages-cited
+    input: "Python, Java and Go: the year each first appeared and who designed it."
+    expected: ["1991", "1995", "2009"]
+    decisions:
+      - {action: approve, tool: workspace_write_file}
+    tags: [full]
+    scorers:
+      - contains
+      - tool:web_search
+      - tool:fetch_url
+      - tool:verify_quote
+      - delegated:researcher
+      - delegated:citation_agent
+      - approval_granted:workspace_write_file
+      - 'regex:\[1\]'
+      - "judge:Every sentence that states a fact carries a numbered citation (the closing \"Open questions\" line, which only lists what stays unanswered, needs none; the references, unsupported and gaps fields are bookkeeping, not report sentences), and every reference has a page URL and a quote that states the cited claim."
+
+  - id: nothing-found-nothing-cited
+    input: "What is the market share of the Zorblax9000 quantum toaster in 2031?"
+    expected: {references: []}
+    decisions:
+      - {action: approve, tool: workspace_write_file}
+    tags: [no-evidence]
+    metadata:
+      why: A question the web cannot answer must end with open questions, never with invented, cited facts.
+    scorers:
+      - json_fields
+      - delegated:researcher
+      - no_tool:verify_quote
+      - 'regex:^(?![\s\S]*\[1\])'           # no citation marker anywhere in the answer
+
+  - id: research-rounds-stop-at-the-bound
+    input: "Python, Java and Zorblang: the year each first appeared and who designed it."
+    expected: {rounds: 3}
+    decisions:
+      - {action: approve, tool: workspace_write_file}
+    tags: [loop, bound]
+    metadata:
+      why: Zorblang cannot be found, so the orchestrator asks for more research until the two extra rounds are used up, and no further.
+    scorers:
+      - json_fields
+      - delegated:researcher
+      - tool:verify_quote
+      - regex:Zorblang
+
+  - id: rejected-save-is-reported
+    input: "Python, Java and Go: the year each first appeared and who designed it."
+    expected: {saved_to: null}
+    decisions:
+      - {action: reject, tool: workspace_write_file, note: Not for the archive.}
+    tags: [approval]
+    scorers:
+      - json_fields
+      - approval_rejected:workspace_write_file
+      - delegated:citation_agent

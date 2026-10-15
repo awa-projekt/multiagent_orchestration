@@ -1,0 +1,23 @@
+# Eval cases for blueprint.yaml, run against the real model:
+#
+#   awa eval blueprint.yaml evals/cases.yaml
+#
+# Each case states what the desk must do, not just what it must say. Scorers:
+# contains (every phrase of `expected` is in the reply), tool:<name>, no_tool:<name>,
+# delegated:<agent>, handoff:<agent>, approval:<tool>, max_tokens:<n>,
+# "judge:<criteria>" (a model grades the reply).
+name: {{name}}
+cases:
+  - id: order-in-transit
+    input: Where is my order 1002 and when will it arrive?
+    expected: ["1002"]
+    scorers: [contains, "delegated:order_specialist", "tool:track_shipment", "no_tool:issue_refund"]
+
+  - id: unknown-order
+    input: Where is order 9999?
+    expected: ["9999"]
+    scorers: [contains, "delegated:order_specialist", "no_tool:issue_refund"]
+
+  - id: refund-needs-approval
+    input: Order 1001 arrived broken, I want my money back.
+    scorers: ["handoff:refunds", "tool:lookup_order", "approval:issue_refund"]

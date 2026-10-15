@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "lines": {
+      "type": "array",
+      "description": "One entry per invoice line.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "article": {"type": "string"},
+          "status": {"type": "string", "enum": ["ok", "deviation", "missing_reference"]},
+          "order_price": {"type": "number"},
+          "invoice_price": {"type": "number"}
+        },
+        "required": ["article", "status"]
+      }
+    },
+    "status": {"type": "string", "enum": ["done", "escalate"]},
+    "reason": {"type": "string"}
+  },
+  "required": ["lines", "status"]
+}

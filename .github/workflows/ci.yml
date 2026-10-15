@@ -1,0 +1,179 @@
+# CI for awa on GitHub; mirrors .gitlab-ci.yml.
+# awa is always installed from this checkout, never from an index; the only downloads are the
+# third-party dependencies locked by uv.lock and the pinned tools. No job needs a secret.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUTF8: "1"
+  UV_LINK_MODE: copy
+  # Property tests: 100 derandomized examples each (see tests/property/conftest.py).
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: uv lock --check
+      - run: python -m ruff check .
+      - run: python -m ruff format --check src tests examples scripts
+      - run: lint-imports --no-cache
+
+  types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: python -m mypy src
+      - run: python -m mypy examples/*.py
+      - run: python -m mypy tests/typing
+
+  # Offline by construction: fake models, real model requests are blocked. Tests marked
+  # `postgres` use the service below; coverage fails under `fail_under` in pyproject.toml.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_USER: awa
+          POSTGRES_PASSWORD: awa # throwaway database of this job only
+          POSTGRES_DB: awa
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U awa" --health-interval 5s --health-timeout 5s
+          --health-retries 10
+    env:
+      AWA_TEST_POSTGRES_DSN: "postgresql://awa:awa@localhost:5432/awa"
+      AWA_TEST_REQUIRE_BROWSER: "1" # the web app tests drive the runner's headless Chrome
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: >-
+          python -m pytest -q -rs -n 2 --ignore=tests/docs
+          --cov --cov-report=term --cov-report=xml:coverage.xml
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          retention-days: 7
+
+  # The same offline checks on Windows, blocking.
+  test-windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+        with:
+          extras: dev
+      - run: python -m pytest -q -rs -n 2 --ignore=tests/docs
+
+  # The checks of the README and the documentation run apart, so a drifted page or a missing
+  # screenshot never hides a code failure in the test job.
+  docs-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: python -m pytest -q -rs -n 2 tests/docs
+
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+      - run: python -m mkdocs build --strict -d site
+      - uses: actions/upload-artifact@v5
+        with:
+          name: site
+          path: site
+          retention-days: 7
+
+  # Build the sdist and the wheel and check the metadata, then install both into clean
+  # environments from the files, outside the checkout, so the source tree cannot be imported.
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --quiet "build==1.6.1" "twine==7.0.0"
+      - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - name: Install the wheel into a clean environment
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -m venv wheel-env
+          wheel-env/bin/pip install --quiet "$GITHUB_WORKSPACE"/dist/*.whl
+          wheel-env/bin/python -c "import awa; print('wheel', awa.__version__)"
+          wheel-env/bin/awa --version
+      - name: Install the sdist into a clean environment
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -m venv sdist-env
+          sdist-env/bin/pip install --quiet "$GITHUB_WORKSPACE"/dist/*.tar.gz
+          sdist-env/bin/awa --version
+      - uses: actions/upload-artifact@v5
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # The install tests the test job leaves out (markers packaging, core_install and first_run), run
+  # against the wheel of the package job (AWA_TEST_WHEEL): the wheel read back, installed into a
+  # core-only environment and through the keyless first run. They need uv and the package index.
+  install-tests:
+    needs: [package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - uses: ./.github/actions/setup
+        with:
+          extras: dev
+          install-project: false
+      - run: uv pip install --python .venv/bin/python dist/*.whl
+      - run: echo "AWA_TEST_WHEEL=$(ls "$GITHUB_WORKSPACE"/dist/*.whl)" >> "$GITHUB_ENV"
+      - run: python -m pytest -q -rs -m "packaging or core_install or first_run"
+
+  # The tests against the newest allowed versions of all dependencies on every pull request and on
+  # main; the nightly workflow (compat.yml) runs it and the other upstream jobs on a schedule.
+  compat-latest:
+    uses: ./.github/workflows/compat.yml
+    with:
+      only-latest: true

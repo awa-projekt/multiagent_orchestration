@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. Is it running? Nothing runs by itself until you start a worker.
+2. The run waits for your OK. It is the same card as on Try it.
+3. Approve.
+4. The trigger and what starts it.

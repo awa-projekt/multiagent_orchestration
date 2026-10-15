@@ -1,0 +1,22 @@
+{
+  "recipients": [
+    "compliance-team@example.com"
+  ],
+  "topics": [
+    {
+      "id": "gdpr",
+      "query": "GDPR data protection authority fine enforcement",
+      "why": "Fines and guidance change how we handle customer data."
+    },
+    {
+      "id": "nis2",
+      "query": "NIS2 directive national implementation cybersecurity obligations",
+      "why": "Our IT services fall under the essential entities."
+    },
+    {
+      "id": "csrd",
+      "query": "CSRD sustainability reporting omnibus delay",
+      "why": "Reporting deadlines drive the finance close calendar."
+    }
+  ]
+}

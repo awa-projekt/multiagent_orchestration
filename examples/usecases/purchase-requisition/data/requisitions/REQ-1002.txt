@@ -1,0 +1,8 @@
+From: maya.brandt@company.example
+Subject: 2 GPU servers for the ML team
+
+Hello,
+we need two GPU servers for the ML team, cost center CC-100. Kern IT sent quote Q-8841:
+total 14.800,00 EUR (2 x 7.400,00), delivery 6 weeks. Please place the order so the
+servers arrive before the end of November. Budget is OK from our side.
+Maya

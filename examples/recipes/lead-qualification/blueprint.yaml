@@ -1,0 +1,102 @@
+# Lead qualification: research, ICP score, CRM update and a personal first email.
+#
+# The SDR lead reads the inbound lead from the CRM, has the company researched and scored
+# against the ideal customer profile, writes the result to the CRM, and drafts a
+# personal first email for A and B leads. A human approves every email before it is sent.
+#
+#   awa validate examples/recipes/lead-qualification/blueprint.yaml \
+#       --tools examples/recipes/lead-qualification/tools.py
+#   awa run examples/recipes/lead-qualification/blueprint.yaml "Qualify inbound lead L-301." \
+#       --tools examples/recipes/lead-qualification/tools.py --stream
+name: lead-qualification
+description: Researches and scores inbound leads, updates the CRM and drafts the first email.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+agents:
+  - name: sdr_lead
+    acknowledge_ungated: [update_crm_lead]  # internal records of this demo; no person needed
+    description: Owns each inbound lead from the CRM record to the first email.
+    instructions: |
+      You qualify one inbound lead per request.
+      1. Read the lead with get_lead. If account_status is "customer", do not qualify it:
+         update the CRM with status "existing_customer", tier "not_scored", score 0 and a
+         note for the account manager, and stop.
+      2. Delegate company research to researcher (company name, domain, the lead's message).
+      3. Delegate scoring to qualifier with the lead record and the complete research.
+      4. Write the result with update_crm_lead: tier A or B -> "sales_ready", C ->
+         "nurture", disqualified -> "disqualified"; notes = the qualifier's summary.
+      5. For A and B leads only, write a first email and send it with send_lead_email (a human
+         approves it): at most 120 words, one concrete reference to their situation from
+         the research, one question, a clear next step (a 20-minute call), no attachments,
+         no pricing, signed "The Sales Team". If the email is rejected, do not resend.
+    tools: [get_lead, update_crm_lead, send_lead_email]
+    skills: [delegation-briefs, customer-communication]
+    output_schema:
+      type: object
+      description: The qualification outcome for the sales pipeline.
+      properties:
+        lead_id: {type: string}
+        company: {type: string}
+        score: {type: integer, minimum: 0, maximum: 100}
+        tier: {enum: [A, B, C, disqualified, not_scored]}
+        next_step: {enum: [email_sent, email_rejected, nurture, disqualified, route_to_account_manager]}
+        summary: {type: string, description: "Two sentences for the sales rep, naming facts that are unknown and need manual research."}
+      required: [lead_id, company, score, tier, next_step, summary]
+
+  - name: researcher
+    description: Researches a company's firmographics and recent news for sales.
+    instructions: |
+      Research the company for a sales conversation. Use get_company_profile with the
+      domain and search_company_news with the company name. Report as bullet points:
+      industry, employees, country, business model, and every news item from the last
+      6 months with its id and date. Write "unknown" for anything you could not find;
+      never estimate firmographics.
+    tools: [get_company_profile, search_company_news]
+    skills: [research-synthesis, source-verification]
+    capabilities: [research]
+
+  - name: qualifier
+    description: Scores a lead against the ideal customer profile rubric.
+    instructions: |
+      Score the lead with the rubric from get_icp_rubric. Score each criterion only from
+      the facts you were given; a missing fact scores 0 and is named in the evidence.
+      Apply the disqualifiers before the tiers.
+    tools: [get_icp_rubric]
+    skills: [structured-output]
+    capabilities: [scoring]
+    output_schema:
+      type: object
+      properties:
+        score: {type: integer, minimum: 0, maximum: 100}
+        tier: {enum: [A, B, C, disqualified]}
+        criteria:
+          type: array
+          items:
+            type: object
+            properties:
+              criterion: {type: string}
+              points: {type: integer, minimum: 0}
+              max_points: {type: integer, minimum: 0}
+              evidence: {type: string}
+            required: [criterion, points, max_points, evidence]
+        disqualifiers:
+          type: array
+          items: {type: string}
+        summary: {type: string}
+      required: [score, tier, criteria, disqualifiers, summary]
+
+team:
+  orchestrator: sdr_lead
+  members: [researcher, qualifier]
+  messaging: false
+  limits:
+    max_delegation_depth: 1
+    max_calls_per_member: 2
+    delegation_timeout: 120
+
+approvals:
+  - tool: send_lead_email      # every email to a prospect is read by a human first

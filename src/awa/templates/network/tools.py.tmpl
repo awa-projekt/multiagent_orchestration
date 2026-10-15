@@ -1,0 +1,41 @@
+"""Tools for blueprint.yaml, backed by small in-memory sample data.
+
+Every documented function listed in `__all__` is a tool: its signature is the
+argument schema and its docstring the description the model reads. Replace the
+sample data with calls to your own systems.
+"""
+
+from __future__ import annotations
+
+import json
+
+SEGMENTS: dict[str, dict[str, str]] = {
+    "small businesses": {
+        "needs": "save time on reporting, no data team",
+        "tone": "practical, plain words, one clear benefit",
+    },
+    "enterprises": {
+        "needs": "governance, single sign-on, audit trails",
+        "tone": "precise, reference security and scale",
+    },
+}
+SCHEDULED: list[dict[str, str]] = []
+
+
+def lookup_segment(segment: str) -> str:
+    """Return the needs and the tone that works for an audience segment."""
+
+    profile = SEGMENTS.get(segment.strip().lower())
+    return json.dumps(profile) if profile else f"No profile for segment {segment!r}."
+
+
+def schedule_post(channel: str, text: str) -> str:
+    """Schedule a post on a channel (linkedin, newsletter). Requires human approval."""
+
+    if channel not in ("linkedin", "newsletter"):
+        return f"Unknown channel {channel!r}."
+    SCHEDULED.append({"channel": channel, "text": text})
+    return f"Scheduled on {channel} as post {len(SCHEDULED)}."
+
+
+__all__ = ["lookup_segment", "schedule_post"]

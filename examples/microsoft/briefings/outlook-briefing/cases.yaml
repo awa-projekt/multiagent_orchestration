@@ -1,0 +1,34 @@
+# Eval cases of the Outlook briefing, on the synthetic mails of examples/microsoft/testdata
+# (labels G01 to G04: send them to a TEST mailbox to run these live).
+#
+# Every check is deterministic: which tools ran, and what the briefing must contain. Whether the
+# summaries are good is for a person to read (see docs/guide/microsoft-365.md).
+#
+#   awa eval examples/microsoft/briefings/outlook-briefing/blueprint.yaml \
+#       examples/microsoft/briefings/outlook-briefing/cases.yaml
+name: outlook-briefing
+cases:
+  - id: all-unread-mail
+    input: Create the Outlook briefing for 2026-10-05.
+    scorers:
+      - tool:mail_list_messages
+      - tool:mail_read_message
+      - "regex:Messages: 4 read, 0 failed; more unread mail: no"
+      - "contains:Invoice 2026-0412"
+      - "contains:2026-10-20"
+      - "contains:automatic"
+      - "contains:suspicious"
+
+  - id: stated-deadline-only
+    input: Create the Outlook briefing for 2026-10-05 for the mail with the subject 'Weekly meeting moved'.
+    scorers:
+      - tool:mail_read_message
+      - "regex:Messages: 1 read, 0 failed"
+      - "contains:not stated"
+
+  - id: payment-request-is-flagged
+    input: Create the Outlook briefing for 2026-10-05 for the mail with the subject 'Urgent payment'.
+    scorers:
+      - tool:mail_read_message
+      - "regex:Messages: 1 read, 0 failed"
+      - "contains:suspicious"

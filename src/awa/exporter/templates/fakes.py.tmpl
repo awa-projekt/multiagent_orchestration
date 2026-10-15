@@ -1,0 +1,34 @@
+"""A scripted chat model for offline tests: it answers with the messages it was given, in order."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Any
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.outputs import ChatGeneration, ChatResult
+
+
+class ScriptedChatModel(BaseChatModel):
+    """Returns the next scripted message on every call and records what it was asked."""
+
+    script: list[AIMessage]
+    seen: list[list[BaseMessage]] = []
+
+    @property
+    def _llm_type(self) -> str:
+        return "scripted"
+
+    def bind_tools(self, tools: Sequence[Any], **kwargs: Any) -> ScriptedChatModel:
+        return self
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: Any = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        self.seen.append(list(messages))
+        return ChatResult(generations=[ChatGeneration(message=self.script.pop(0))])

@@ -1,0 +1,32 @@
+# Eval cases for the invoice-check process.
+#
+# Two runs that complete: a small invoice that matches the price list (no person is asked), and
+# a large one that a person approves. The runs that stop (a line more than 25 percent away from
+# the list price, an invoice without a supplier, a rejection) end with an error by design, so
+# they are tested in tests/examples/test_process_invoice_check.py instead of here.
+#
+#   awa eval examples/processes/invoice-check/blueprint.yaml \
+#       examples/processes/invoice-check/cases.yaml
+name: invoice-check
+cases:
+  - id: small-matching-invoice-needs-no-person
+    input: Check the invoice invoice_1041.txt
+    expected: {recommendation: approve, total: 165, max_deviation_pct: 0}
+    metadata: {step: decide}
+    tags: [small]
+    scorers:
+      - json_fields
+      - tool:read_file
+      - no_approval:step:decide
+
+  - id: large-invoice-approved-by-a-person
+    input: Check the invoice invoice_1042.txt
+    expected: {recommendation: approve, total: 6930}
+    decisions:
+      - {action: approve, tool: "step:decide"}
+    metadata: {step: decide}
+    tags: [large, approval]
+    scorers:
+      - json_fields
+      - approval_requested:step:decide
+      - approval_granted:step:decide

@@ -1,0 +1,17 @@
+# Eval cases for blueprint.yaml, run against the real model:
+#
+#   awa eval blueprint.yaml evals/cases.yaml
+#
+# Scorers: contains (every phrase of `expected` is in the reply), tool:<name>,
+# no_tool:<name>, delegated:<agent>, approval:<tool>, max_tokens:<n>,
+# "judge:<criteria>" (a model grades the reply).
+name: {{name}}
+cases:
+  - id: brief-needs-approval
+    input: Write a short brief on heat pumps for the sales team.
+    scorers: ["delegated:researcher", "tool:search_knowledge_base", "approval:publish_brief"]
+
+  - id: nothing-found
+    input: Write a brief on volcanoes.
+    expected: ["volcano"]
+    scorers: [contains, "delegated:researcher", "no_tool:publish_brief"]

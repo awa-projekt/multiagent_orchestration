@@ -1,0 +1,69 @@
+"""Offline tests for blueprint.yaml: scripted models, no API key needed."""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+from awa import Blueprint
+from awa.testing import tool_call
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+
+@pytest.fixture(autouse=True)
+def _fresh_tickets() -> Iterator[None]:
+    tools.TICKETS.clear()
+    yield
+    tools.TICKETS.clear()
+
+
+def test_blueprint_is_valid() -> None:
+    issues = Blueprint.from_yaml(BLUEPRINT).check(tools=TOOLS)
+    assert [issue for issue in issues if issue.severity == "error"] == []
+
+
+def test_answers_from_the_account(build_offline) -> None:
+    offline = build_offline(
+        {
+            "assistant": [
+                tool_call("lookup_account", {"account_id": "A-100"}),
+                "Acme GmbH is on the Pro plan with no open invoices.",
+            ]
+        }
+    )
+
+    result = asyncio.run(offline.system.run("Which plan is account A-100 on?"))
+
+    assert result.output == "Acme GmbH is on the Pro plan with no open invoices."
+    # The second model call saw the tool result.
+    assert '"plan": "Pro"' in offline.models["assistant"].calls[1].last_message.content
+    assert tools.TICKETS == []
+
+
+def test_a_ticket_waits_for_approval(build_offline) -> None:
+    offline = build_offline(
+        {
+            "assistant": [
+                tool_call("create_ticket", {"account_id": "A-200", "summary": "Call back"}),
+                "I opened ticket T-001.",
+            ]
+        }
+    )
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Open a ticket to call Globex (A-200) back.")
+        assert paused.is_interrupted
+        assert paused.interrupts[0]["value"]["tool"] == "create_ticket"
+        assert tools.TICKETS == []  # nothing happens before a human decides
+
+        done = await offline.system.resume(paused.thread_id, {"action": "approve"})
+        assert done.output == "I opened ticket T-001."
+
+    asyncio.run(scenario())
+    assert [ticket["account"] for ticket in tools.TICKETS] == ["A-200"]

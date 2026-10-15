@@ -1,0 +1,46 @@
+"""Tests for the `{{name}}` toolbox: tool names, schemas, calls and approvals."""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from awa.testing import ToolContract  # noqa: E402
+from langchain_core.tools import BaseTool  # noqa: E402
+
+from {{name}} import {{class_name}}  # noqa: E402
+
+
+@pytest.fixture
+def toolbox(tmp_path: Path) -> {{class_name}}:
+    records = tmp_path / "records.json"
+    records.write_text(json.dumps([{"id": "N-1", "title": "Welcome"}]), encoding="utf-8")
+    return {{class_name}}(path=records)
+
+
+def _tool(toolbox: {{class_name}}, name: str) -> BaseTool:
+    return next(item for item in toolbox.tools() if item.name == name)
+
+
+def test_every_method_becomes_a_prefixed_tool(toolbox: {{class_name}}) -> None:
+    assert [item.name for item in toolbox.tools()] == ["{{name}}_search", "{{name}}_create"]
+
+
+def test_search_is_read_only_and_finds_records(toolbox: {{class_name}}) -> None:
+    contract = ToolContract(_tool(toolbox, "{{name}}_search"))
+    contract.expect_args("query").expect_risk(private_data=True).expect_approval(False)
+    assert "Welcome" in contract.call({"query": "welcome"})
+
+
+def test_create_waits_for_a_human_and_stores_the_record(toolbox: {{class_name}}) -> None:
+    contract = ToolContract(_tool(toolbox, "{{name}}_create"))
+    contract.expect_risk(external_action=True).expect_approval("always")
+    payload = contract.expect_approval_request({"title": "Hello"})
+    assert payload["tool"] == "{{name}}_create"
+    assert contract.call({"title": "Hello"}, approve=True) == "Created N-2."
+    assert "Hello" in toolbox.path.read_text(encoding="utf-8")

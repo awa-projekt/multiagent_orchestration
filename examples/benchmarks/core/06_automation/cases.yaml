@@ -1,0 +1,41 @@
+# Cases of benchmark scenario 6 (automation end to end). Each case serves ledger-desk in process
+# and plays the same day: a small invoice and a large one over the webhook (the large one waits for
+# approval), the server stops, `awa runs decide` answers the approval, the server restarts and the
+# paused run resumes, a file dropped into inbox/ is booked, and the weekly schedule is fired once.
+#
+# `scorers` name the checks of the driver (benchmarks/core/harness.py), not `awa eval` scorers.
+name: ledger-desk
+cases:
+  - id: large-invoice-approved
+    input: Webhook invoices RE-20 (200 EUR) and RE-17 (1250 EUR), file RE-31 (80 EUR); the manager approves RE-17.
+    metadata:
+      webhook: [{invoice_no: RE-20, supplier: Acme, amount: 200}, {invoice_no: RE-17, supplier: Acme, amount: 1250}]
+      file: {name: re-31.txt, text: "Invoice RE-31 from Beta GmbH, total 80.00 EUR"}
+      decision: approve
+    expected:
+      ledger: ["RE-20,Acme,200.00", "RE-17,Acme,1250.00", "RE-31,Beta GmbH,80.00"]
+    tags: [automation, approval]
+    scorers:
+      - webhook_run_succeeded
+      - large_run_waits_for_approval
+      - file_drop_run_succeeded
+      - decision_resumes_after_restart
+      - ledger_matches
+      - schedule_run_succeeded
+
+  - id: large-invoice-rejected
+    input: Webhook invoices RE-20 (200 EUR) and RE-17 (1250 EUR), file RE-31 (80 EUR); the manager rejects RE-17.
+    metadata:
+      webhook: [{invoice_no: RE-20, supplier: Acme, amount: 200}, {invoice_no: RE-17, supplier: Acme, amount: 1250}]
+      file: {name: re-31.txt, text: "Invoice RE-31 from Beta GmbH, total 80.00 EUR"}
+      decision: reject
+    expected:
+      ledger: ["RE-20,Acme,200.00", "RE-31,Beta GmbH,80.00"]
+    tags: [automation, approval]
+    scorers:
+      - webhook_run_succeeded
+      - large_run_waits_for_approval
+      - file_drop_run_succeeded
+      - decision_resumes_after_restart
+      - ledger_matches
+      - schedule_run_succeeded

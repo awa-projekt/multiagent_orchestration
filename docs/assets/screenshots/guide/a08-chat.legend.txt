@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The system stops. It shows the step and its exact values.
+2. You answer. y approves; anything else says no.
+3. An invoice that was paid is not paid twice.

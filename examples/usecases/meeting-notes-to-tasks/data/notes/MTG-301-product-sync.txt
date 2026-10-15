@@ -1,0 +1,15 @@
+Product sync - Fri 2 Oct 2026
+Attendees: Anna, Ben V., Chloe, Dmitri
+
+Decisions
+* Export feature ships in the November release.
+* The legacy PDF report is dropped, nobody uses it.
+
+Actions
+- Chloe to send new onboarding mockups by next Wednesday
+- Ben V. to fix the login timeout bug by Wed 7 Oct
+- Dmitri will write the regression test plan for export, end of next week
+- Anna to book the customer interview slots EOW
+- someone to check the pricing page copy with legal
+
+Open: who owns the migration of old reports? parked until 9 Oct

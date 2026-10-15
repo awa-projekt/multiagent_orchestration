@@ -1,0 +1,8 @@
+*In the picture:*
+
+1. Runs every eval case.
+2. The result: all eval cases passed.
+3. What the case sends. Change it to use other files.
+4. The files this case uses, found in its text.
+5. Saves the change in evals/cases.yaml and runs only this case.
+6. The result of this case.

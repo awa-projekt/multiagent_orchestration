@@ -1,0 +1,63 @@
+# Cases of benchmark scenario 8 (an MCP client calls the supplier-order blueprint). Each case starts
+# `awa mcp serve` for the blueprint of scenario 2 as a separate process and calls it with the official
+# MCP client over the named transport (`stdio` or `http`, with a bearer key). `answer` says how the
+# pending reschedule approvals are answered: `elicitation` (the client's user is asked inside the
+# tool call) or `resume_tool` (a client without elicitation calls resume_order_checker). Expected
+# values are those of scenario 2 for the orders of Kowalski Stahl (B-1001 on 11.11., a holiday in
+# Poland, and B-1004 on a Saturday).
+#
+# `scorers` name the checks of the driver (benchmarks/core/mcp_client.py), not `awa eval` scorers.
+name: supplier-orders-over-mcp
+cases:
+  - id: stdio-approved-by-elicitation
+    input: Check the open orders of Kowalski Stahl and ask for a reschedule where needed.
+    metadata: {transport: stdio, answer: elicitation, decision: approve}
+    expected:
+      checked_orders: 2
+      flagged_orders: [B-1001, B-1004]
+      flagged_total_eur: 27650.0
+      rescheduled_orders: [B-1001, B-1004]
+      rejected: []
+    tags: [mcp, stdio, elicitation, approval]
+    scorers: &checks
+      - tools_listed
+      - protocol_revision
+      - approvals_answered
+      - completed
+      - output_matches
+
+  - id: http-rejected-by-elicitation
+    input: Check the open orders of Kowalski Stahl and ask for a reschedule where needed.
+    metadata: {transport: http, answer: elicitation, decision: reject}
+    expected:
+      checked_orders: 2
+      flagged_orders: [B-1001, B-1004]
+      flagged_total_eur: 27650.0
+      rescheduled_orders: []
+      rejected: [B-1001, B-1004]
+    tags: [mcp, http, elicitation, approval]
+    scorers: *checks
+
+  - id: http-approved-with-resume-tool
+    input: Check the open orders of Kowalski Stahl and ask for a reschedule where needed.
+    metadata: {transport: http, answer: resume_tool, decision: approve}
+    expected:
+      checked_orders: 2
+      flagged_orders: [B-1001, B-1004]
+      flagged_total_eur: 27650.0
+      rescheduled_orders: [B-1001, B-1004]
+      rejected: []
+    tags: [mcp, http, resume, approval]
+    scorers: *checks
+
+  - id: stdio-rejected-with-resume-tool
+    input: Check the open orders of Kowalski Stahl and ask for a reschedule where needed.
+    metadata: {transport: stdio, answer: resume_tool, decision: reject}
+    expected:
+      checked_orders: 2
+      flagged_orders: [B-1001, B-1004]
+      flagged_total_eur: 27650.0
+      rescheduled_orders: []
+      rejected: [B-1001, B-1004]
+    tags: [mcp, stdio, resume, approval]
+    scorers: *checks

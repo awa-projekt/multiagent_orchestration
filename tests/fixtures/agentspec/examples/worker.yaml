@@ -1,0 +1,52 @@
+# The worker example of the agent spec (docs/develop/agent-spec.md):
+# special cases are the `special_cases:` table of the step, tools are builtin references.
+format_version: awa/v1
+name: invoice_process
+description: Checks supplier invoices before payment.
+toolkits:
+  data:
+    root: data
+data:
+  - {name: invoice, path: data/invoice.csv, role: input, description: The supplier invoice.}
+  - {name: price_list, path: data/price_list.csv, role: reference, description: Agreed unit prices.}
+  - {name: goods_receipt, path: data/goods_receipt.csv, role: reference, description: What arrived.}
+process:
+  steps:
+    - name: check_invoice
+      title: Check invoice
+      agent: check_invoice
+      documents: [invoice, price_list, goods_receipt]
+      retry: {max_attempts: 2, on: [error]}
+      after_last_try: ask
+      checks:
+        - kind: schema
+        - {kind: rule, fail_when: "len(lines) == 0", message: Every invoice line needs a status.}
+special_cases:
+  check_invoice:
+    cases:
+      - {if: "status == 'done'", then: approve}
+    else: {then: ask, by: finance}
+    when_unclear: ask
+agents:
+  - name: check_invoice
+    role: worker
+    description: Checks supplier invoices against price list and order. Use for every incoming supplier invoice before payment approval.
+    goal: Decide for each invoice line whether price and quantity match the order and the price list.
+    system:
+      context: Wrong prices cost money only if they reach payment; finance approves or blocks payment on this result.
+      how_to_work: |
+        1. Match each invoice line to the order line by article number.
+        2. Compare the unit price with price_list; a difference above 1% is a deviation.
+        3. Compare the quantity with goods_receipt.
+      tools_in_step: "Use `read_csv` once per input file and filter by article number."
+      rules:
+        - Mark an article missing from price_list as missing_reference, because finance decides those manually.
+      output: auto
+    tools:
+      - "builtin:read_csv"
+    skills:
+      - invoice-reconciliation
+    skill_mode: on_demand
+    output_schema: {$ref: schemas/invoice_check.json}
+    max_steps: 20
+    escalation: {to: person, when: ["parse failure after retries", "deviation above 10%"], how: 'status "escalate" with a reason'}

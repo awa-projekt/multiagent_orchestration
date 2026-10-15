@@ -1,0 +1,83 @@
+# Document-review workflow.
+#
+# An intake agent summarizes the document; legal, compliance and style reviewers
+# work on it in parallel; an editor merges their findings into a structured verdict.
+#
+#   awa validate examples/blueprints/document_review.yaml
+#   awa show examples/blueprints/document_review.yaml --mermaid
+#   awa run examples/blueprints/document_review.yaml "$(cat contract.txt)" --json
+name: document-review
+description: Reviews a document from legal, compliance and style angles and returns a verdict.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 8
+
+agents:
+  - name: intake
+    description: Summarizes the document and lists the passages reviewers must check.
+    instructions: |
+      Summarize the document in at most five sentences. Then list every clause that
+      creates an obligation, a deadline, a payment or a liability, quoting it exactly.
+
+  - name: legal_reviewer
+    description: Reviews obligations, liabilities and termination terms.
+    instructions: |
+      Review the document for legal risk: unlimited liability, one-sided obligations,
+      missing termination rights, unclear governing law. For each finding give the
+      quoted passage, the risk and a suggested change. Say "no findings" if there are none.
+    capabilities: [legal]
+
+  - name: compliance_reviewer
+    description: Checks data-protection, retention and regulatory requirements.
+    instructions: |
+      Review the document for compliance gaps: personal data handling, retention periods,
+      audit rights, required notices. Quote each passage and name the requirement it misses.
+      Say "no findings" if there are none.
+    capabilities: [compliance]
+
+  - name: style_reviewer
+    description: Checks clarity, consistency and defined terms.
+    instructions: |
+      Review the document for ambiguous wording, undefined or inconsistent terms and
+      contradictions between clauses. Quote each passage and suggest clearer wording.
+    capabilities: [editing]
+    skills: [writing]
+
+  - name: editor
+    description: Merges all reviews into one prioritized verdict.
+    instructions: |
+      You receive the original request, the summary and every review. Merge duplicate
+      findings, order them by severity and decide: "approve" when nothing high-severity
+      remains, otherwise "revise".
+    skills: [quality-review, structured-output]
+    output_schema:
+      type: object
+      description: The review verdict.
+      properties:
+        verdict:
+          enum: [approve, revise]
+        summary:
+          type: string
+          description: Two or three sentences for the document owner.
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              severity: {enum: [high, medium, low]}
+              area: {enum: [legal, compliance, style]}
+              passage: {type: string}
+              recommendation: {type: string}
+            required: [severity, area, recommendation]
+      required: [verdict, summary, findings]
+
+workflow:
+  sequential:
+    - intake
+    - parallel: [legal_reviewer, compliance_reviewer, style_reviewer]
+      fail_fast: false
+      name: reviews
+    - editor
+  carry: all

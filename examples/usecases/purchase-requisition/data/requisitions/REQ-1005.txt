@@ -1,0 +1,5 @@
+From: office@company.example
+Subject: coffee machine
+
+Please order a new coffee machine for the kitchen on the 2nd floor, around 600 EUR,
+preferably from Hartmann since they deliver quickly.

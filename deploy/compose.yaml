@@ -1,0 +1,110 @@
+# Reference setup: awa (HTTP API and worker) with PostgreSQL, a TLS edge, and a self-hosted
+# Langfuse. Described in docs/develop/production.md; every secret is an empty field in
+# deploy/.env.example and deploy/awa.env.example.
+#
+#   docker compose -f deploy/compose.yaml up -d --build                     # awa + PostgreSQL + TLS edge
+#   docker compose -f deploy/compose.yaml -f deploy/compose.tracing.yaml up -d --build   # with Langfuse
+#   docker compose -f deploy/compose.yaml --profile mcp up -d               # also the MCP endpoint
+#   docker compose -f deploy/compose.yaml --profile worker up -d            # the worker, for blueprints with triggers
+#
+# Images are pinned to the versions awa's own local services use (awa.project_setup.services).
+name: awa
+
+x-awa: &awa
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+  image: awa-local:latest
+  user: "${AWA_UID:-10001}:${AWA_GID:-10001}"
+  env_file: [awa.env]
+  environment:
+    AWA_POSTGRES_DSN: postgresql://awa:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/awa
+    AWA_DATA_BACKEND: postgres
+    AWA_LANGFUSE_TRACING: ${AWA_LANGFUSE_TRACING:-false}
+    LANGFUSE_BASE_URL: https://${LANGFUSE_INTERNAL_HOST}:8443
+    LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+    LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+  volumes:
+    - ./project:/srv/project            # the project folder: blueprint.yaml, tools.py, .awa/
+    - ./ca:/etc/awa/ca:ro               # extra CA certificates (*.crt), see entrypoint.sh
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: unless-stopped
+  stop_grace_period: 45s                # above --drain-timeout (30 s)
+
+services:
+  postgres:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: awa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: awa
+    volumes:
+      - awa_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U awa -d awa"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  awa-serve:
+    <<: *awa
+    command:
+      - awa
+      - serve
+      - /srv/project
+      - --host=0.0.0.0
+      - --port=8000
+      - --api-key-env=AWA_API_KEY
+      - --log-format=json
+      - --drain-timeout=30
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/ready', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  awa-worker:
+    <<: *awa
+    profiles: [worker]                 # only for blueprints with `triggers:`
+    command: ["awa", "worker", "/srv/project", "--drain-timeout=30"]
+
+  awa-mcp:
+    <<: *awa
+    profiles: [mcp]
+    command:
+      - awa
+      - mcp
+      - serve
+      - /srv/project
+      - --transport=http
+      - --host=0.0.0.0
+      - --port=8001
+      - --api-key-env=AWA_MCP_API_KEY
+    ports:
+      - 127.0.0.1:8001:8001
+
+  caddy:
+    image: caddy:2.11.7-alpine
+    environment:
+      AWA_PUBLIC_HOST: ${AWA_PUBLIC_HOST:?set AWA_PUBLIC_HOST in deploy/.env}
+      LANGFUSE_INTERNAL_HOST: ${LANGFUSE_INTERNAL_HOST:?set LANGFUSE_INTERNAL_HOST in deploy/.env}
+    ports:
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+    networks:
+      default:
+        aliases:
+          - ${AWA_PUBLIC_HOST}
+          - ${LANGFUSE_INTERNAL_HOST}
+    restart: unless-stopped
+
+volumes:
+  awa_db:
+  caddy_data:

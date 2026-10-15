@@ -1,0 +1,380 @@
+2026-10-02T08:30:00Z INFO gateway health check ok
+2026-10-02T08:30:00Z INFO checkout health check ok
+2026-10-02T08:30:00Z INFO payments-db health check ok
+2026-10-02T08:35:00Z INFO gateway health check ok
+2026-10-02T08:35:00Z INFO checkout health check ok
+2026-10-02T08:35:00Z INFO payments-db health check ok
+2026-10-02T08:40:00Z INFO gateway health check ok
+2026-10-02T08:40:00Z INFO checkout health check ok
+2026-10-02T08:40:00Z INFO payments-db health check ok
+2026-10-02T08:45:00Z INFO gateway health check ok
+2026-10-02T08:45:00Z INFO checkout health check ok
+2026-10-02T08:45:00Z INFO payments-db health check ok
+2026-10-02T08:50:00Z INFO gateway health check ok
+2026-10-02T08:50:00Z INFO checkout health check ok
+2026-10-02T08:50:00Z INFO payments-db health check ok
+2026-10-02T08:55:00Z INFO gateway health check ok
+2026-10-02T08:55:00Z INFO checkout health check ok
+2026-10-02T08:55:00Z INFO payments-db health check ok
+2026-10-02T09:00:00Z INFO gateway health check ok
+2026-10-02T09:00:00Z INFO checkout health check ok
+2026-10-02T09:00:00Z INFO payments-db health check ok
+2026-10-02T09:05:00Z INFO gateway health check ok
+2026-10-02T09:05:00Z INFO checkout health check ok
+2026-10-02T09:05:00Z INFO payments-db health check ok
+2026-10-02T09:05:00Z INFO deploy-bot applied payments-db-config max_connections 100 -> 20
+2026-10-02T09:08:00Z WARN payments-db pool utilization 80% (16/20)
+2026-10-02T09:10:00Z INFO gateway health check ok
+2026-10-02T09:10:00Z INFO checkout health check ok
+2026-10-02T09:10:00Z INFO payments-db health check ok
+2026-10-02T09:10:00Z WARN payments-db pool utilization 95% (19/20)
+2026-10-02T09:12:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:12:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9001)
+2026-10-02T09:12:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:12:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9002)
+2026-10-02T09:12:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9003)
+2026-10-02T09:12:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:12:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9004)
+2026-10-02T09:13:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:13:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9005)
+2026-10-02T09:13:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:13:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9006)
+2026-10-02T09:13:30Z WARN gateway 5xx rate 31% on /checkout
+2026-10-02T09:13:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9007)
+2026-10-02T09:13:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:13:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9008)
+2026-10-02T09:14:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:14:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9009)
+2026-10-02T09:14:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:14:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9010)
+2026-10-02T09:14:30Z WARN gateway 5xx rate 38% on /checkout
+2026-10-02T09:14:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9011)
+2026-10-02T09:14:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:14:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9012)
+2026-10-02T09:15:00Z INFO gateway health check ok
+2026-10-02T09:15:00Z INFO checkout health check ok
+2026-10-02T09:15:00Z INFO payments-db health check ok
+2026-10-02T09:15:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:15:00Z ERROR monitoring ALERT checkout error rate above 5% for 3 minutes
+2026-10-02T09:15:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9013)
+2026-10-02T09:15:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:15:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9014)
+2026-10-02T09:15:30Z WARN gateway 5xx rate 30% on /checkout
+2026-10-02T09:15:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9015)
+2026-10-02T09:15:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:15:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9016)
+2026-10-02T09:16:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:16:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9017)
+2026-10-02T09:16:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:16:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9018)
+2026-10-02T09:16:30Z WARN gateway 5xx rate 37% on /checkout
+2026-10-02T09:16:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9019)
+2026-10-02T09:16:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:16:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9020)
+2026-10-02T09:17:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:17:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9021)
+2026-10-02T09:17:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:17:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9022)
+2026-10-02T09:17:30Z WARN gateway 5xx rate 44% on /checkout
+2026-10-02T09:17:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9023)
+2026-10-02T09:17:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:17:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9024)
+2026-10-02T09:18:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:18:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9025)
+2026-10-02T09:18:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:18:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9026)
+2026-10-02T09:18:30Z WARN gateway 5xx rate 36% on /checkout
+2026-10-02T09:18:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9027)
+2026-10-02T09:18:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:18:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9028)
+2026-10-02T09:19:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:19:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9029)
+2026-10-02T09:19:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:19:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9030)
+2026-10-02T09:19:30Z WARN gateway 5xx rate 43% on /checkout
+2026-10-02T09:19:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9031)
+2026-10-02T09:19:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:19:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9032)
+2026-10-02T09:20:00Z INFO gateway health check ok
+2026-10-02T09:20:00Z INFO checkout health check ok
+2026-10-02T09:20:00Z INFO payments-db health check ok
+2026-10-02T09:20:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:20:00Z INFO pager on-call engineer acknowledged the alert
+2026-10-02T09:20:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9033)
+2026-10-02T09:20:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:20:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9034)
+2026-10-02T09:20:30Z WARN gateway 5xx rate 35% on /checkout
+2026-10-02T09:20:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9035)
+2026-10-02T09:20:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:20:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9036)
+2026-10-02T09:21:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:21:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9037)
+2026-10-02T09:21:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:21:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9038)
+2026-10-02T09:21:30Z WARN gateway 5xx rate 42% on /checkout
+2026-10-02T09:21:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9039)
+2026-10-02T09:21:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:21:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9040)
+2026-10-02T09:22:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:22:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9041)
+2026-10-02T09:22:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:22:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9042)
+2026-10-02T09:22:30Z WARN gateway 5xx rate 34% on /checkout
+2026-10-02T09:22:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9043)
+2026-10-02T09:22:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:22:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9044)
+2026-10-02T09:23:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:23:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9045)
+2026-10-02T09:23:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:23:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9046)
+2026-10-02T09:23:30Z WARN gateway 5xx rate 41% on /checkout
+2026-10-02T09:23:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9047)
+2026-10-02T09:23:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:23:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9048)
+2026-10-02T09:24:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:24:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9049)
+2026-10-02T09:24:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:24:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9050)
+2026-10-02T09:24:30Z WARN gateway 5xx rate 33% on /checkout
+2026-10-02T09:24:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9051)
+2026-10-02T09:24:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:24:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9052)
+2026-10-02T09:25:00Z INFO gateway health check ok
+2026-10-02T09:25:00Z INFO checkout health check ok
+2026-10-02T09:25:00Z INFO payments-db health check ok
+2026-10-02T09:25:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:25:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9053)
+2026-10-02T09:25:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:25:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9054)
+2026-10-02T09:25:30Z WARN gateway 5xx rate 40% on /checkout
+2026-10-02T09:25:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9055)
+2026-10-02T09:25:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:25:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9056)
+2026-10-02T09:26:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:26:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9057)
+2026-10-02T09:26:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:26:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9058)
+2026-10-02T09:26:30Z WARN gateway 5xx rate 32% on /checkout
+2026-10-02T09:26:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9059)
+2026-10-02T09:26:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:26:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9060)
+2026-10-02T09:27:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:27:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9061)
+2026-10-02T09:27:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:27:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9062)
+2026-10-02T09:27:30Z WARN gateway 5xx rate 39% on /checkout
+2026-10-02T09:27:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9063)
+2026-10-02T09:27:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:27:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9064)
+2026-10-02T09:28:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:28:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9065)
+2026-10-02T09:28:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:28:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9066)
+2026-10-02T09:28:30Z WARN gateway 5xx rate 31% on /checkout
+2026-10-02T09:28:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9067)
+2026-10-02T09:28:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:28:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9068)
+2026-10-02T09:29:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:29:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9069)
+2026-10-02T09:29:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:29:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9070)
+2026-10-02T09:29:30Z WARN gateway 5xx rate 38% on /checkout
+2026-10-02T09:29:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9071)
+2026-10-02T09:29:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:29:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9072)
+2026-10-02T09:30:00Z INFO gateway health check ok
+2026-10-02T09:30:00Z INFO checkout health check ok
+2026-10-02T09:30:00Z INFO payments-db health check ok
+2026-10-02T09:30:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:30:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9073)
+2026-10-02T09:30:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:30:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9074)
+2026-10-02T09:30:30Z WARN gateway 5xx rate 30% on /checkout
+2026-10-02T09:30:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9075)
+2026-10-02T09:30:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:30:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9076)
+2026-10-02T09:31:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:31:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9077)
+2026-10-02T09:31:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:31:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9078)
+2026-10-02T09:31:30Z WARN gateway 5xx rate 37% on /checkout
+2026-10-02T09:31:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9079)
+2026-10-02T09:31:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:31:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9080)
+2026-10-02T09:32:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:32:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9081)
+2026-10-02T09:32:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:32:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9082)
+2026-10-02T09:32:30Z WARN gateway 5xx rate 44% on /checkout
+2026-10-02T09:32:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9083)
+2026-10-02T09:32:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:32:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9084)
+2026-10-02T09:33:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:33:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9085)
+2026-10-02T09:33:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:33:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9086)
+2026-10-02T09:33:30Z WARN gateway 5xx rate 36% on /checkout
+2026-10-02T09:33:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9087)
+2026-10-02T09:33:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:33:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9088)
+2026-10-02T09:34:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:34:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9089)
+2026-10-02T09:34:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:34:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9090)
+2026-10-02T09:34:30Z WARN gateway 5xx rate 43% on /checkout
+2026-10-02T09:34:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9091)
+2026-10-02T09:34:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:34:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9092)
+2026-10-02T09:35:00Z INFO gateway health check ok
+2026-10-02T09:35:00Z INFO checkout health check ok
+2026-10-02T09:35:00Z INFO payments-db health check ok
+2026-10-02T09:35:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:35:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9093)
+2026-10-02T09:35:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:35:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9094)
+2026-10-02T09:35:30Z WARN gateway 5xx rate 35% on /checkout
+2026-10-02T09:35:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9095)
+2026-10-02T09:35:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:35:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9096)
+2026-10-02T09:36:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:36:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9097)
+2026-10-02T09:36:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:36:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9098)
+2026-10-02T09:36:30Z WARN gateway 5xx rate 42% on /checkout
+2026-10-02T09:36:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9099)
+2026-10-02T09:36:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:36:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9100)
+2026-10-02T09:37:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:37:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9101)
+2026-10-02T09:37:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:37:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9102)
+2026-10-02T09:37:30Z WARN gateway 5xx rate 34% on /checkout
+2026-10-02T09:37:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9103)
+2026-10-02T09:37:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:37:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9104)
+2026-10-02T09:38:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:38:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9105)
+2026-10-02T09:38:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:38:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9106)
+2026-10-02T09:38:30Z WARN gateway 5xx rate 41% on /checkout
+2026-10-02T09:38:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9107)
+2026-10-02T09:38:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:38:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9108)
+2026-10-02T09:39:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:39:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9109)
+2026-10-02T09:39:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:39:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9110)
+2026-10-02T09:39:30Z WARN gateway 5xx rate 33% on /checkout
+2026-10-02T09:39:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9111)
+2026-10-02T09:39:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:39:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9112)
+2026-10-02T09:40:00Z INFO gateway health check ok
+2026-10-02T09:40:00Z INFO checkout health check ok
+2026-10-02T09:40:00Z INFO payments-db health check ok
+2026-10-02T09:40:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:40:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9113)
+2026-10-02T09:40:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:40:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9114)
+2026-10-02T09:40:30Z WARN gateway 5xx rate 40% on /checkout
+2026-10-02T09:40:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9115)
+2026-10-02T09:40:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:40:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9116)
+2026-10-02T09:41:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:41:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9117)
+2026-10-02T09:41:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:41:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9118)
+2026-10-02T09:41:30Z WARN gateway 5xx rate 32% on /checkout
+2026-10-02T09:41:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9119)
+2026-10-02T09:41:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:41:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9120)
+2026-10-02T09:42:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:42:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9121)
+2026-10-02T09:42:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:42:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9122)
+2026-10-02T09:42:30Z WARN gateway 5xx rate 39% on /checkout
+2026-10-02T09:42:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9123)
+2026-10-02T09:42:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:42:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9124)
+2026-10-02T09:43:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:43:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9125)
+2026-10-02T09:43:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:43:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9126)
+2026-10-02T09:43:30Z WARN gateway 5xx rate 31% on /checkout
+2026-10-02T09:43:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9127)
+2026-10-02T09:43:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:43:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9128)
+2026-10-02T09:44:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:44:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9129)
+2026-10-02T09:44:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:44:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9130)
+2026-10-02T09:44:30Z WARN gateway 5xx rate 38% on /checkout
+2026-10-02T09:44:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9131)
+2026-10-02T09:44:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:44:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9132)
+2026-10-02T09:45:00Z INFO gateway health check ok
+2026-10-02T09:45:00Z INFO checkout health check ok
+2026-10-02T09:45:00Z INFO payments-db health check ok
+2026-10-02T09:45:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:45:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9133)
+2026-10-02T09:45:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:45:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9134)
+2026-10-02T09:45:30Z WARN gateway 5xx rate 30% on /checkout
+2026-10-02T09:45:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9135)
+2026-10-02T09:45:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:45:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9136)
+2026-10-02T09:46:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:46:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9137)
+2026-10-02T09:46:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:46:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9138)
+2026-10-02T09:46:30Z WARN gateway 5xx rate 37% on /checkout
+2026-10-02T09:46:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9139)
+2026-10-02T09:46:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:46:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9140)
+2026-10-02T09:47:00Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:47:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9141)
+2026-10-02T09:47:20Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:47:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9142)
+2026-10-02T09:47:30Z WARN gateway 5xx rate 44% on /checkout
+2026-10-02T09:47:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9143)
+2026-10-02T09:47:40Z ERROR payments-db connection pool exhausted, waiting 5000 ms
+2026-10-02T09:47:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9144)
+2026-10-02T09:48:00Z INFO deploy-bot rolled back payments-db-config to max_connections 100
+2026-10-02T09:48:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9145)
+2026-10-02T09:48:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9146)
+2026-10-02T09:48:30Z WARN gateway 5xx rate 36% on /checkout
+2026-10-02T09:48:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9147)
+2026-10-02T09:48:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9148)
+2026-10-02T09:49:05Z ERROR checkout payment authorization timeout after 10000 ms (order O-9149)
+2026-10-02T09:49:20Z ERROR checkout payment authorization timeout after 10000 ms (order O-9150)
+2026-10-02T09:49:30Z WARN gateway 5xx rate 43% on /checkout
+2026-10-02T09:49:35Z ERROR checkout payment authorization timeout after 10000 ms (order O-9151)
+2026-10-02T09:49:50Z ERROR checkout payment authorization timeout after 10000 ms (order O-9152)
+2026-10-02T09:50:00Z INFO gateway health check ok
+2026-10-02T09:50:00Z INFO checkout health check ok
+2026-10-02T09:50:00Z INFO payments-db health check ok
+2026-10-02T09:50:00Z INFO payments-db pool utilization 22% (22/100)
+2026-10-02T09:55:00Z INFO gateway health check ok
+2026-10-02T09:55:00Z INFO checkout health check ok
+2026-10-02T09:55:00Z INFO payments-db health check ok
+2026-10-02T10:00:00Z INFO gateway health check ok
+2026-10-02T10:00:00Z INFO checkout health check ok
+2026-10-02T10:00:00Z INFO payments-db health check ok
+2026-10-02T10:03:00Z INFO monitoring checkout error rate back to 0.2%, alert resolved
+2026-10-02T10:05:00Z INFO gateway health check ok
+2026-10-02T10:05:00Z INFO checkout health check ok
+2026-10-02T10:05:00Z INFO payments-db health check ok
+2026-10-02T10:10:00Z INFO gateway health check ok
+2026-10-02T10:10:00Z INFO checkout health check ok
+2026-10-02T10:10:00Z INFO payments-db health check ok
+2026-10-02T10:15:00Z INFO gateway health check ok
+2026-10-02T10:15:00Z INFO checkout health check ok
+2026-10-02T10:15:00Z INFO payments-db health check ok
+2026-10-02T10:20:00Z INFO gateway health check ok
+2026-10-02T10:20:00Z INFO checkout health check ok
+2026-10-02T10:20:00Z INFO payments-db health check ok
+2026-10-02T10:25:00Z INFO gateway health check ok
+2026-10-02T10:25:00Z INFO checkout health check ok
+2026-10-02T10:25:00Z INFO payments-db health check ok
+2026-10-02T10:30:00Z INFO gateway health check ok
+2026-10-02T10:30:00Z INFO checkout health check ok
+2026-10-02T10:30:00Z INFO payments-db health check ok

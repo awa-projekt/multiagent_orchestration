@@ -1,0 +1,69 @@
+# Strict tier of the upstream seam for the `awa` package (see ../ruff.toml and
+# docs/about/stability.md): only `awa/_internal/upstream` imports LangChain and LangGraph,
+# and only `awa/_compat` the MCP client packages.
+extend = "../ruff.toml"
+
+[lint.flake8-tidy-imports.banned-api]
+"langchain".msg = "Import upstream APIs from awa._internal.upstream.<area> (the upstream seam)."
+"langchain_core".msg = "Import upstream APIs from awa._internal.upstream.<area> (the upstream seam)."
+"langgraph".msg = "Import upstream APIs from awa._internal.upstream.<area> (the upstream seam)."
+"langchain_mcp_adapters".msg = "Use awa._compat.mcp (the MCP client seam)."
+"mcp".msg = "Use awa._compat.mcp (the MCP client seam)."
+"langchain_community".msg = "Archived in June 2026; use a partner package, an MCP server or awa.tools.importing."
+# Architecture rules (docs/develop/architecture.md, Rules for a change): production code does not
+# know tests exist, and a driver is imported only in a backend, root or seam module. The precise
+# check is the guard GT2 with the role table tests/architecture/roles.toml; this is the editor
+# feedback, and test_ruff_ignores.py keeps the per-file ignores below in step with the role table.
+"awa.testing".msg = "Production code never imports test support (rule R11)."
+"pytest".msg = "Production code never imports pytest (rule R11)."
+"unittest".msg = "Production code never imports unittest (rule R11)."
+"psycopg".msg = "Driver: import only in a backend module (rule R5, tests/architecture/roles.toml)."
+"psycopg_pool".msg = "Driver: import only in a backend module (rule R5)."
+"sqlite3".msg = "Driver: import only in a backend module (rule R5)."
+"smtplib".msg = "Driver: import only in a backend module (rule R5)."
+"imaplib".msg = "Driver: import only in a backend module (rule R5)."
+"socket".msg = "Sockets: import only in a backend module (rule R5)."
+"subprocess".msg = "Starting a process: import only in a backend module (rule R5)."
+"urllib.request".msg = "HTTP egress: use the hardened client awa._internal.http (rule R5)."
+"http.client".msg = "HTTP egress: use the hardened client awa._internal.http (rule R5)."
+
+[lint.per-file-ignores]
+"awa/_compat/**" = ["TID251"]
+"awa/_internal/upstream/**" = ["TID251"]
+"awa/kernel/**" = ["TID251"]
+"awa/exporter/runtime_src/**" = ["TID251"]  # copied into exports, which have no awa seam
+"awa/testing/**" = ["TID251"]  # test support imports itself, and pytest in the contract suites
+# Backends (role backend, backend-kit or mixed in tests/architecture/roles.toml): drivers belong here.
+"awa/**/_postgres.py" = ["TID251"]
+"awa/persistence/sql.py" = ["TID251"]  # SQL kit: PostgreSQL helpers and SqliteDatabase (psycopg, sqlite3)
+"awa/persistence/sqlite.py" = ["TID251"]
+"awa/persistence/cache.py" = ["TID251"]  # SqliteCacheStore and InMemoryCacheStore (sqlite3)
+"awa/persistence/runlog/sqlite.py" = ["TID251"]  # SqliteRunLog (sqlite3)
+"awa/persistence/ledger.py" = ["TID251"]  # migration runner (sqlite3, psycopg)
+"awa/automation/_sqlite.py" = ["TID251"]  # SqliteRunStore (sqlite3)
+"awa/persistence/threads.py" = ["TID251"]  # SqliteThreadIndex (sqlite3)
+"awa/server/_store_copy.py" = ["TID251"]  # copying between SQLite and PostgreSQL (sqlite3)
+"awa/persistence/artifacts.py" = ["TID251"]  # mixed: the PostgreSQL artifact repository
+"awa/_internal/http.py" = ["TID251"]
+"awa/toolkits/sql.py" = ["TID251"]
+"awa/toolkits/_sql_schema.py" = ["TID251"]
+"awa/toolkits/communication.py" = ["TID251"]
+"awa/connectors/_local.py" = ["TID251"]
+"awa/automation/_trigger_mail.py" = ["TID251"]
+"awa/core/webhooks.py" = ["TID251"]
+"awa/core/dotenv.py" = ["TID251"]
+"awa/data/_sqlite.py" = ["TID251"]  # the SQLite file reader (sqlite3, read only)
+"awa/data/_source_rows.py" = ["TID251"]  # LocalFileReader (sqlite3)
+"awa/data/_isolate.py" = ["TID251"]  # the killable worker process (subprocess)
+# Roots (CLI, UI, HTTP server, blueprint project files) choose and start the backends.
+"awa/cli/_doctor.py" = ["TID251"]
+"awa/project_setup/services.py" = ["TID251"]  # the docker adapter: subprocess, and a bind test
+"awa/cli/_ui.py" = ["TID251"]
+"awa/exporter/_probe.py" = ["TID251"]  # imports the generated graph in a fresh interpreter (subprocess)
+"awa/ui/_app.py" = ["TID251"]
+"awa/server/_blueprint_app.py" = ["TID251"]
+"awa/blueprints/_project_files.py" = ["TID251"]
+# The work list: known violations (guards GT2 and GT3). Delete each line when the file is fixed.
+"awa/automation/worker.py" = ["TID251"]  # socket for the worker id: inject it
+"awa/cli/_new.py" = ["TID251"]  # imports awa.testing for `awa tools call`: move the harness out
+"awa/cli/_plugins.py" = ["TID251"]  # imports the contract suites of awa.testing for `awa plugins check`

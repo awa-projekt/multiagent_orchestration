@@ -1,0 +1,95 @@
+"""Offline tests for blueprint.yaml: scripted models, no API key needed."""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+from awa import Blueprint
+from awa.testing import tool_call
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+
+@pytest.fixture(autouse=True)
+def _fresh_refunds() -> Iterator[None]:
+    tools.REFUNDS.clear()
+    yield
+    tools.REFUNDS.clear()
+
+
+def test_blueprint_is_valid() -> None:
+    issues = Blueprint.from_yaml(BLUEPRINT).check(tools=TOOLS)
+    assert [issue for issue in issues if issue.severity == "error"] == []
+
+
+def test_refunds_are_bounded_by_the_order_total() -> None:
+    assert tools.issue_refund("1001", 500.0, "broken").startswith("Refund refused")
+    assert tools.REFUNDS == []
+
+
+def test_order_questions_are_delegated(build_offline) -> None:
+    offline = build_offline(
+        {
+            "triage": [
+                tool_call("delegate_task", {"agent": "order_specialist", "task": "Where is 1002?"}),
+                "Your order 1002 is on its way and expected on 29 September.",
+            ],
+            "order_specialist": [
+                tool_call("lookup_order", {"order_id": "1002"}),
+                tool_call("track_shipment", {"shipment_id": "SH-78"}),
+                "Order 1002 shipped; expected on 2026-09-29.",
+            ],
+        }
+    )
+
+    result = asyncio.run(offline.system.run("Where is my order 1002?"))
+
+    assert result.output == "Your order 1002 is on its way and expected on 29 September."
+    assert result.usage.by_agent["order_specialist"].requests == 3
+    assert tools.REFUNDS == []
+
+
+def refund_scripts() -> dict[str, list]:
+    return {
+        "triage": [tool_call("transfer_to_refunds", {"reason": "Refund request."})],
+        "refunds": [
+            tool_call("lookup_order", {"order_id": "1001"}),
+            tool_call("issue_refund", {"order_id": "1001", "amount": 49.90, "reason": "broken"}),
+            "Your refund of 49.90 is on its way.",
+        ],
+    }
+
+
+def test_a_refund_waits_for_approval(build_offline) -> None:
+    offline = build_offline(refund_scripts())
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Order 1001 arrived broken, I want my money back.")
+        assert paused.is_interrupted
+        assert paused.interrupts[0]["value"]["tool"] == "issue_refund"
+        assert tools.REFUNDS == []  # no money moves before a human decides
+
+        done = await offline.system.resume(paused.thread_id, {"action": "approve"})
+        assert done.output == "Your refund of 49.90 is on its way."
+        assert done.handoff_path == ("triage", "refunds")
+
+    asyncio.run(scenario())
+    assert tools.REFUNDS == [{"order": "1001", "amount": 49.90, "reason": "broken"}]
+
+
+def test_a_rejected_refund_is_not_paid(build_offline) -> None:
+    offline = build_offline(refund_scripts())
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Order 1001 arrived broken, I want my money back.")
+        await offline.system.resume(paused.thread_id, {"action": "reject", "note": "Photo first."})
+
+    asyncio.run(scenario())
+    assert tools.REFUNDS == []
+    assert "Photo first." in str(offline.models["refunds"].calls[2].last_message.content)

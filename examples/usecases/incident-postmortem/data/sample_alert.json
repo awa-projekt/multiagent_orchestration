@@ -1,0 +1,8 @@
+{
+  "incident_id": "INC-2041",
+  "severity": "SEV1",
+  "service": "checkout",
+  "started_at": "2026-10-02T09:12:00Z",
+  "resolved_at": "2026-10-02T10:03:00Z",
+  "summary": "Checkout error rate above 5 percent, payments timing out."
+}

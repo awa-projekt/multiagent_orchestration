@@ -1,0 +1,62 @@
+# {{name}}: a lead delegating to a researcher and a writer.
+#
+# The lead plans the work and delegates; the writer may consult the researcher
+# directly; publishing a brief waits for a human.
+#
+#   awa validate blueprint.yaml
+#   awa show blueprint.yaml --mermaid
+#   awa chat blueprint.yaml
+name: {{name}}
+description: Researches a topic and publishes a short, sourced brief.
+version: 0.1.0
+
+defaults:
+  model: {{model}}
+  max_steps: 12
+
+agents:
+  - name: lead
+    description: Plans each request, delegates research and writing, and reports the outcome.
+    instructions: |
+      You coordinate briefs for colleagues.
+      1. Delegate fact finding to researcher with a precise question.
+      2. Delegate drafting and publishing to writer, passing on the researcher's facts.
+      3. Report the outcome in two sentences: what was published, or why not.
+    skills: [orchestration-planning, delegation-briefs]
+
+  - name: researcher
+    description: Finds facts in the knowledge base and cites the article ids.
+    instructions: |
+      Search the knowledge base with search_knowledge_base. Return at most five facts,
+      each with the id of the article it comes from. Say plainly when nothing is found.
+    tools: [search_knowledge_base]
+    capabilities: [research]
+
+  - name: writer
+    description: Writes a brief from the facts it is given and publishes it.
+    instructions: |
+      Write a brief of at most 120 words from the facts you are given; consult
+      researcher if a fact is missing. Publish it with publish_brief. A human approves
+      every publication; if it is rejected, report the reason.
+    tools: [publish_brief]
+    capabilities: [writing]
+    skills: [writing]
+
+team:
+  orchestrator: lead
+  members: [researcher, writer]
+  peers:
+    writer: [researcher]
+  limits:
+    max_delegation_depth: 3
+    max_calls_per_member: 4
+
+approvals:
+  - tool: publish_brief         # every publication waits for a human
+
+# The most one run may use, also a run a trigger starts. Options such as
+# `awa run --max-requests` can only tighten it.
+limits:
+  max_requests: 50
+  max_total_tokens: 200000
+  max_duration: 5m

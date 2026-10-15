@@ -1,0 +1,54 @@
+"""Offline tests for blueprint.yaml: scripted models, no API key needed."""
+
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+
+from awa import Blueprint
+from awa.testing import structured_output, tool_call
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+
+def test_blueprint_is_valid() -> None:
+    issues = Blueprint.from_yaml(BLUEPRINT).check(tools=TOOLS)
+    assert [issue for issue in issues if issue.severity == "error"] == []
+
+
+def test_policy_lookup() -> None:
+    assert "6 years" in tools.lookup_policy("Retention")
+    assert tools.lookup_policy("travel").startswith("No policy")
+
+
+def test_the_workflow_runs_every_step_in_order(build_offline) -> None:
+    verdict = {
+        "verdict": "revise",
+        "summary": "The retention period breaks policy.",
+        "findings": ["Customer names are kept for 10 years (policy: 6)."],
+    }
+    offline = build_offline(
+        {
+            "intake": [
+                tool_call("fetch_document", {"document_id": "DOC-7"}),
+                "Supplier agreement; stores customer names for 10 years.",
+            ],
+            "policy_checker": [
+                tool_call("lookup_policy", {"topic": "retention"}),
+                "Breaks the retention policy (6 years).",
+            ],
+            "risk_checker": ["Risk: medium."],
+            "reviewer": [structured_output("ReviewerOutput", verdict)],
+        }
+    )
+
+    result = asyncio.run(offline.system.run("Review document DOC-7."))
+
+    assert result.output.verdict == "revise"
+    # The reviewer received the findings of both parallel checks.
+    prompt = str(offline.models["reviewer"].calls[0].last_message.content)
+    assert "retention policy" in prompt
+    assert "Risk: medium." in prompt

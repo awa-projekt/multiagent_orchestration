@@ -1,0 +1,5 @@
+Invoice RE-1044
+Date: 2026-10-01
+Lines:
+- A-100 Paper A4 (box of 5 reams), quantity 3, unit price 4.20
+Total: 12.60

@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. Hides names, IBANs and the like from the AI model. You still see everything.
+2. Drop your files here, or press Choose files. Your originals are never changed.
+3. Every file is copied into your project.
+4. One card per file: what it is and what awa found in it, in plain words.
+5. A note in your own words: what should happen with this file.

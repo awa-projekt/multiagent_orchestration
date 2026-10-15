@@ -1,0 +1,47 @@
+# Supplier countries from a public GraphQL API, joined with the supplier master.
+#
+# suppliers.json lists each supplier with its country code and annual spend. The analyst reads
+# the countries (currency, continent, capital) from the public Countries GraphQL API
+# (https://countries.trevorblades.com, keyless) and answers questions that need both.
+#
+#   awa validate examples/benchmarks/core/03_graphql_lookup/blueprint.yaml
+name: graphql-lookup
+description: Answers supplier questions by joining a JSON file with a public GraphQL API.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 10
+
+toolkits:
+  files: {root: ./data}
+
+connectors:
+  countries:
+    use: graphql
+    base_url: https://countries.trevorblades.com/graphql
+    auth: none
+
+agents:
+  - name: trade_analyst
+    description: Joins the supplier master with country data from the Countries API.
+    instructions: |
+      Answer questions about our suppliers.
+      1. Read suppliers.json with json_query (path "suppliers.json", query "suppliers").
+      2. Look up the countries of the suppliers in one countries_query call, for example
+         { countries(filter: {code: {in: ["PL", "DE"]}}) { code name capital currency
+         continent { code name } } }. A country's currency field may hold several codes
+         separated by commas: it uses the euro only when it is exactly EUR.
+      3. Join by country code and answer. supplier_ids are supplier ids in ascending order;
+         amounts are plain numbers in EUR. Fields the question does not ask for are null.
+    tools: [builtin:json_query, connector:countries.query]
+    output_schema:
+      type: object
+      properties:
+        supplier_ids: {type: array, items: {type: string}}
+        count: {type: integer}
+        total_annual_spend_eur: {type: ["number", "null"]}
+        capital: {type: ["string", "null"]}
+        uses_euro: {type: ["boolean", "null"]}
+        summary: {type: string}
+      required: [supplier_ids, count, summary]

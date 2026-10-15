@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. Your files and your ledger from step 3. × takes one out.
+2. Your description, in your own words.
+3. Leave this on: awa tests and repairs the design.
+4. Starts the build.

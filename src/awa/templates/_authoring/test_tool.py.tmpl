@@ -1,0 +1,34 @@
+"""Tests for the `{{name}}` tool: its schema, a call, errors and safety flags."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from awa.testing import ToolContract  # noqa: E402
+
+from {{name}} import {{class_name}}Deps, {{name}}  # noqa: E402
+
+contract = ToolContract({{name}}, deps={{class_name}}Deps())
+
+
+def test_schema_shows_only_the_model_arguments() -> None:
+    contract.expect_args("record_id").expect_hidden("ctx").expect_description()
+
+
+def test_a_call_returns_the_status() -> None:
+    assert contract.call({"record_id": "R-1"}{{approve_arg}}) == "Record R-1 is open."
+
+
+def test_errors_are_returned_to_the_model_as_text() -> None:
+    contract.expect_error({"record_id": "R-9"}{{approve_arg}}, contains="unknown record")
+{{approval_tests}}
+
+
+def test_it_passes_the_awa_tool_contract() -> None:
+    from awa.testing.plugin_contract import verify
+
+    result = verify("tool.{{name}}", {{name}})
+    assert result.passed, result.summary()

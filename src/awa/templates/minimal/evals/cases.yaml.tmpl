@@ -1,0 +1,21 @@
+# Eval cases for blueprint.yaml, run against the real model:
+#
+#   awa eval blueprint.yaml evals/cases.yaml
+#
+# Scorers: contains (every phrase of `expected` is in the reply), tool:<name>,
+# no_tool:<name>, approval:<tool>, max_tokens:<n>, "judge:<criteria>" (a model grades the reply).
+name: {{name}}
+cases:
+  - id: account-plan
+    input: Which plan is account A-100 on?
+    expected: ["Pro"]
+    scorers: [contains, "tool:lookup_account", "no_tool:create_ticket"]
+
+  - id: unknown-account
+    input: What is the plan of account A-999?
+    expected: ["A-999"]
+    scorers: [contains, "no_tool:create_ticket"]
+
+  - id: ticket-needs-approval
+    input: Open a follow-up ticket to call Globex (A-200) back about their invoices.
+    scorers: ["approval:create_ticket"]

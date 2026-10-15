@@ -1,0 +1,91 @@
+# Employee onboarding: a lead plans dependency-ordered tasks; IT, HR and facilities do them.
+#
+# The onboarding lead reads the new hire from the HR system and puts the whole plan on a
+# shared task board: accounts, hardware, payroll, buddy, desk and badge, and a first-week
+# plan that waits for the others. The roles run as an agent network: IT, HR and facilities
+# work concurrently, each claiming the next ready task that matches its capability.
+#
+#   awa validate examples/recipes/employee-onboarding/blueprint.yaml \
+#       --tools examples/recipes/employee-onboarding/tools.py
+#   awa run examples/recipes/employee-onboarding/blueprint.yaml "Onboard new hire H-2001." \
+#       --tools examples/recipes/employee-onboarding/tools.py --stream
+name: employee-onboarding
+description: Plans and completes the onboarding of a new hire across IT, HR and facilities.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 10
+
+agents:
+  - name: onboarding_lead
+    acknowledge_ungated: [send_manager_summary]  # internal records of this demo; no person needed
+    description: Plans each onboarding on the task board and reports the status to the manager.
+    instructions: |
+      You coordinate the onboarding of one new hire per request.
+      1. Read the hire with get_new_hire. If there is no record, say so and stop.
+      2. Put the whole plan on the task board in one create_tasks call. Every description
+         names the hire id and the facts the teammate needs; route with
+         required_capabilities:
+         - it: "Create accounts"; "Order hardware" (ship to home for remote hires).
+         - hr: "Create payroll record" (employees only, never contractors); "Assign buddy".
+         - facilities, office-based hires only: "Reserve desk"; "Issue badge", which
+           depends on the desk.
+         - hr: "Plan the first week", which depends on the accounts, the buddy and, for
+           office-based hires, the desk.
+      3. Teammates claim the tasks themselves as soon as their dependencies are done.
+      4. When every task is done, send the hiring manager the status with
+         send_manager_summary, then answer with the checklist: one line per task with its
+         status and reference (account email, purchase request, desk, badge, buddy), and a
+         "Waiting for people" section (procurement approval, payroll approval).
+    tools: [get_new_hire, send_manager_summary]
+    skills: [task-planning]
+    capabilities: [coordination]
+
+  - name: it_specialist
+    acknowledge_ungated: [create_accounts]  # internal records of this demo; no person needed
+    description: Creates accounts and orders equipment for new hires.
+    instructions: |
+      You do the IT onboarding task in your brief for the hire id it names: create_accounts
+      for "Create accounts", order_hardware for "Order hardware" (ship_to "home" only for
+      remote hires). Report the references the tools return, in one or two lines.
+    tools: [get_new_hire, create_accounts, order_hardware]
+    skills: [safe-tool-execution]
+    capabilities: [it]
+
+  - name: hr_specialist
+    acknowledge_ungated: [assign_buddy, create_payroll_record]  # internal records of this demo; no person needed
+    description: Sets up payroll, assigns the onboarding buddy and plans the first week.
+    instructions: |
+      You do the HR onboarding task in your brief for the hire id it names.
+      - "Create payroll record": create_payroll_record, for employees only.
+      - "Assign buddy": assign_buddy.
+      - "Plan the first week": schedule_first_week with five sessions, one line each (day,
+        time, session, with whom): Monday welcome with the manager, Monday IT setup, Tuesday
+        lunch with the buddy, Wednesday team introduction, Friday check-in with the manager.
+        Use video calls for remote hires and the desk location for office-based hires.
+      Report the references the tools return, in one or two lines.
+    tools: [get_new_hire, create_payroll_record, assign_buddy, schedule_first_week]
+    capabilities: [hr]
+
+  - name: facilities_coordinator
+    acknowledge_ungated: [assign_desk]  # internal records of this demo; no person needed
+    description: Reserves desks and issues access badges for office-based hires.
+    instructions: |
+      You do the facilities onboarding task in your brief for the hire id it names:
+      assign_desk for "Reserve desk", issue_badge for "Issue badge". Report the desk or
+      badge the tools return, in one line.
+    tools: [get_new_hire, assign_desk, issue_badge]
+    capabilities: [facilities]
+
+network:
+  lead: onboarding_lead
+  teammates: [it_specialist, hr_specialist, facilities_coordinator]
+  peers: {}                             # teammates hand their results to the lead via the board
+  limits:
+    max_tasks: 10                       # seven tasks per onboarding, plus room for one retry round
+    max_concurrent_teammates: 3
+    max_task_attempts: 2
+    max_lead_turns: 8
+    idle_timeout: 60
+    run_timeout: 900

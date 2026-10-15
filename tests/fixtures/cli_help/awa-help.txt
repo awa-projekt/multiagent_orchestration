@@ -1,0 +1,70 @@
+usage: awa [-h] [--version] [--verbose] [--project DIR] action ...
+
+AI agents for business processes, with hard limits in code, approvals, eval cases and a one-agent
+exit to plain LangGraph.
+
+Start:
+  ui          [preview] open the web app: set up, add files, describe, connect, test, run
+  build       [preview] build a tested project from a description (files: --data)
+  init        create a starter project from a template; its tests run offline
+  setup       set the model key; optionally database and tracing
+
+Build:
+  new         write a blueprint, tool, toolbox, parser, connector or skill from a template
+  add         [preview] add a trigger to a blueprint; import tools, graphs and skills
+  connect     [preview] set up a project's external systems, setting by setting
+  brief       [preview] write a brief for a coding assistant from the project folder
+  people      [preview] find colleagues in Entra ID and pin them to roles
+  export      eject a one-agent project into plain LangChain and LangGraph code
+
+Check:
+  validate    check a blueprint for errors without running it
+  show        describe a blueprint's agents, tools, triggers and flow
+  eval        run the eval cases and report the pass rate (exit 1 below the target)
+  data        [preview] inspect your files, check them against a project, run it on them
+  doctor      check the installation, keys and settings, and say what to fix
+  check       [preview] check the Microsoft 365 setup with small live reads
+
+Run:
+  chat        talk to the system in the terminal; approvals are asked inline
+  run         give the system one task and print the answer
+  worker      [preview] run the triggers and queued runs until stopped
+  serve       [preview] offer the system as a web API with its webhooks and triggers
+  mcp         offer the system to MCP clients; pin the tools of its MCP servers
+
+Operate:
+  runs        [preview] list, approve, retry, cancel and trace process runs
+  trigger     [preview] list a blueprint's triggers or fire one once to try it
+  connectors  list, show and test the connectors to your external systems
+  skills      list or show the skills
+  tools       list the tools of a Python file or the builtins, or call one
+  plugins     list, show, check and switch plugins and parts
+
+Settings:
+  env         show and change the settings in the project .env (secrets never shown)
+  cache       show or clear what the caches hold, or write the project's cache salt
+  store       [preview] where runs are kept: status, sqlite or postgres, backup, erase
+
+options:
+  -h, --help     show this help message and exit
+  --version      show the installed version and exit
+  --verbose      show tracebacks for errors (works before or after the command)
+  --project DIR  project folder (default: the nearest folder at or above the current one with
+                 blueprint.yaml, pyproject.toml [tool.awa] or .awa/)
+
+Three ways to start:
+  1. Web app:   awa ui --project invoice-desk
+  2. Terminal:  awa build "<your process>" --out invoice-desk [--data <your files>]
+  3. Template:  awa init my-desk --template support
+
+Then, in the project folder (a model key is needed: awa setup sets it, awa doctor checks it):
+  awa chat blueprint.yaml                    try it
+  awa eval blueprint.yaml evals/cases.yaml   test it
+
+Let it run by itself:
+  awa add trigger blueprint.yaml             asks what starts it and prints the command:
+    awa worker blueprint.yaml                schedule, file drop, email or queue
+    awa serve blueprint.yaml                 web requests (webhooks), plus all triggers
+  awa runs decide RUN_ID --approve           answer an approval (or Approvals in awa ui)
+
+More: awa <action> --help for every option.

@@ -1,0 +1,4 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-09-29,flight,Danubia Air,Berlin-Vienna return,1,410.00,EXP-2005-1.pdf
+2,2026-09-29,hotel,Hotel Ringstrasse,3 nights summit,3,450.00,EXP-2005-2.pdf
+3,2026-09-30,training,Industry Summit Vienna,Conference fee,1,600.00,EXP-2005-3.pdf

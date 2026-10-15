@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The trigger that awa wrote into blueprint.yaml.
+2. A run that starts by itself needs a budget (limits).
+3. The command that starts the automation.

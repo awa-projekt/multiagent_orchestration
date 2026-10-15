@@ -1,0 +1,21 @@
+# TLS edge of the reference setup. Certificates come from deploy/certs/ (tls.crt with the full
+# chain, tls.key); no certificate is requested from the internet.
+{
+	auto_https off
+	admin off
+}
+
+# The awa HTTP API, published on the host (port 443).
+https://{$AWA_PUBLIC_HOST}:443 {
+	tls /certs/tls.crt /certs/tls.key
+	reverse_proxy awa-serve:8000 {
+		# Server-sent events must not be buffered.
+		flush_interval -1
+	}
+}
+
+# Langfuse for awa's span export, on the internal network only (port 8443 is not published).
+https://{$LANGFUSE_INTERNAL_HOST}:8443 {
+	tls /certs/tls.crt /certs/tls.key
+	reverse_proxy langfuse-web:3000
+}

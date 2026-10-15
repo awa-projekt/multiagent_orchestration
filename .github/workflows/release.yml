@@ -1,0 +1,77 @@
+# Release: runs only on a pushed tag `vX.Y.Z`. The build and audit jobs
+# keep their files as workflow artifacts; nothing is uploaded unless publishing is turned on.
+#
+# Publishing to PyPI uses trusted publishing: GitHub issues the job a short-lived OIDC token that
+# PyPI exchanges for a one-time upload token; no token is stored in a secret. PREPARED, NOT ACTIVE:
+# the job `publish` is skipped until the owner (1) registers this repository, the workflow file
+# `release.yml` and the environment `pypi` as a trusted publisher of the PyPI project `awa-agents`,
+# (2) creates the environment `pypi` with required reviewers (the manual approval of a release),
+# and (3) sets the repository variable AWA_PYPI_PUBLISH to `true`.
+
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]*"]
+
+permissions:
+  contents: read
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.3"
+      - run: uv build
+      - run: uvx "twine==7.0.0" check --strict dist/*
+      - run: cd dist && sha256sum *.whl *.tar.gz > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v5
+        with:
+          name: dist
+          path: dist/
+          retention-days: 90
+
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.3"
+      # The locked runtime dependencies, without awa itself.
+      - run: uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements.txt
+      - run: uvx "pip-audit>=2.9,<3" --requirement requirements.txt --no-deps --disable-pip
+      - run: >-
+          uvx --from "cyclonedx-bom>=6,<8" cyclonedx-py requirements requirements.txt
+          --of JSON -o sbom.cdx.json
+      - uses: actions/upload-artifact@v5
+        with:
+          name: audit
+          path: |
+            requirements.txt
+            sbom.cdx.json
+          retention-days: 90
+
+  publish:
+    if: vars.AWA_PYPI_PUBLISH == 'true'
+    needs: [build, audit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - run: rm dist/SHA256SUMS.txt
+      - uses: pypa/gh-action-pypi-publish@release/v1

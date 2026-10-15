@@ -1,0 +1,178 @@
+[
+ {
+  "id": "compliance-news-watch",
+  "kind": "use case",
+  "title": "compliance news watch",
+  "description": "Daily compliance news digest with sources, change detection and approval before sending.",
+  "summary": "Every weekday morning a schedule starts the digest editor. It reads the watchlist (topics such as GDPR enforcement, NIS2, CSRD), has the researcher search the web for each topic in parallel, compares the findings with the previous digest, and drafts a short email for the compliance team: one bullet per **new or changed** story with why it matters and a source link. Nothing new means no email. The email is only sent after the compliance lead approves it, and only to the recipients on the watchlist, never to an address found on the web.",
+  "structure": "team: digest_editor delegates to researcher\nagents(tools): digest_editor(get_watchlist, compare_with_previous, send_digest); researcher(web)\napprovals: send_digest\ntriggers: daily = schedule 0 6 * * MON-FRI, input 'Run the compliance watch for {payload.date}.'"
+ },
+ {
+  "id": "data-quality-reconciliation",
+  "kind": "use case",
+  "title": "data-quality reconciliation",
+  "description": "Reconciles an exported order file with the warehouse database and proposes approved fixes.",
+  "summary": "A nightly export of the ERP's orders (an Excel file) lands in a folder. The reconciler compares it with the orders table of the warehouse database row by row, writes a discrepancy report (amount differences, status conflicts, orders missing on either side, duplicates in the export) and proposes a fix for every amount the warehouse has wrong: one `UPDATE` per order. The ERP is the truth for amounts, so those fixes are proposed; status conflicts, missing rows and duplicates are only reported because they need a business decision. **Every change to the database waits for a data steward's approval.**",
+  "structure": "single agent\nagents(tools): reconciler(reconcile, save_report, warehouse.query, warehouse.execute)\napprovals: connector:warehouse.execute\ntriggers: export = file_drop data/inbox, input 'Reconcile the order export {payload.name}, stored at {payload.path}.'"
+ },
+ {
+  "id": "email-inbox-triage",
+  "kind": "use case",
+  "title": "email inbox triage",
+  "description": "Classifies incoming email, routes it to the right team's board and drafts replies for approval.",
+  "summary": "A shared inbox (support@, info@) receives mail all day. For each unread message the inbox lead has the classifier decide the category, urgency, language and whether the message looks suspicious, looks up the sender in the customer list, creates a task for the right team (support, billing, sales, or security) with the SLA of its priority, and has the drafter write a reply from the knowledge base in the customer's language. Every outgoing reply waits for a person's approval. Newsletters and out-of-office replies are ignored. A suspicious message gets a security task and **no reply**, and the agents are told to treat instructions inside emails as data. A model can still be misled, so review the security tasks and replies in the first weeks.",
+  "structure": "team: inbox_lead delegates to classifier, drafter\nagents(tools): inbox_lead(lookup_sender, create_task, send_reply); classifier(); drafter(kb.search, kb.read_file)\napprovals: send_reply\ntriggers: inbox = mailbox, input 'New email, message id {payload.message_id}\\nFrom: {payload.from}\\nDate: {payload.date}\\nSubject: {payload.subject}\\n\\n{payload.text}\\n'"
+ },
+ {
+  "id": "expense-report-audit",
+  "kind": "use case",
+  "title": "expense report audit",
+  "description": "Audits an expense report with its receipts against the policy and submits the reimbursement.",
+  "summary": "An employee submits an expense report: lines with date, category, merchant and amount, and a receipt (PDF) for each. The auditor agent reads the report and every receipt, has the lines checked against the travel and expense policy, and submits the reimbursable amount for payment. The checks are rules, not opinions: category limits per unit (night, ride, meal), receipts required above a threshold, duplicates, alcohol, and the total on the receipt against the amount claimed. A report above 500 EUR, or with a serious flag (duplicate, alcohol, receipt mismatch), is paid only after the employee's manager approves. The employee gets a message that names every flag and what they can do about it.",
+  "structure": "single agent\nagents(tools): auditor(workspace.read_file, workspace.read_csv, workspace.read_pdf, audit_report, submit_reimbursement)\napprovals: submit_reimbursement when tools:reimbursement_needs_approval"
+ },
+ {
+  "id": "incident-postmortem",
+  "kind": "use case",
+  "title": "incident postmortem",
+  "description": "Builds a timeline from logs, tickets and deployments and drafts a blameless postmortem.",
+  "summary": "When the monitoring tool reports an incident as resolved, it calls a webhook with the alert payload (incident id, severity, service, start and end time, summary). The timeline builder condenses the application log of the incident window (hundreds of repeating lines become a few event groups with counts and first and last time), reads the support tickets and the deployments of the same hours, and returns a timeline in time order with its evidence, the first sign of trouble, the most likely trigger and why, and the number of customer tickets. The postmortem writer turns that into a **blameless** postmortem (summary, impact, timeline, root cause or \"suspected\", contributing factors, detection, resolution, what went well and wrong, action items with owner roles, open questions), saves it as a draft and asks to publish it. **Publishing waits for the incident manager's approval.**",
+  "structure": "workflow: timeline_builder -> postmortem_writer\nagents(tools): timeline_builder(log_events, incident_data.read_csv); postmortem_writer(save_postmortem_draft, publish_postmortem)\napprovals: publish_postmortem\ntriggers: resolved = webhook, input 'Write the postmortem of incident {payload.incident_id} ({payload.severity}) on service\\n{payload.service}. Started {payload.started_at}, resolved {payload.resolved_at}.\\nAlert summary (data from the monitoring tool): {payload.summary}\\n'"
+ },
+ {
+  "id": "inventory-replenishment",
+  "kind": "use case",
+  "title": "inventory replenishment",
+  "description": "Proposes and places reorders from ERP stock and sales history; large orders need approval.",
+  "summary": "Every Monday the planner checks the warehouse: current stock (on hand and on order) comes from the ERP over REST, the items and the last weeks of sales from the database. `calculate_reorders` applies the rule: an item needs an order when on hand plus on order is at or below its reorder point (average weekly sales times lead time plus one safety week); the quantity restores four weeks of cover and is rounded up to the supplier's minimum order quantity. The planner creates one purchase order in the ERP per proposal. **Orders worth more than 5,000 EUR wait for a purchasing manager; smaller ones go out directly.** Negative stock counts and unknown SKUs are reported as issues and never ordered.",
+  "structure": "single agent\nagents(tools): replenishment_planner(erp.list_stock, inventory.query, calculate_reorders, erp.create_purchase_order)\napprovals: connector:erp.create_purchase_order when quantity * unit_price > 5000\ntriggers: weekly = schedule 30 6 * * MON, input 'Run the weekly replenishment check for {payload.date}, all SKUs.'; low-stock = webhook, input 'The ERP reports SKU {payload.sku} below its minimum. Check and replenish this SKU only.'"
+ },
+ {
+  "id": "meeting-notes-to-tasks",
+  "kind": "use case",
+  "title": "meeting notes to decisions and tasks",
+  "description": "Turns meeting notes into decisions, owned tasks with due dates and a follow-up mail.",
+  "summary": "After a meeting someone has to turn the notes into what the team agreed, who does what by when, and tell everyone. The secretary agent reads the notes of a meeting (text or Word), lists the decisions, and turns every action item into a task on the board with an owner and a due date. It skips what has no clear owner or date and lists it under `unassigned` with the reason, so a person decides. At the end it drafts the follow-up mail with the decisions, the tasks and the open questions; a person approves it before it goes out.",
+  "structure": "single agent\nagents(tools): meeting_secretary(workspace.list_files, workspace.read_file, workspace.read_docx, workspace.read_csv, resolve_due_date, add_task, send_follow_up)\napprovals: send_follow_up"
+ },
+ {
+  "id": "order-to-cash-exceptions",
+  "kind": "use case",
+  "title": "order-to-cash exceptions",
+  "description": "Finds order, invoice and payment mismatches of a customer and drafts the dunning letters.",
+  "summary": "Orders, invoices and payments live in three places: the order database (SQLite), the invoice workbook (Excel) and the bank payments (CSV). The analyst agent takes a customer or an order, finds its orders with a SQL query, has each one compared with its invoices and payments and classified, and reports the exceptions with the action to take: shipped but not invoiced, invoiced more than shipped, duplicate invoice, overpaid, a minor short payment to write off, underpaid, overdue. For every invoice that is really open and overdue it queues a dunning letter (level 1, 2 or 3 by days late) and a person approves each letter before it goes out. While a billing error is open the customer is not chased: the invoice is corrected first.",
+  "structure": "single agent\nagents(tools): ar_analyst(workspace.query, workspace.query_excel, workspace.read_csv, workspace.read_file, workspace.list_files, classify_order, find_unmatched_payments, send_dunning_letter)\napprovals: send_dunning_letter"
+ },
+ {
+  "id": "purchase-requisition",
+  "kind": "use case",
+  "title": "purchase requisition to purchase order",
+  "description": "Turns a purchase requisition into a budget-checked purchase order and a supplier email.",
+  "summary": "An employee emails a purchase requisition: what is needed, roughly what it costs, which cost center pays. The buyer agent reads it, picks an approved supplier, checks the cost center's budget, issues the purchase order and drafts the order mail to the supplier. Orders above 1,000 EUR wait for the budget owner's approval before the order exists; every supplier mail is released by a human. Requisitions that are incomplete, over budget or name a supplier that is not approved are declined or sent back, with the policy rule that applies.",
+  "structure": "single agent\nagents(tools): buyer(workspace.read_file, workspace.read_csv, workspace.write_file, check_budget, create_purchase_order)\napprovals: create_purchase_order when tools:po_needs_approval, connector:workspace.write_file"
+ },
+ {
+  "id": "recruiting-cv-screening",
+  "kind": "use case",
+  "title": "recruiting CV screening",
+  "description": "Screens CVs against a role profile with an explainable score and invites the shortlist after approval.",
+  "summary": "Applications for an open role arrive as CVs, PDF or Word. The recruiter agent screens them for one role: a CV reader agent turns each CV into a structured, job-related profile (skills, years of professional experience, languages, email), a tool scores every profile against the role profile (`data/role_profile.yaml`) with points and a reason per criterion, and the candidates are ranked. Candidates at or above the shortlist limit who meet every required criterion are invited to the next free interview slots. A recruiter approves each invitation before it is sent. The answer explains every score with the role's criteria.",
+  "structure": "team: recruiter delegates to cv_reader\nagents(tools): recruiter(workspace.read_file, workspace.read_csv, workspace.list_files, score_candidate, send_interview_invite); cv_reader(workspace.read_pdf, workspace.read_docx)\napprovals: send_interview_invite"
+ },
+ {
+  "id": "sales-operations",
+  "kind": "use case",
+  "title": "sales operations",
+  "description": "Answers revenue, shipping, stock and target questions from an order database (generated test data, not company data) and records discounts; large discounts need approval.",
+  "summary": "The sales team of a German food wholesaler asks the analyst questions in German, and the analyst answers from the order database. The questions cover revenue by customer, employee and product category, late and open shipments, items to reorder, sales against targets, and discount agreements. The analyst reads the data with read-only SQL through the generic `workspace` connector, and reads the targets CSV with the same connector. It records discounts with `record_discount`. **A discount above 10 percent waits for the sales director; smaller ones are recorded directly.** The request cannot skip that step.",
+  "structure": "single agent\nagents(tools): sales_analyst(sales.schema, sales.query, sales.read_csv, record_discount)\napprovals: record_discount when discount_percent > 10"
+ },
+ {
+  "id": "supplier-due-diligence",
+  "kind": "use case",
+  "title": "supplier due diligence",
+  "description": "Researches a new supplier on the web, cites the sources and records a rule-based risk decision.",
+  "summary": "Before a new supplier is onboarded, compliance wants three checks: is the company or an owner on a sanctions list, is there adverse news (fraud, corruption, serious proceedings), and who owns it. The lead agent reads the candidate's row and the checklist and hands the web research to a researcher agent, which uses the built-in keyless web search and page reader and reports, per check, a result (`clear`, `concern`, `hit`, `no_data`), one sentence and the URL of the page it rests on. The lead has the findings scored by fixed rules (`score_risk`: a sanctions hit is critical, a concern is high, a missing or uncited check is medium, otherwise low) and records the decision after a compliance officer approves it. The answer is a structured risk summary with the sources and the open items.",
+  "structure": "team: dd_lead delegates to web_researcher\nagents(tools): dd_lead(workspace.read_csv, workspace.read_file, score_risk, record_decision); web_researcher(builtin:web_search, builtin:fetch_url)\napprovals: record_decision"
+ },
+ {
+  "id": "weekly-management-report",
+  "kind": "use case",
+  "title": "weekly management report",
+  "description": "Weekly KPI report from SQL with variance explanations and a summary mail for approval.",
+  "summary": "Every Monday morning a schedule starts a two-step workflow. The analyst finds the reporting week (the last complete Monday-to-Sunday week), queries revenue, number of orders, gross margin and new customers for it and for the week before, compares them with the budget, and explains every flagged variance from the data: breakdowns by region and product with their amounts, and \"the data does not explain it\" when it does not. It also reports data problems it notices (here: orders without a region). The writer turns that into a short mail for management with a headline, a KPI table and one paragraph per variance. **The mail is sent only after a person approves it.**",
+  "structure": "workflow: kpi_analyst -> report_writer\nagents(tools): kpi_analyst(reporting_weeks, finance.query, variance_table); report_writer(send_report)\napprovals: send_report\ntriggers: weekly = schedule 0 7 * * MON, input 'Create the management report. Run date: {payload.date}.'"
+ },
+ {
+  "id": "content-production",
+  "kind": "recipe",
+  "title": "content production",
+  "description": "Turns marketing requests into edited, compliance-checked, published articles.",
+  "summary": "Marketing files a content request (blog post, social post, newsletter item). The strategist turns it into a brief: audience, key message, keywords, length, call to action. The writer drafts from the brief and the approved product facts only; the editor checks the draft against the brief and the brand guidelines and sends it back with numbered feedback until it is approved (at most three rounds). The compliance reviewer then checks the approved text against the marketing rules (no guarantees, figures with their basis, closing disclaimer, customer names only with consent), adds the mandatory disclaimer, and saves compliant content to the CMS as \"ready for publication\". The publisher publishes it once the content owner approves.",
+  "structure": "workflow: strategist -> () -> compliance_reviewer -> publisher\nagents(tools): strategist(get_content_request, get_brand_guidelines); writer(get_product_facts); editor(get_brand_guidelines, get_product_facts); compliance_reviewer(get_compliance_rules, get_product_facts, check_reference_consent, save_cms_draft); publisher(get_cms_draft, publish_article)\napprovals: publish_article"
+ },
+ {
+  "id": "contract-review",
+  "kind": "recipe",
+  "title": "contract review",
+  "description": "Reviews a contract against the legal, compliance and commercial playbooks.",
+  "summary": "Before a contract is signed, its owner asks for a review. Intake pulls the contract and the counterparty record and prepares a fact sheet. Legal (liability, indemnity, termination, governing law), compliance (data protection, data location, sub-processors, audit) and commercial (payment terms, price changes, renewal, contract value) review it at the same time, each against its own playbook, quoting the playbook's fallback redline for every gap. The editor merges the three reviews into one verdict: `sign`, `sign_with_changes` (every issue has a standard redline) or `escalate_to_legal` (a position outside the playbook), with findings numbered by priority (`cannot_review` when the contract is not in the repository). Nothing is signed or sent; the verdict goes to the contract owner.",
+  "structure": "workflow: intake -> (legal_reviewer | compliance_reviewer | commercial_reviewer) -> editor\nagents(tools): intake(get_contract, get_counterparty); legal_reviewer(get_contract, get_playbook); compliance_reviewer(get_contract, get_playbook); commercial_reviewer(get_contract, get_playbook); editor()"
+ },
+ {
+  "id": "customer-support-desk",
+  "kind": "recipe",
+  "title": "customer support desk",
+  "description": "Answers customer requests end to end, with specialists, refunds and human escalation.",
+  "summary": "Every customer message reaches triage first. Triage identifies the customer, recalls what the desk already knows about them, and answers how-to questions straight from the knowledge base. Billing, technical and order/returns conversations are handed to a specialist who owns the conversation until the topic changes, then hands it back. Duplicate charges and damaged items are refunded on the spot; refunds above 50.00 wait for a support lead. Customers who ask for a person, mention legal steps or keep coming back about the same problem are escalated to the human queue with a summary. Lasting facts (preferences, refunds, promises) are remembered for the next conversation.",
+  "structure": "team: triage delegates to billing_specialist, technical_specialist, returns_specialist\nagents(tools): triage(lookup_customer, search_knowledge_base, escalate_to_human); billing_specialist(lookup_invoices, issue_refund, escalate_to_human); technical_specialist(get_service_status, search_knowledge_base, escalate_to_human); returns_specialist(lookup_order, create_return_label, issue_refund, escalate_to_human)\napprovals: issue_refund when tools:refund_needs_approval"
+ },
+ {
+  "id": "deep-research",
+  "kind": "recipe",
+  "title": "deep research",
+  "description": "Researches a question on the web in parallel and delivers a report with checked citations.",
+  "summary": "Someone asks a research question that has several parts (\"Python, Java and Go: the year each first appeared and who designed it\"). The orchestrator `research_lead` splits it into up to four aspects and saves its plan on the shared blackboard, so the plan survives even when the orchestrator's conversation is shortened. One researcher per aspect then searches the open web and reads pages, all at the same time, and writes what it found to the blackboard: every finding is a claim with the page URL and a word-for-word quote. The lead reads the plan and the evidence again, writes a draft from the evidence only, and decides whether more research is needed: for a missing or thin aspect it sends researchers out again, at most two extra rounds. A separate citation agent then adds numbered citations: it cites a claim only when a quote states it and the quote was checked against the page; a claim without verified evidence is removed and listed as unsupported. A person approves saving the report, which is written to the `reports/` folder. The answer is structured: report, references, unsupported claims, open questions, rounds used and where it was saved.",
+  "structure": "team: research_lead delegates to researcher, citation_agent\nagents(tools): research_lead(workspace.write_file); researcher(builtin:web_search, builtin:fetch_url); citation_agent(builtin:verify_quote)\napprovals: connector:workspace.write_file"
+ },
+ {
+  "id": "employee-onboarding",
+  "kind": "recipe",
+  "title": "employee onboarding",
+  "description": "Plans and completes the onboarding of a new hire across IT, HR and facilities.",
+  "summary": "When HR marks a new hire as signed, the onboarding lead reads the hire's record and puts the whole onboarding on a shared task board, in dependency order: IT creates the accounts and raises the hardware purchase request; HR creates the payroll record (employees only) and assigns a buddy; facilities reserves a desk and then issues the badge (office-based hires only); and once accounts, buddy and desk exist, HR schedules the first week. Teammates pick up the tasks that match their capability as soon as they are ready and report the references back. The lead then sends the hiring manager a status summary and answers with a checklist that also lists what is still waiting for people (procurement's approval of the hardware, the payroll administrator's approval).",
+  "structure": "single agent\nagents(tools): onboarding_lead(get_new_hire, send_manager_summary); it_specialist(get_new_hire, create_accounts, order_hardware); hr_specialist(get_new_hire, create_payroll_record, assign_buddy, schedule_first_week); facilities_coordinator(get_new_hire, assign_desk, issue_badge)"
+ },
+ {
+  "id": "invoice-processing",
+  "kind": "recipe",
+  "title": "invoice processing",
+  "description": "Extracts, validates, policy-checks and books incoming supplier invoices.",
+  "summary": "A supplier invoice arrives in the accounts-payable (AP) inbox. Its fields are extracted exactly as printed, then two checks run in parallel: a three-way match against the purchase order, the goods receipt and the vendor master, and an AP policy check (duplicates, changed bank details, approval limits). A clean invoice is booked in the ERP and the vendor gets the pre-approved \"booked\" message; invoices above 10,000 EUR (or not in EUR) are booked only after an AP manager approves. Anything else goes to the AP exception queue with every reason, and the vendor is asked to act (for example, to issue a credit note) only after a human has read the message. The result is a structured record for the ledger and the audit trail.",
+  "structure": "team: ap_coordinator delegates to extractor, validator, policy_checker\nagents(tools): ap_coordinator(book_invoice, hold_invoice, notify_vendor); extractor(fetch_invoice_document); validator(get_vendor, get_purchase_order, get_goods_receipt); policy_checker(get_ap_policy, get_vendor, find_booked_invoices)\napprovals: book_invoice when tools:booking_needs_approval, notify_vendor when tools:vendor_note_needs_approval"
+ },
+ {
+  "id": "it-incident-triage",
+  "kind": "recipe",
+  "title": "IT incident triage",
+  "description": "Triages IT incidents, pages responders, diagnoses and communicates.",
+  "summary": "An alert from monitoring or a report from a colleague arrives. The incident commander looks the service up in the service catalog and sets the severity with a fixed matrix (SEV1: a tier-1 customer-facing service is down; SEV2: tier-1 degraded or tier-2 down; SEV3: internal or with a workaround). It opens the incident and, for SEV1 and SEV2, pages the owning on-call rotation; a SEV1 page also wakes the major-incident rotation and waits for the on-duty engineer to confirm. The diagnostics engineer checks metrics, logs and recent deploys and names the runbook step to run. For customer-facing SEV1/SEV2 incidents the communications lead drafts a public status update, which is posted only after approval. After resolution, the same desk writes the post-incident notes.",
+  "structure": "team: incident_commander delegates to diagnostics_engineer, communications_lead\nagents(tools): incident_commander(get_service, open_incident, get_incident, page_responders); diagnostics_engineer(get_service_health, query_logs, get_recent_deploys, lookup_runbook); communications_lead(get_incident, post_status_update, save_post_incident_notes)\napprovals: page_responders when tools:paging_needs_approval, post_status_update when tools:status_update_needs_approval"
+ },
+ {
+  "id": "lead-qualification",
+  "kind": "recipe",
+  "title": "lead qualification",
+  "description": "Researches and scores inbound leads, updates the CRM and drafts the first email.",
+  "summary": "An inbound lead lands in the CRM (demo request, webinar, newsletter). The SDR lead reads it; existing customers are routed straight to their account manager. For prospects, the company is researched (firmographics and news from the last six months) and scored against the ideal customer profile (ICP) rubric, criterion by criterion, with evidence. The score, tier and a summary are written back to the CRM, whose own rules then start nurture campaigns or sales follow-up. A and B leads get a short, personal first email that refers to something concrete about their company; a human reads and approves every email before it is sent.",
+  "structure": "team: sdr_lead delegates to researcher, qualifier\nagents(tools): sdr_lead(get_lead, update_crm_lead, send_lead_email); researcher(get_company_profile, search_company_news); qualifier(get_icp_rubric)\napprovals: send_lead_email"
+ },
+ {
+  "id": "market-research-report",
+  "kind": "recipe",
+  "title": "market research report",
+  "description": "Produces a sourced, reviewed market research report.",
+  "summary": "A product or strategy team asks a market question (\"predictive maintenance software for mid-sized manufacturers in DACH\"). The research lead plans the study on a task board: market research and competitor research run in parallel, the analyst turns their findings and the market statistics into figures and a labeled projection, the writer drafts the report, and the reviewer is instructed to check each claim against its source. If the review finds an unsourced or overstated claim, the writer revises once and the reviewer checks again. The approved report, with a source list, is saved to the knowledge base and returned. Missing data is to be reported as a gap, not estimated.",
+  "structure": "single agent\nagents(tools): research_lead(save_report_to_knowledge_base); market_researcher(search_sources, read_source); competitor_researcher(get_competitor_profiles, search_sources); analyst(get_market_statistics); writer(); reviewer(read_source)"
+ }
+]

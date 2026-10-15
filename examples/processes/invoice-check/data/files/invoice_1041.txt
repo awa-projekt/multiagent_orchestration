@@ -1,0 +1,7 @@
+Invoice RE-1041
+Supplier: ACME GmbH
+Date: 2026-09-30
+Lines:
+- A-100 Paper A4 (box of 5 reams), quantity 10, unit price 4.20
+- A-200 Toner cartridge, quantity 2, unit price 61.50
+Total: 165.00

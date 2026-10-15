@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. The trigger you added, in plain words below it.
+2. Run it now with a sample: nothing has to arrive.
+3. What such a file would carry: its name ...
+4. ... and its text.
+5. Runs the system once, for real, on this computer.

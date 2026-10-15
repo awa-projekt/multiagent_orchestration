@@ -1,0 +1,54 @@
+# Cases of benchmark scenario 2 (supplier order check). Exact numbers; decisions answer the
+# reschedule approvals. Expected values come from data/orders.csv and the public holidays of 2024
+# (Nager.Date): 11.11. is a holiday in PL and FR, 03.10. in DE, 16.11. is a Saturday, and 31.10.
+# (Reformationstag) is only a regional holiday in DE.
+name: supplier-orders
+cases:
+  - id: all-open-orders
+    input: Check the delivery dates of all open orders and ask for a reschedule where needed.
+    expected:
+      checked_orders: 7
+      flagged_orders: [B-1001, B-1002, B-1004, B-1005]
+      flagged_total_eur: 34511.25
+      rescheduled_orders: [B-1001, B-1002, B-1004, B-1005]
+      rejected: []
+    decisions:
+      - {action: approve, tool: request_reschedule, repeat: true}
+    tags: [rest, csv, approval]
+    scorers:
+      - json_fields
+      - tool:read_csv
+      - tool:holidays_public_holidays
+      - tool:check_delivery_date
+      - approval_granted:request_reschedule
+      - "judge:The answer lists the four flagged orders with the reason for each (public holiday or weekend) and the proposed business day."
+
+  - id: one-supplier-rejected
+    input: Check the open orders of Kowalski Stahl and ask for a reschedule where needed.
+    expected:
+      checked_orders: 2
+      flagged_orders: [B-1001, B-1004]
+      flagged_total_eur: 27650.0
+      rescheduled_orders: []
+      rejected: [B-1001, B-1004]
+    decisions:
+      - {action: reject, tool: request_reschedule, repeat: true, note: The supplier keeps the date.}
+    tags: [rest, csv, approval]
+    scorers:
+      - json_fields
+      - tool:holidays_public_holidays
+      - approval_rejected:request_reschedule
+
+  - id: regional-holiday-is-no-problem
+    input: Check order B-1006 and ask for a reschedule where needed.
+    expected:
+      checked_orders: 1
+      flagged_orders: []
+      flagged_total_eur: 0
+      rescheduled_orders: []
+      rejected: []
+    tags: [rest, csv, negative]
+    scorers:
+      - json_fields
+      - tool:holidays_public_holidays
+      - no_approval:request_reschedule

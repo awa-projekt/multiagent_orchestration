@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The run succeeded.
+2. The one command that keeps it running after you close this window.
+3. Copies the command.

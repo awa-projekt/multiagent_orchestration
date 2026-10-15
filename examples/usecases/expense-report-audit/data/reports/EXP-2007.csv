@@ -1,0 +1,3 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-10-01,hotel,Hotel am Rhein,1 night partner meeting,1,160.00,EXP-2007-1.pdf
+2,2026-10-01,train,Nordwind Rail,Berlin-Cologne return,1,340.01,EXP-2007-2.pdf

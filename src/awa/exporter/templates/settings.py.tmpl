@@ -1,0 +1,16 @@
+"""Settings of ${title}: the model and the limits of a run. Edit them here."""
+
+from __future__ import annotations
+
+import os
+from typing import Any
+
+MODEL = os.environ.get("MODEL", ${model})
+"""A `provider:model` id; the environment variable MODEL overrides it."""
+
+MODEL_KWARGS: dict[str, Any] = ${model_kwargs}
+"""Keyword arguments of the chat model (temperature, max_tokens, ...)."""
+
+MAX_STEPS = ${max_steps}
+"""Model calls one run may make; more raises ModelCallLimitExceededError."""
+${limits}

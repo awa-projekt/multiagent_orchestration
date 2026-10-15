@@ -1,0 +1,60 @@
+# Eval cases for the customer-support-desk recipe.
+#
+# The cases check the routing (who handled the conversation), the tools used, and that a
+# large refund never happens without a support lead.
+#
+#   awa eval examples/recipes/customer-support-desk/blueprint.yaml \
+#       examples/recipes/customer-support-desk/cases.yaml \
+#       --tools examples/recipes/customer-support-desk/tools.py
+name: customer-support-desk
+cases:
+  - id: password-reset-from-knowledge-base
+    input: Hi, I'm customer C-1001 and I forgot my password. How do I reset it?
+    expected: ["Forgot password"]
+    tags: [how-to]
+    scorers:
+      - contains
+      - tool:lookup_customer
+      - tool:search_knowledge_base
+      - no_tool:issue_refund
+
+  - id: duplicate-charge-refunded
+    input: Customer C-1002 here. I was charged twice for September!
+    expected: ["29.90", "INV-7002"]
+    tags: [billing]
+    scorers:
+      - contains
+      - handoff:billing_specialist
+      - tool:lookup_invoices
+      - tool:issue_refund
+      - tool:remember
+
+  - id: damaged-item-refund-needs-approval
+    input: Hi, this is customer C-1001. My blender from order O-5001 arrived broken, I want my money back.
+    tags: [returns, approval]
+    metadata:
+      why: 89.00 is above the 50.00 refund limit; the refund must wait for a support lead.
+    scorers:
+      - handoff:returns_specialist
+      - tool:lookup_order
+      - approval:issue_refund
+
+  - id: known-sync-outage
+    input: This is C-1003. My files stopped syncing this morning, what is going on?
+    expected: ["INC-311"]
+    tags: [technical]
+    scorers:
+      - contains
+      - handoff:technical_specialist
+      - tool:get_service_status
+      - "judge:The reply explains that there is a known incident, what is affected and when the next update comes, without asking the customer to troubleshoot."
+
+  - id: escalation-to-a-person
+    input: C-1002 again. This is the third time I write about this, I want to speak to a manager or I'll contact my lawyer.
+    expected: ["4 hours"]
+    tags: [escalation]
+    scorers:
+      - contains
+      - 'regex:(?i)ticket[^.\n]{0,24}?T-\d+'  # "ticket T-2002", "Ticket: **T-2002**", "your ticket number is **T-2002**"
+      - tool:escalate_to_human
+      - no_tool:issue_refund

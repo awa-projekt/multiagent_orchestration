@@ -1,0 +1,42 @@
+// Markdown style rules for awa (read by markdownlint-cli2 and the editor extension).
+// The docs are built with MkDocs Material; the settings below follow its conventions.
+{
+  "config": {
+    "default": true,
+    // Prose is written one sentence or paragraph per line; MkDocs wraps it.
+    "MD013": false,
+    // Keep a Changelog repeats "Added", "Fixed" ... under each version.
+    "MD024": { "siblings_only": true },
+    // Content of admonitions (!!!) and content tabs (===) is indented, which the
+    // rule reads as indented code blocks; every code block itself is fenced.
+    "MD046": false,
+    // Commands carry a `$` prompt so that readers tell input from output.
+    "MD014": false,
+    // Python-Markdown (MkDocs) needs four spaces for a nested list.
+    "MD007": { "indent": 4 },
+    // Numbered steps continue after a code block between them (2., 3. ...).
+    "MD029": false,
+    // Material grid cards are written as "-   **Title**" with content indented to match.
+    "MD030": false,
+    // Anchors set with attr_list ({ #id }) are checked by `mkdocs build --strict`
+    // and the docs tests; this rule does not see them.
+    "MD051": false,
+    // HTML is used only for these layout elements.
+    "MD033": { "allowed_elements": ["div", "details", "summary", "br", "img", "span", "kbd", "sup"] }
+  },
+  "overrides": [
+    {
+      // Skill files are instructions for agents: `<placeholder>` marks a field the agent
+      // fills in. Kept here, not in a file next to the skills, so it does not ship in the wheel.
+      "filter": ["src/awa/skills/**"],
+      "combine": "merge",
+      "config": { "MD033": false }
+    }
+  ],
+  "ignores": [
+    "**/node_modules/**",
+    ".venv*/**",
+    "site/**",
+    "dist/**"
+  ]
+}

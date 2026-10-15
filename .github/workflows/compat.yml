@@ -1,0 +1,72 @@
+# Upstream compatibility (docs/about/stability.md, Python, LangChain and LangGraph): the tests against the
+# lowest and the newest allowed versions of all dependencies, pre-releases, and LangChain and
+# LangGraph from their main branches. Nightly and by hand; ci.yml calls it for compat-latest
+# alone on every pull request and on main. compat-prerelease and compat-upstream-main are
+# reported, not blocking.
+
+name: Upstream compatibility
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      only-latest:
+        description: Run compat-latest only.
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUTF8: "1"
+  UV_LINK_MODE: copy
+  HYPOTHESIS_PROFILE: ci
+
+jobs:
+  compat:
+    name: compat-${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    continue-on-error: ${{ matrix.name == 'prerelease' || matrix.name == 'upstream-main' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: >-
+          ${{ inputs.only-latest && fromJSON('["latest"]')
+          || fromJSON('["lowest", "latest", "prerelease", "upstream-main"]') }}
+    env:
+      PYTHON_VERSION: ${{ matrix.name == 'lowest' && '3.11' || '3.13' }}
+      RESOLUTION: >-
+        ${{ fromJSON('{"lowest": "--resolution lowest-direct", "latest": "--upgrade",
+        "prerelease": "--upgrade --prerelease allow", "upstream-main": ""}')[matrix.name] }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.11.3"
+      - name: Install awa with the upstream versions of this job
+        run: |
+          uv venv .venv-compat --python "${{ steps.python.outputs.python-path }}"
+          uv pip install --python .venv-compat/bin/python $RESOLUTION -e ".[dev]"
+      - name: Install LangChain and LangGraph from their main branches
+        if: matrix.name == 'upstream-main'
+        run: >-
+          uv pip install --python .venv-compat/bin/python
+          "langchain-core @ git+https://github.com/langchain-ai/langchain#subdirectory=libs/core"
+          "langchain @ git+https://github.com/langchain-ai/langchain#subdirectory=libs/langchain_v1"
+          "langgraph @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/langgraph"
+          "langgraph-prebuilt @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/prebuilt"
+          "langgraph-checkpoint @ git+https://github.com/langchain-ai/langgraph#subdirectory=libs/checkpoint"
+      - run: >-
+          .venv-compat/bin/python -c "import json, awa._internal.upstream as u;
+          print(json.dumps(u.upstream_versions(), indent=2))"
+      - run: .venv-compat/bin/python -m pytest -q tests/upstream
+      - run: .venv-compat/bin/python -m pytest -q -n 2

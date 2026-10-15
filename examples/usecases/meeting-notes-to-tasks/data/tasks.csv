@@ -1,0 +1,4 @@
+task_id,title,owner,due_date,status,meeting_id
+TASK-101,Prepare Q4 roadmap draft,Anna Keller,2026-10-09,open,MTG-300
+TASK-102,Fix login timeout bug,Ben Vogt,2026-10-07,open,MTG-300
+TASK-103,Collect customer quotes for the launch page,Eva Lindqvist,2026-09-30,done,MTG-300

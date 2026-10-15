@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-03",
+  "items": [
+    {
+      "topic": "gdpr",
+      "title": "Data protection authority fines a retailer for unlawful tracking",
+      "url": "https://news.example.org/gdpr/retailer-tracking-fine",
+      "summary": "Fine of 1.2 million EUR for cookies set before consent."
+    },
+    {
+      "topic": "nis2",
+      "title": "Germany passes its NIS2 implementation act",
+      "url": "https://news.example.org/nis2/germany-implementation",
+      "summary": "Registration with the BSI is required within three months."
+    },
+    {
+      "topic": "csrd",
+      "title": "Omnibus package: first CSRD reporting year postponed",
+      "url": "https://news.example.org/csrd/first-reporting-year-postponed",
+      "summary": "Companies of the second group report one year later."
+    }
+  ]
+}

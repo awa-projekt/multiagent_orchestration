@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. Python is found and new enough.
+2. No key yet. You enter it in step 2.
+3. The last line says whether awa is usable.

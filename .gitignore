@@ -1,0 +1,50 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+
+# environments and secrets (only .env.example is committed)
+.venv/
+.venv.*/
+.venv-dev/
+.env
+.env.*
+!.env.example
+
+# caches and test output
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.import_linter_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+.langgraph_api/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# run state and artifacts awa writes next to a project
+.awa/
+.awa_artifacts/
+
+# results the use cases write when they run (restore the sample data with make_data.py)
+examples/usecases/*/data/outbox/
+
+# build output and tool caches
+site/
+.cache/
+
+# copies the Microsoft examples download while they run (the folder ships with a README)
+examples/microsoft/*/*/data/*
+!examples/microsoft/*/*/data/README.md
+
+# What example runs write (outboxes, drafts, reports); generated, never committed
+examples/**/out/
+examples/recipes/deep-research/reports/*
+!examples/recipes/deep-research/reports/README.md
+
+# profiler output
+*.out

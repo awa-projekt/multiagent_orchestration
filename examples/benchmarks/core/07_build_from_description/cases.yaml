@@ -1,0 +1,27 @@
+# Case of benchmark scenario 7 (template to application): `awa build` writes a project from a
+# plain-language description of the document-intake process of scenario 4, then the project is
+# validated and run from its own folder.
+#
+# `input` is the description handed to the builder; `scorers` name the checks of the driver
+# (benchmarks/core/harness.py): the build reached its pass rate, the written project validates,
+# the approval above the limit is part of the design, and the project answers a case of its own.
+# The report also records the rounds, the pass rate and why the build stopped.
+name: build-from-description
+cases:
+  - id: document-intake-process
+    input: >-
+      Supplier invoices arrive as PDF, Word or Excel files in an inbox folder. For each document
+      the clerk extracts the vendor, the invoice number, the net, tax and gross amounts and the
+      due date, checks the vendor against the vendor master and the amounts against the purchase
+      order (net plus tax must equal gross; the invoice may exceed the order by at most 2 %). A
+      clean invoice is booked in the ERP; an invoice above 10,000 EUR is booked only after a
+      manager has approved it. An invoice that fails a check is put on hold with the reason.
+    metadata:
+      max_rounds: 3
+      approval_limit: 10000
+    tags: [build, template]
+    scorers:
+      - build_passed
+      - project_validates
+      - approval_in_design
+      - project_runs

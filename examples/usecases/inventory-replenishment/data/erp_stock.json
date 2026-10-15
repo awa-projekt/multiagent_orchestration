@@ -1,0 +1,34 @@
+{
+  "items": [
+    {
+      "sku": "BRG-6204",
+      "on_hand": 120,
+      "on_order": 0
+    },
+    {
+      "sku": "HYD-HOSE-12",
+      "on_hand": -4,
+      "on_order": 0
+    },
+    {
+      "sku": "MOT-AC-750",
+      "on_hand": 12,
+      "on_order": 0
+    },
+    {
+      "sku": "GSK-KIT-A",
+      "on_hand": 15,
+      "on_order": 0
+    },
+    {
+      "sku": "FLT-OIL-3",
+      "on_hand": 150,
+      "on_order": 100
+    },
+    {
+      "sku": "XTR-77",
+      "on_hand": 3,
+      "on_order": 0
+    }
+  ]
+}

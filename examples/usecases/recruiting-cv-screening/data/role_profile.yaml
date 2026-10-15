@@ -1,0 +1,12 @@
+# Role profile. The score is the sum of the points of these criteria, nothing else.
+role_id: R-100
+title: Data Engineer
+location: Berlin (hybrid) or remote in the EU
+shortlist_from: 60            # total points; every required criterion must be met as well
+criteria:
+  - {id: python, label: Python, type: skill, aliases: [python], points: 25, required: true}
+  - {id: sql, label: SQL, type: skill, aliases: [sql, postgresql, mysql], points: 20, required: true}
+  - {id: cloud, label: Cloud data platform, type: skill, aliases: [aws, azure, gcp, google cloud], points: 15}
+  - {id: orchestration, label: Workflow orchestration, type: skill, aliases: [airflow, dagster, prefect], points: 10}
+  - {id: experience, label: Professional experience in data engineering, type: years, min_years: 3, full_years: 5, points: 20}
+  - {id: english, label: English, type: language, aliases: [english], points: 10}

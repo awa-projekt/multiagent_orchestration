@@ -1,0 +1,84 @@
+# Supplier order check: an order file (German CSV) against a public REST API.
+#
+# The buyer's open orders have a requested delivery date. The check asks the public holidays
+# API (keyless, https://date.nager.at) for the supplier's country, flags every order whose date
+# is a weekend or a nationwide holiday there, and asks the buyer to approve a reschedule to the
+# next business day.
+#
+#   awa validate examples/benchmarks/core/02_supplier_orders/blueprint.yaml \
+#       --tools examples/benchmarks/core/02_supplier_orders/tools.py
+name: supplier-orders
+description: Flags supplier orders whose delivery date falls on a weekend or public holiday.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 14
+
+toolkits:
+  files: {root: ./data}
+
+connectors:
+  holidays:
+    use: rest
+    base_url: https://date.nager.at/api/v3
+    auth: none
+    operations:
+      - name: public_holidays
+        description: >-
+          Public holidays of a country in a year. Each has a date, a name and `global`: true for
+          a nationwide holiday, false for one that only applies in some regions.
+        path: /PublicHolidays/{year}/{country}
+        params:
+          - {name: year, description: "Year, e.g. 2024.", in: path}
+          - {name: country, description: "Two-letter country code, e.g. DE.", in: path}
+
+agents:
+  - name: order_checker
+    description: Checks open supplier orders against public holidays and asks for reschedules.
+    instructions: |
+      You check the open supplier orders of orders.csv (German CSV: ';' separated, amounts like
+      "4.250,00", dates like 11.11.2024; the status "storniert" means cancelled: ignore those).
+      1. Read orders.csv with read_csv and pick the orders the request asks for.
+      2. For each country and year of those orders, call holidays_public_holidays once.
+      3. For each order call check_delivery_date with its delivery date as YYYY-MM-DD and only
+         the dates of holidays whose `global` is true (a regional holiday does not count).
+      4. For every order that is not ok, call request_reschedule with the order number, the
+         next business day and a one-sentence reason. When a request is rejected, do not ask
+         again; list the order under rejected.
+      Answer with the result: orders in ascending order number, amounts as plain numbers in
+      EUR (4250.00, not "4.250,00"), and in `flags` for every flagged order the reason (the
+      holiday's name or "weekend") and the proposed business day.
+    tools:
+      - builtin:read_csv
+      - connector:holidays.public_holidays
+      - check_delivery_date
+      - request_reschedule
+    output_schema:
+      type: object
+      properties:
+        checked_orders: {type: integer, description: Open orders that were checked.}
+        flagged_orders:
+          type: array
+          items: {type: string}
+          description: Order numbers whose date is a weekend or a nationwide holiday.
+        flagged_total_eur: {type: number, description: Sum of the flagged orders' amounts.}
+        rescheduled_orders:
+          type: array
+          items: {type: string}
+          description: Flagged orders whose reschedule request was approved.
+        rejected: {type: array, items: {type: string}}
+        flags:
+          type: array
+          description: One entry per flagged order, with why it is flagged and the proposed day.
+          items:
+            type: object
+            properties:
+              order_no: {type: string}
+              reason: {type: string, description: "Public holiday (name) or weekend."}
+              proposed_date: {type: string, description: Next business day as YYYY-MM-DD.}
+            required: [order_no, reason, proposed_date]
+      required: [checked_orders, flagged_orders, flagged_total_eur, rescheduled_orders, rejected, flags]
+
+approvals:
+  - tool: request_reschedule

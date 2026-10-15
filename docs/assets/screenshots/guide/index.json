@@ -1,0 +1,333 @@
+{
+  "a01-doctor": {
+    "marks": [
+      "Python is found and new enough.",
+      "No key yet. You enter it in step 2.",
+      "The last line says whether awa is usable."
+    ],
+    "size": [
+      942,
+      1063
+    ]
+  },
+  "a02-setup": {
+    "marks": [
+      "The card of your AI provider. A click opens it.",
+      "Paste your key here. What you type is hidden.",
+      "Optional: the model to use. Leave it empty for awa's default."
+    ],
+    "size": [
+      864,
+      975
+    ]
+  },
+  "a03-add-system": {
+    "marks": [
+      "The question. What you type stays hidden.",
+      "awa made one small, read-only call to the ledger.",
+      "The structure awa read: the table and its columns, no rows.",
+      "The tools the agents get: they can read the ledger, not change it."
+    ],
+    "size": [
+      942,
+      264
+    ]
+  },
+  "a03-data": {
+    "marks": [
+      "Hides names, IBANs and the like from the AI model. You still see everything.",
+      "Drop your files here, or press Choose files. Your originals are never changed.",
+      "Every file is copied into your project.",
+      "One card per file: what it is and what awa found in it, in plain words.",
+      "A note in your own words: what should happen with this file."
+    ],
+    "size": [
+      1280,
+      2359
+    ]
+  },
+  "a03-inspect": {
+    "marks": [
+      "The count: files, tables, rows, warnings and errors.",
+      "One line for each file: what it is and what awa read.",
+      "A column of the purchase orders. awa found that it holds decimal numbers."
+    ],
+    "size": [
+      942,
+      478
+    ]
+  },
+  "a03-systems": {
+    "marks": [
+      "The ledger, under the name you gave it.",
+      "Live: the design reads the real ledger, read-only.",
+      "What awa read: the table and its columns. No rows.",
+      "Where the address is saved: in .env, never shown again."
+    ],
+    "size": [
+      864,
+      381
+    ]
+  },
+  "a03-systems-test": {
+    "marks": [
+      "The kind of system: here a SQL database. The list comes from awa's catalog.",
+      "Your name for it. The design and the data map use this name.",
+      "Which database. For a file: SQLite.",
+      "Where it is: for a file its path, for a server its address. Hidden.",
+      "One small, read-only call. Nothing is saved yet.",
+      "The result of the test, in plain words."
+    ],
+    "size": [
+      864,
+      712
+    ]
+  },
+  "a04-build": {
+    "marks": [
+      "awa writes the tests first and then designs the system.",
+      "It runs every eval case on sample data.",
+      "Where each source of data comes from, in plain words.",
+      "Your ledger: live, read through the SQL connector, read-only.",
+      "The exact technical names, for your IT team."
+    ],
+    "size": [
+      942,
+      693
+    ]
+  },
+  "a04-describe-after": {
+    "marks": [
+      "The five steps of the build. Each one is ticked when it is done.",
+      "Every eval case and whether it passes.",
+      "The result in plain words: what was built and what passes.",
+      "Where the data comes from: your ledger is live.",
+      "Opens the next step, Review.",
+      "The technical details, for your IT team."
+    ],
+    "size": [
+      1280,
+      2452
+    ]
+  },
+  "a04-describe-before": {
+    "marks": [
+      "Your files and your ledger from step 3. \u00d7 takes one out.",
+      "Your description, in your own words.",
+      "Leave this on: awa tests and repairs the design.",
+      "Starts the build."
+    ],
+    "size": [
+      1280,
+      1364
+    ]
+  },
+  "a05-review": {
+    "marks": [
+      "How the work flows: the checker hands over to the clerk.",
+      "A tool that asks you first: it waits for a person.",
+      "The ledger is live: the design reads your real ledger.",
+      "Per agent: what it reads and writes, and with which tool.",
+      "The eval cases: each with its input and what it expects."
+    ],
+    "size": [
+      1280,
+      1985
+    ]
+  },
+  "a05-show": {
+    "marks": [
+      "The invoice checker. Its only tool reads the ledger.",
+      "The payment clerk. Its tool finance_approval needs a person.",
+      "The order of the work: the checker first, then the clerk.",
+      "The steps that wait for a person."
+    ],
+    "size": [
+      942,
+      361
+    ]
+  },
+  "a06-connect": {
+    "marks": [
+      "How many systems are live, and how many work on a stand-in.",
+      "Live: the ledger you added in step 3.",
+      "Why: it was declared under Your data."
+    ],
+    "size": [
+      1280,
+      1026
+    ]
+  },
+  "a06-nothing": {
+    "marks": [
+      "Every system is live already: nothing works on a stand-in."
+    ],
+    "size": [
+      942,
+      108
+    ]
+  },
+  "a07-eval": {
+    "marks": [
+      "The share of eval cases that passed.",
+      "The case with 7,450 EUR: the approval was asked for and answered."
+    ],
+    "size": [
+      942,
+      1122
+    ]
+  },
+  "a07-test": {
+    "marks": [
+      "Runs every eval case.",
+      "The result: all eval cases passed.",
+      "What the case sends. Change it to use other files.",
+      "The files this case uses, found in its text.",
+      "Saves the change in evals/cases.yaml and runs only this case.",
+      "The result of this case."
+    ],
+    "size": [
+      1280,
+      2200
+    ]
+  },
+  "a08-chat": {
+    "marks": [
+      "The system stops. It shows the step and its exact values.",
+      "You answer. y approves; anything else says no.",
+      "An invoice that was paid is not paid twice."
+    ],
+    "size": [
+      942,
+      517
+    ]
+  },
+  "a08-try-answer": {
+    "marks": [
+      "The step ran after your OK.",
+      "Your decision stays in the conversation.",
+      "The answer."
+    ],
+    "size": [
+      864,
+      472
+    ]
+  },
+  "a08-try-approval": {
+    "marks": [
+      "Example requests from your eval cases. A click fills the box.",
+      "Every step the system takes, in plain words.",
+      "What will happen, the exact values, and why you are asked.",
+      "Approve: lets it go ahead.",
+      "Say no: stops the step. You can leave a note."
+    ],
+    "size": [
+      1280,
+      1439
+    ]
+  },
+  "a09-trigger": {
+    "marks": [
+      "The trigger that awa wrote into blueprint.yaml.",
+      "A run that starts by itself needs a budget (limits).",
+      "The command that starts the automation."
+    ],
+    "size": [
+      942,
+      537
+    ]
+  },
+  "a09-trigger-form": {
+    "marks": [
+      "What starts the run: a file that appears in a folder.",
+      "The folder to watch.",
+      "Which files count.",
+      "What each run is asked. {payload.name} and {payload.text} come from the file.",
+      "Writes the trigger into blueprint.yaml."
+    ],
+    "size": [
+      856,
+      706
+    ]
+  },
+  "a09-trigger-sample": {
+    "marks": [
+      "The trigger you added, in plain words below it.",
+      "Run it now with a sample: nothing has to arrive.",
+      "What such a file would carry: its name ...",
+      "... and its text.",
+      "Runs the system once, for real, on this computer."
+    ],
+    "size": [
+      856,
+      538
+    ]
+  },
+  "a09-worker": {
+    "marks": [
+      "Where awa keeps the runs and the waiting approvals.",
+      "The run stopped at the approval. Its id starts with proc_."
+    ],
+    "size": [
+      942,
+      147
+    ]
+  },
+  "a10-approvals": {
+    "marks": [
+      "The waiting run and the trigger that started it.",
+      "What it wants to do, with the exact values.",
+      "Approve. The decision is saved in the project folder."
+    ],
+    "size": [
+      880,
+      669
+    ]
+  },
+  "a10-trace": {
+    "marks": [
+      "What the whole run used.",
+      "The checker looked the invoice up in the ledger.",
+      "Who approved, and how long the run waited."
+    ],
+    "size": [
+      942,
+      439
+    ]
+  },
+  "a10-use-it-done": {
+    "marks": [
+      "The run succeeded.",
+      "The one command that keeps it running after you close this window.",
+      "Copies the command."
+    ],
+    "size": [
+      864,
+      645
+    ]
+  },
+  "a10-use-it-waiting": {
+    "marks": [
+      "Is it running? Nothing runs by itself until you start a worker.",
+      "The run waits for your OK. It is the same card as on Try it.",
+      "Approve.",
+      "The trigger and what starts it."
+    ],
+    "size": [
+      880,
+      1273
+    ]
+  },
+  "b03-systems": {
+    "marks": [
+      "The system, and whether it is set up.",
+      "Opens the fields. Fill in only the systems your process uses.",
+      "The address of the system.",
+      "The key. What you type is hidden."
+    ],
+    "size": [
+      298,
+      698
+    ]
+  }
+}

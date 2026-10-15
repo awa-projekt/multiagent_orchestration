@@ -1,0 +1,51 @@
+# Cases of benchmark scenario 1 (market brief). Deterministic scorers first, the judge last.
+# `metadata.checks` names code scorers from scorers.py.
+#
+#   python examples/benchmarks/core/run.py --only 1 --live
+name: market-brief
+cases:
+  - id: linux-distributions
+    input: >-
+      Brief on the Linux distributions Debian, Ubuntu and Fedora: the year of the first release
+      of each. Cite the page of every fact.
+    expected:
+      items.0.name: Debian
+      items.0.year: 1993
+      items.1.name: Ubuntu
+      items.1.year: 2004
+      items.2.name: Fedora
+      items.2.year: 2003
+    tags: [web, research]
+    metadata: {checks: [quotes_grounded, peer_consulted]}
+    scorers:
+      - json_fields
+      - delegated:researcher
+      - delegated:analyst
+      - delegated:writer
+      - tool:web_search
+      - tool:fetch_url
+      - regex:https?://\S+
+      - "judge:Every item states a year and names the page it comes from, and the executive summary mentions all three distributions without a claim that the quoted evidence does not support."
+
+  - id: programming-languages
+    input: >-
+      Brief on the programming languages Python, Java and Go: the year each first appeared. Cite
+      the page of every fact.
+    expected:
+      items.0.name: Python
+      items.0.year: 1991
+      items.1.name: Java
+      items.1.year: 1995
+      items.2.name: Go
+      items.2.year: 2009
+    tags: [web, research]
+    metadata: {checks: [quotes_grounded, peer_consulted]}
+    scorers:
+      - json_fields
+      - delegated:researcher
+      - delegated:analyst
+      - delegated:writer
+      - tool:web_search
+      - tool:fetch_url
+      - regex:https?://\S+
+      - "judge:Every item states a year and names the page it comes from, and the executive summary mentions all three languages without a claim that the quoted evidence does not support."

@@ -1,0 +1,38 @@
+# The judge example of the agent spec (docs/develop/agent-spec.md): `judges:` is set on the judge.
+format_version: awa/v1
+name: invoice_process_judged
+description: Checks supplier invoices before payment, with a judge.
+toolkits:
+  data:
+    root: data
+data:
+  - {name: invoice, path: data/invoice.csv, role: input, description: The supplier invoice.}
+  - {name: price_list, path: data/price_list.csv, role: reference, description: Agreed unit prices.}
+limits: {max_requests: 40}
+agents:
+  - name: invoice_process_lead
+    role: orchestrator
+    description: Runs the invoice check. Entry point for each new invoice.
+    sub_agents: [check_invoice]
+  - name: check_invoice
+    role: worker
+    description: Checks supplier invoices against the price list. Use for every incoming supplier invoice.
+    goal: Decide for each invoice line whether the price matches the price list.
+    system:
+      output: "Per line: article, status (ok, deviation or missing_reference) and both prices."
+    documents: [invoice, price_list]
+    tools: [builtin:query_csv]
+  - name: check_invoice_judge
+    role: judge
+    judges: check_invoice
+    model: fast
+    description: Verifies check_invoice results against the source files. Use after every invoice check.
+    goal: Accept the check only if every rubric item passes.
+    system:
+      tools_in_step: "Use `read_csv` to re-read only rows marked ok that show a price difference."
+    tools:
+      - "builtin:read_csv"
+    rubric:
+      - Every invoice line has exactly one status.
+      - Each deviation states order price and invoice price.
+    max_steps: 10

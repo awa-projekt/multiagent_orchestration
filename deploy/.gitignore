@@ -1,0 +1,6 @@
+# Real values and key material stay on the host that runs the stack.
+.env
+*.env
+certs/
+ca/*.crt
+project/

@@ -1,0 +1,185 @@
+# The local services of one awa project: PostgreSQL (profile db) and Langfuse (profile tracing).
+# awa setup copies this file to .awa/compose.services.yaml and fills in __PROJECT__ (the Compose
+# project name), __PROJECT_ID__, __DB_PORT__ and __TRACING_PORT__. Every published port is bound
+# to 127.0.0.1; passwords come from the project .env (--env-file) as ${VAR} references only.
+# Images are pinned to exact versions, as in Langfuse's own docker-compose.yml; MinIO is pinned
+# by digest because it has no version tags.
+name: "__PROJECT__"
+
+x-labels: &labels
+  io.awa.managed: "true"
+  io.awa.project: "__PROJECT_ID__"
+
+x-langfuse-depends: &langfuse-depends
+  langfuse-db: {condition: service_healthy}
+  clickhouse: {condition: service_healthy}
+  redis: {condition: service_healthy}
+  minio: {condition: service_healthy}
+
+x-langfuse-env: &langfuse-env
+  NEXTAUTH_URL: http://localhost:__TRACING_PORT__
+  DATABASE_URL: postgresql://langfuse:${AWA_SETUP_LANGFUSE_DB_PASSWORD}@langfuse-db:5432/langfuse
+  SALT: ${AWA_SETUP_LANGFUSE_SALT}
+  ENCRYPTION_KEY: ${AWA_SETUP_LANGFUSE_ENCRYPTION_KEY}
+  TELEMETRY_ENABLED: "false"
+  CLICKHOUSE_MIGRATION_URL: clickhouse://clickhouse:9000
+  CLICKHOUSE_URL: http://clickhouse:8123
+  CLICKHOUSE_USER: clickhouse
+  CLICKHOUSE_PASSWORD: ${AWA_SETUP_LANGFUSE_CLICKHOUSE_PASSWORD}
+  CLICKHOUSE_CLUSTER_ENABLED: "false"
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_AUTH: ${AWA_SETUP_LANGFUSE_REDIS_PASSWORD}
+  LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse
+  LANGFUSE_S3_EVENT_UPLOAD_REGION: auto
+  LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: minio
+  LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${AWA_SETUP_LANGFUSE_MINIO_PASSWORD}
+  LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://minio:9000
+  LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+  LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+  LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse
+  LANGFUSE_S3_MEDIA_UPLOAD_REGION: auto
+  LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: minio
+  LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${AWA_SETUP_LANGFUSE_MINIO_PASSWORD}
+  LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://minio:9000
+  LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
+  LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+
+services:
+  postgres:
+    image: postgres:17.11
+    profiles: [db]
+    environment:
+      POSTGRES_USER: awa
+      POSTGRES_PASSWORD: ${AWA_SETUP_DB_PASSWORD}
+      POSTGRES_DB: awa
+    ports: ["127.0.0.1:__DB_PORT__:5432"]
+    volumes: ["awa_db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U awa -d awa"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    labels: *labels
+    restart: unless-stopped
+
+  langfuse-web:
+    image: langfuse/langfuse:4.53.0
+    profiles: [tracing]
+    depends_on: *langfuse-depends
+    environment:
+      <<: *langfuse-env
+      NEXTAUTH_SECRET: ${AWA_SETUP_LANGFUSE_NEXTAUTH_SECRET}
+      LANGFUSE_INIT_ORG_ID: local-org
+      LANGFUSE_INIT_ORG_NAME: local
+      LANGFUSE_INIT_PROJECT_ID: awa-local
+      LANGFUSE_INIT_PROJECT_NAME: awa local
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_INIT_USER_EMAIL: ${AWA_SETUP_LANGFUSE_ADMIN_EMAIL}
+      LANGFUSE_INIT_USER_NAME: admin
+      LANGFUSE_INIT_USER_PASSWORD: ${AWA_SETUP_LANGFUSE_ADMIN_PASSWORD}
+    ports: ["127.0.0.1:__TRACING_PORT__:3000"]
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://localhost:3000/api/public/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+    labels: *labels
+    restart: unless-stopped
+
+  langfuse-worker:
+    image: langfuse/langfuse-worker:4.53.0
+    profiles: [tracing]
+    depends_on: *langfuse-depends
+    environment: *langfuse-env
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://localhost:3030/api/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+    labels: *labels
+    restart: unless-stopped
+
+  langfuse-db:
+    image: postgres:17.11
+    profiles: [tracing]
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: ${AWA_SETUP_LANGFUSE_DB_PASSWORD}
+      POSTGRES_DB: langfuse
+      TZ: UTC
+      PGTZ: UTC
+    volumes: ["awa_langfuse_db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse -d langfuse"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    labels: *labels
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.12.11.4
+    profiles: [tracing]
+    user: "101:101"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: clickhouse
+      CLICKHOUSE_PASSWORD: ${AWA_SETUP_LANGFUSE_CLICKHOUSE_PASSWORD}
+    volumes:
+      - awa_clickhouse_data:/var/lib/clickhouse
+      - awa_clickhouse_logs:/var/log/clickhouse-server
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    labels: *labels
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4.11
+    profiles: [tracing]
+    command: ["--requirepass", "${AWA_SETUP_LANGFUSE_REDIS_PASSWORD}", "--maxmemory-policy", "noeviction"]
+    volumes: ["awa_redis:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", 'redis-cli -a "$$REDIS_PASSWORD" ping | grep PONG']
+      interval: 3s
+      timeout: 5s
+      retries: 20
+    environment:
+      REDIS_PASSWORD: ${AWA_SETUP_LANGFUSE_REDIS_PASSWORD}
+    labels: *labels
+    restart: unless-stopped
+
+  minio:
+    image: cgr.dev/chainguard/minio@sha256:e7ca559d9f7c0b5f24f5f669bb92f40f3ca88d56273b808bf3a7c116c17d2ffa
+    profiles: [tracing]
+    entrypoint: sh
+    command: ["-c", 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data']
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: ${AWA_SETUP_LANGFUSE_MINIO_PASSWORD}
+    volumes: ["awa_minio:/data"]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    labels: *labels
+    restart: unless-stopped
+
+volumes:
+  awa_db: {labels: *labels}
+  awa_langfuse_db: {labels: *labels}
+  awa_clickhouse_data: {labels: *labels}
+  awa_clickhouse_logs: {labels: *labels}
+  awa_redis: {labels: *labels}
+  awa_minio: {labels: *labels}

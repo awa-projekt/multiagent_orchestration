@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. The invoice checker. Its only tool reads the ledger.
+2. The payment clerk. Its tool finance_approval needs a person.
+3. The order of the work: the checker first, then the clerk.
+4. The steps that wait for a person.

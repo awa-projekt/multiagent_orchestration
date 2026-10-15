@@ -1,0 +1,34 @@
+{
+  "support": {
+    "sla_hours": {
+      "urgent": 2,
+      "normal": 24,
+      "low": 72
+    },
+    "lead": "support-lead@example.com"
+  },
+  "billing": {
+    "sla_hours": {
+      "urgent": 4,
+      "normal": 24,
+      "low": 72
+    },
+    "lead": "billing-lead@example.com"
+  },
+  "sales": {
+    "sla_hours": {
+      "urgent": 8,
+      "normal": 48,
+      "low": 96
+    },
+    "lead": "sales-lead@example.com"
+  },
+  "security": {
+    "sla_hours": {
+      "urgent": 1,
+      "normal": 8,
+      "low": 24
+    },
+    "lead": "security@example.com"
+  }
+}

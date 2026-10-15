@@ -1,0 +1,5 @@
+cost_center,name,owner,annual_budget_eur,spent_eur,committed_eur
+CC-100,Engineering,Maya Brandt,120000,81000,22000
+CC-200,Facilities,Jonas Weber,40000,31500,2000
+CC-300,Marketing,Lea Hoffmann,30000,29200,0
+CC-400,Sales,Omar Haddad,60000,20000,5000

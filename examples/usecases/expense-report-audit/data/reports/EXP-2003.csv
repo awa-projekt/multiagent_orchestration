@@ -1,0 +1,4 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-09-18,train,Transalpe Rail,Paris-Lyon,1,120.00,EXP-2003-1.pdf
+2,2026-09-18,meals,Bouchon Lyonnais,Lunch with workshop team,1,148.50,EXP-2003-2.pdf
+3,2026-09-19,office,Papeterie Lumiere,Flipchart paper,1,23.90,

@@ -1,0 +1,44 @@
+{
+  "deliveries": [
+    {
+      "order": "B-2001",
+      "supplier": "Nordwind GmbH",
+      "days_late": 0
+    },
+    {
+      "order": "B-2002",
+      "supplier": "Nordwind GmbH",
+      "days_late": 2
+    },
+    {
+      "order": "B-2003",
+      "supplier": "Alpha Logistik",
+      "days_late": 5
+    },
+    {
+      "order": "B-2004",
+      "supplier": "Alpha Logistik",
+      "days_late": 8
+    },
+    {
+      "order": "B-2005",
+      "supplier": "Alpha Logistik",
+      "days_late": 6
+    },
+    {
+      "order": "B-2006",
+      "supplier": "Kowalski Stahl",
+      "days_late": 3
+    },
+    {
+      "order": "B-2007",
+      "supplier": "Kowalski Stahl",
+      "days_late": 1
+    },
+    {
+      "order": "B-2008",
+      "supplier": "Lyon Emballages",
+      "days_late": 4
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+request_type,department,contact,legal_deadline_days,sensitive
+expense_report,Finance,finance@company.example,,no
+employment_certificate,HR,hr@company.example,,yes
+payroll_change,Payroll,payroll@company.example,,yes
+facility_issue,Facilities,facilities@company.example,,no
+room_booking,Facilities,facilities@company.example,,no
+data_subject_request,Privacy,privacy@company.example,30,no

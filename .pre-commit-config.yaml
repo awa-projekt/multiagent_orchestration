@@ -1,0 +1,20 @@
+# Hooks run the tools installed in the active environment (`pip install -e ".[dev]"`),
+# so local results always match CI.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check
+        entry: python -m ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: python -m ruff format
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: python -m mypy src tests/typing
+        language: system
+        pass_filenames: false

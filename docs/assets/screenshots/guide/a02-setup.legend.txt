@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The card of your AI provider. A click opens it.
+2. Paste your key here. What you type is hidden.
+3. Optional: the model to use. Leave it empty for awa's default.

@@ -1,0 +1,27 @@
+# Cases for the `market_brief.yaml` role tree: they check the structure of the work (who is
+# called, that the written brief went through its judge and reviewers, that nothing acts outside),
+# not the quality of the facts. Run them with your own model; the scripted runs in the test suite
+# only prove that the plumbing works.
+#
+#   awa eval examples/blueprints/market_brief.yaml examples/evals/market_brief_cases.yaml
+name: market-brief
+cases:
+  - id: brief-with-sources
+    input: What is hybrid search?
+    expected: ["https://"]
+    tags: [full]
+    scorers:
+      - contains
+      - delegated:researcher_team
+      - delegated:brief_writer_checked
+      - delegated:citation_checker
+      - no_tool:send_email
+
+  - id: nothing-found
+    input: What is the market share of the Zorblax9000 quantum toaster in 2031?
+    tags: [no-evidence]
+    metadata:
+      why: A question the sources cannot answer must end with a statement that nothing was found, not with a made-up brief.
+    scorers:
+      - delegated:researcher_team
+      - "regex:(?i)nothing|no facts|not found"

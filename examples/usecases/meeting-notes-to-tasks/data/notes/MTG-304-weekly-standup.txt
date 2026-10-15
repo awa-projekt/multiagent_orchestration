@@ -1,0 +1,7 @@
+Weekly standup - Wed 7 Oct 2026
+Attendees: Anna, Ben V., Dmitri
+
+Decisions
+* Standup moves to 9:30 from next week.
+
+No action items.

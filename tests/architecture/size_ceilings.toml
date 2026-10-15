@@ -1,0 +1,124 @@
+# Code lines per package group of src/awa (`.py` files; lines that are neither blank nor a
+# comment, docstrings count), checked by test_sizes.py.
+#
+# `ceiling` is the most a group may hold now. A change that makes a group smaller lowers its
+# ceiling in the same commit (the test says when the slack is large); raising a ceiling is a
+# decision with a reason in the commit message. `target` is the size the group is meant to reach.
+# Every top-level package or module of src/awa is in exactly one group.
+
+[groups.blueprints]
+about = "blueprint schema, lint, compile, match, dry run, the build loop, short forms, refine"
+packages = ["blueprints", "quick", "refine"]
+ceiling = 18433
+target = 18000
+
+[groups.data]
+about = "data profiles, readers and safe intake"
+packages = ["data"]
+ceiling = 8199
+target = 7000
+
+[groups.kernel]
+about = "code shared by awa runs and exported packages"
+packages = ["kernel"]
+ceiling = 1341
+target = 4000
+
+[groups.runtime_agents]
+about = "run context, the Agent, guards"
+packages = ["runtime", "agents", "guardrails"]
+ceiling = 5826
+target = 5000
+
+[groups.tools_skills_mcp]
+about = "tools, skills, MCP client, imports from LangChain and LangGraph"
+packages = ["tools", "skills", "mcp"]
+ceiling = 5474
+target = 5000
+
+[groups.team_workflows]
+about = "teams, workflows, the agent directory"
+packages = ["team", "workflows", "directory"]
+ceiling = 8668
+target = 6000
+
+[groups.foundation]
+about = "models, settings, errors, contracts, the upstream seam, plugins, the facade"
+packages = [
+  "models", "core", "config", "project_setup", "contracts", "_compat", "__init__", "errors",
+  "_internal", "plugins", "ext",
+]
+ceiling = 10890
+target = 10000
+
+[groups.persistence_observability]
+about = "checkpoints, stores, run records, erasure and retention, events, traces, audit"
+packages = ["persistence", "observability"]
+ceiling = 8916
+target = 7000
+
+[groups.evals]
+about = "datasets, scorers, judge, reports"
+packages = ["evals"]
+ceiling = 2853
+target = 4000
+
+[groups.exporter]
+about = "export to plain LangGraph code"
+packages = ["exporter"]
+ceiling = 1357
+target = 2000
+
+[groups.serve]
+about = "HTTP API, jobs, serving over MCP"
+packages = ["server"]
+ceiling = 9472
+target = 5000
+
+[groups.cli]
+about = "the awa command and its checks"
+packages = ["cli", "checks", "__main__"]
+ceiling = 9647
+target = 5000
+
+[groups.testing]
+about = "offline test doubles and contract suites"
+packages = ["testing"]
+ceiling = 3761
+target = 3000
+
+[groups.connectors]
+about = "extension: connectors, Microsoft 365, the people directory"
+packages = ["connectors", "people"]
+ceiling = 9914
+target = 18000
+
+[groups.toolkits]
+about = "ready-made tools"
+packages = ["toolkits"]
+ceiling = 6615
+target = 0
+
+[groups.automation]
+about = "extension: triggers, durable process runs, the worker"
+packages = ["automation"]
+ceiling = 6579
+target = 6000
+
+[groups.ui]
+about = "extension: the web app"
+packages = ["ui"]
+ceiling = 4560
+target = 3000
+
+[groups.knowledge]
+about = "extension: memory and knowledge bases"
+packages = ["memory"]
+ceiling = 1084
+target = 1500
+
+[groups.network]
+about = "extension: the agent network, its message bus and task board (legacy)"
+packages = ["messaging", "tasks"]
+ceiling = 2596
+target = 4135

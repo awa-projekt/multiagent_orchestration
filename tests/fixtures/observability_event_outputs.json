@@ -1,0 +1,4195 @@
+{
+ "log": [
+  "agent_started agent=lead depth=0 run=root input='Summarise the report for jane@example.com'",
+  "agent_started agent=lead depth=1 run=lead_run input='Summarise the report'",
+  "text_delta agent=lead depth=1 run=lead_run delta='Sum'",
+  "model_response agent=lead depth=1 run=lead_run tool_calls=search,delegate_task input_tokens=120 output_tokens=30",
+  "tool_call agent=lead depth=1 run=lead_run tool=search call_id=call_1",
+  "tool_result agent=lead depth=1 run=lead_run tool=search call_id=call_1 is_error=False",
+  "tool_call agent=lead depth=1 run=lead_run tool=delegate_task call_id=call_2",
+  "delegation agent=lead depth=1 run=lead_run mode=delegate target=writer task='Write it up for jane@example.com'",
+  "agent_started agent=writer depth=1 run=writer_run input='Write it up'",
+  "tool_call agent=writer depth=1 run=writer_run tool=transfer_to_editor call_id=call_3",
+  "tool_result agent=writer depth=1 run=writer_run tool=fetch call_id=call_4 is_error=True",
+  "agent_finished agent=writer depth=1 run=writer_run duration_ms=3000 total_tokens=150",
+  "delegation_result agent=lead depth=1 run=lead_run target=writer status=ok",
+  "delegation agent=lead depth=1 run=lead_run mode=consult target=critic task='Is it right?'",
+  "handoff agent=lead depth=1 run=lead_run source=lead target=editor",
+  "agent_message agent=lead depth=1 run=lead_run kind=request sender=lead recipient=writer",
+  "message_undelivered agent=lead depth=1 run=lead_run",
+  "approval_requested agent=lead depth=1 run=lead_run tool=send_mail interrupt_id=int_1",
+  "approval_decided agent=lead depth=1 run=lead_run tool=send_mail decision=approve reviewer=boss@example.com expired=True remembered=True",
+  "guardrail_blocked agent=lead depth=1 run=lead_run guardrail=pii stage=tool tool=send_mail",
+  "limit_exceeded agent=lead depth=1 run=lead_run limit=tool_calls value=11.0 maximum=10.0",
+  "step agent=lead depth=1 run=lead_run step=check 2/3 status=failed",
+  "model_retry agent=lead depth=1 run=lead_run model=gpt-test attempt=2 kind=rate_limit delay=1.5s",
+  "output_retry agent=lead depth=1 run=lead_run check=schema attempt=1/3",
+  "model_fallback agent=lead depth=1 run=lead_run from=gpt-test to=gpt-small reason=overloaded",
+  "error agent=lead depth=1 run=lead_run error=UsageLimitExceeded: tool call limit reached for jane@example.com stop=usage_limit bound=tool_calls",
+  "run_cancelled agent=lead depth=0 run=root reason=user elapsed_ms=26000",
+  "agent_finished agent=lead depth=0 run=root duration_ms=27000 total_tokens=150",
+  "run_completed agent=lead depth=0 run=root duration_ms=0"
+ ],
+ "chat": [
+  null,
+  null,
+  null,
+  null,
+  "lead -> search({\"query\": \"report for jane@example.com\", \"token\": \"[REDACTED:credential]\"})",
+  null,
+  null,
+  "lead => writer: Write it up for jane@example.com",
+  null,
+  null,
+  "writer <- fetch [error]: HTTP 500 from server",
+  null,
+  "lead <= writer [ok]",
+  "lead asks critic: Is it right?",
+  "lead >> editor: needs polish",
+  "lead -> writer [request]: Draft for jane@example.com",
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  "! lead failed: UsageLimitExceeded: tool call limit reached for jane@example.com",
+  null,
+  null,
+  null
+ ],
+ "trace": {
+  "summary": [
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:00.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "kind": "team"
+   },
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:01.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "parent_run_id": "root",
+    "kind": "agent"
+   },
+   null,
+   {
+    "type": "model_response",
+    "ts": "2026-01-01T00:00:03.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "model": "gpt-test",
+    "provider": "openai",
+    "finish_reason": "tool_calls",
+    "input_tokens": 120,
+    "output_tokens": 30,
+    "tool_calls": [
+     "search",
+     "delegate_task"
+    ],
+    "content_chars": 23
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:04.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "search",
+    "call_id": "call_1",
+    "arguments_preview": "{\"query\": \"report for [REDACTED:email]\", \"token\": \"[REDACTED:secret]\"}"
+   },
+   {
+    "type": "tool_result",
+    "ts": "2026-01-01T00:00:05.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "search",
+    "call_id": "call_1",
+    "is_error": false,
+    "result_chars": 66
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:06.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "delegate_task",
+    "call_id": "call_2",
+    "arguments_preview": "{\"agent\": \"writer\"}"
+   },
+   {
+    "type": "delegation",
+    "ts": "2026-01-01T00:00:07.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "writer",
+    "mode": "delegate",
+    "correlation_id": "corr_1",
+    "task_chars": 32
+   },
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:08.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "parent_run_id": "lead_run",
+    "kind": "agent"
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:09.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "transfer_to_editor",
+    "call_id": "call_3",
+    "arguments_preview": "{}"
+   },
+   {
+    "type": "tool_result",
+    "ts": "2026-01-01T00:00:10.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "fetch",
+    "call_id": "call_4",
+    "is_error": true,
+    "result_chars": 20,
+    "error": "HTTP 500 from server"
+   },
+   {
+    "type": "agent_finished",
+    "ts": "2026-01-01T00:00:11.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "duration_ms": 3000
+   },
+   {
+    "type": "delegation_result",
+    "ts": "2026-01-01T00:00:12.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "writer",
+    "correlation_id": "corr_1",
+    "status": "ok"
+   },
+   {
+    "type": "delegation",
+    "ts": "2026-01-01T00:00:13.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "critic",
+    "mode": "consult",
+    "correlation_id": "corr_2",
+    "task_chars": 12
+   },
+   {
+    "type": "handoff",
+    "ts": "2026-01-01T00:00:14.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "source": "lead",
+    "target": "editor"
+   },
+   {
+    "type": "agent_message",
+    "ts": "2026-01-01T00:00:15.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "kind": "request",
+    "sender": "lead",
+    "recipient": "writer",
+    "topic": "drafts",
+    "message_id": "msg_1"
+   },
+   {
+    "type": "message_undelivered",
+    "ts": "2026-01-01T00:00:16.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "recipient": "writer",
+    "reason": "mailbox full"
+   },
+   {
+    "type": "approval_requested",
+    "ts": "2026-01-01T00:00:17.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "send_mail",
+    "interrupt_id": "int_1",
+    "args_preview": "{\"to\": \"[REDACTED:email]\"}",
+    "reason": "needs a person",
+    "expires_at": "2026-01-01T01:00:00.000+00:00"
+   },
+   {
+    "type": "approval_decided",
+    "ts": "2026-01-01T00:00:18.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "send_mail",
+    "decision": "approve",
+    "interrupt_id": "int_1",
+    "reviewer": "[REDACTED:email]",
+    "note": "fine",
+    "latency_ms": 900,
+    "remembered": true,
+    "expired": true
+   },
+   {
+    "type": "guardrail_blocked",
+    "ts": "2026-01-01T00:00:19.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "guardrail": "pii",
+    "stage": "tool",
+    "tool": "send_mail",
+    "reason": "mail address [REDACTED:email]"
+   },
+   {
+    "type": "limit_exceeded",
+    "ts": "2026-01-01T00:00:20.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "limit": "tool_calls",
+    "value": 11.0,
+    "maximum": 10.0,
+    "message": "too many tool calls"
+   },
+   {
+    "type": "step",
+    "ts": "2026-01-01T00:00:21.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "step": "check",
+    "index": 1,
+    "total": 3,
+    "status": "failed",
+    "title": "Check the totals",
+    "message": "totals differ",
+    "attempt": 2,
+    "case": "case_1",
+    "checks": [
+     {
+      "id": "sum",
+      "kind": "rule",
+      "passed": false,
+      "message": "off by 2"
+     },
+     {
+      "id": "names",
+      "kind": "rule",
+      "passed": true
+     }
+    ]
+   },
+   {
+    "type": "model_retry",
+    "ts": "2026-01-01T00:00:22.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "model": "gpt-test",
+    "attempt": 2,
+    "delay": 1.5,
+    "error_type": "RateLimitError",
+    "kind": "rate_limit",
+    "status": 429
+   },
+   {
+    "type": "output_retry",
+    "ts": "2026-01-01T00:00:23.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "check": "schema",
+    "attempt": 1,
+    "max_retries": 3,
+    "kind": "schema"
+   },
+   {
+    "type": "model_fallback",
+    "ts": "2026-01-01T00:00:24.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "from_model": "gpt-test",
+    "to_model": "gpt-small",
+    "reason": "overloaded",
+    "error_type": "APIError"
+   },
+   {
+    "type": "error",
+    "ts": "2026-01-01T00:00:25.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "error_type": "UsageLimitExceeded",
+    "message": "tool call limit reached for [REDACTED:email]",
+    "stop": {
+     "stop_reason": "usage_limit",
+     "category": "limit",
+     "bound": "tool_calls",
+     "value": 11,
+     "maximum": 10,
+     "last_steps": [
+      "search",
+      "send_mail"
+     ]
+    }
+   },
+   {
+    "type": "run_cancelled",
+    "ts": "2026-01-01T00:00:26.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "reason": "user",
+    "cancelled_by": "ops@example.com",
+    "elapsed_ms": 26000
+   },
+   {
+    "type": "agent_finished",
+    "ts": "2026-01-01T00:00:27.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "duration_ms": 27000
+   },
+   null
+  ],
+  "full": [
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:00.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "kind": "team",
+    "input": "Summarise the report for [REDACTED:email]"
+   },
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:01.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "parent_run_id": "root",
+    "kind": "agent",
+    "input": "Summarise the report"
+   },
+   null,
+   {
+    "type": "model_response",
+    "ts": "2026-01-01T00:00:03.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "model": "gpt-test",
+    "provider": "openai",
+    "finish_reason": "tool_calls",
+    "input_tokens": 120,
+    "output_tokens": 30,
+    "tool_calls": [
+     "search",
+     "delegate_task"
+    ],
+    "content_chars": 23,
+    "content": "Calling the search tool"
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:04.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "search",
+    "call_id": "call_1",
+    "arguments": {
+     "query": "report for [REDACTED:email]",
+     "token": "[REDACTED:secret]"
+    }
+   },
+   {
+    "type": "tool_result",
+    "ts": "2026-01-01T00:00:05.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "search",
+    "call_id": "call_1",
+    "is_error": false,
+    "result_chars": 66,
+    "content": "<tool_output note=\"data\">{\"content\": \"found 3 hits\"}</tool_output>"
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:06.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "delegate_task",
+    "call_id": "call_2",
+    "arguments": {
+     "agent": "writer",
+     "task": "Write it up"
+    }
+   },
+   {
+    "type": "delegation",
+    "ts": "2026-01-01T00:00:07.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "writer",
+    "mode": "delegate",
+    "correlation_id": "corr_1",
+    "task_chars": 32,
+    "task": "Write it up for [REDACTED:email]"
+   },
+   {
+    "type": "agent_started",
+    "ts": "2026-01-01T00:00:08.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "parent_run_id": "lead_run",
+    "kind": "agent",
+    "input": "Write it up"
+   },
+   {
+    "type": "tool_call",
+    "ts": "2026-01-01T00:00:09.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "transfer_to_editor",
+    "call_id": "call_3",
+    "arguments": {
+     "note": "hand over"
+    }
+   },
+   {
+    "type": "tool_result",
+    "ts": "2026-01-01T00:00:10.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "fetch",
+    "call_id": "call_4",
+    "is_error": true,
+    "result_chars": 20,
+    "error": "HTTP 500 from server",
+    "content": "HTTP 500 from server"
+   },
+   {
+    "type": "agent_finished",
+    "ts": "2026-01-01T00:00:11.000+00:00",
+    "run_id": "writer_run",
+    "agent": "writer",
+    "depth": 1,
+    "root_run_id": "root",
+    "duration_ms": 3000,
+    "output": "The summary is done"
+   },
+   {
+    "type": "delegation_result",
+    "ts": "2026-01-01T00:00:12.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "writer",
+    "correlation_id": "corr_1",
+    "status": "ok",
+    "content": "The summary is done"
+   },
+   {
+    "type": "delegation",
+    "ts": "2026-01-01T00:00:13.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "target": "critic",
+    "mode": "consult",
+    "correlation_id": "corr_2",
+    "task_chars": 12,
+    "task": "Is it right?"
+   },
+   {
+    "type": "handoff",
+    "ts": "2026-01-01T00:00:14.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "source": "lead",
+    "target": "editor",
+    "reason": "needs polish"
+   },
+   {
+    "type": "agent_message",
+    "ts": "2026-01-01T00:00:15.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "kind": "request",
+    "sender": "lead",
+    "recipient": "writer",
+    "topic": "drafts",
+    "message_id": "msg_1",
+    "subject": "Draft for [REDACTED:email]",
+    "content": "Please write the summary."
+   },
+   {
+    "type": "message_undelivered",
+    "ts": "2026-01-01T00:00:16.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "recipient": "writer",
+    "reason": "mailbox full"
+   },
+   {
+    "type": "approval_requested",
+    "ts": "2026-01-01T00:00:17.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "send_mail",
+    "interrupt_id": "int_1",
+    "args_preview": "{\"to\": \"[REDACTED:email]\"}",
+    "reason": "needs a person",
+    "expires_at": "2026-01-01T01:00:00.000+00:00"
+   },
+   {
+    "type": "approval_decided",
+    "ts": "2026-01-01T00:00:18.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "tool": "send_mail",
+    "decision": "approve",
+    "interrupt_id": "int_1",
+    "reviewer": "[REDACTED:email]",
+    "note": "fine",
+    "latency_ms": 900,
+    "remembered": true,
+    "expired": true
+   },
+   {
+    "type": "guardrail_blocked",
+    "ts": "2026-01-01T00:00:19.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "guardrail": "pii",
+    "stage": "tool",
+    "tool": "send_mail",
+    "reason": "mail address [REDACTED:email]"
+   },
+   {
+    "type": "limit_exceeded",
+    "ts": "2026-01-01T00:00:20.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "limit": "tool_calls",
+    "value": 11.0,
+    "maximum": 10.0,
+    "message": "too many tool calls"
+   },
+   {
+    "type": "step",
+    "ts": "2026-01-01T00:00:21.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "step": "check",
+    "index": 1,
+    "total": 3,
+    "status": "failed",
+    "title": "Check the totals",
+    "message": "totals differ",
+    "attempt": 2,
+    "case": "case_1",
+    "checks": [
+     {
+      "id": "sum",
+      "kind": "rule",
+      "passed": false,
+      "message": "off by 2"
+     },
+     {
+      "id": "names",
+      "kind": "rule",
+      "passed": true
+     }
+    ]
+   },
+   {
+    "type": "model_retry",
+    "ts": "2026-01-01T00:00:22.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "model": "gpt-test",
+    "attempt": 2,
+    "delay": 1.5,
+    "error_type": "RateLimitError",
+    "kind": "rate_limit",
+    "status": 429
+   },
+   {
+    "type": "output_retry",
+    "ts": "2026-01-01T00:00:23.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "check": "schema",
+    "attempt": 1,
+    "max_retries": 3,
+    "kind": "schema"
+   },
+   {
+    "type": "model_fallback",
+    "ts": "2026-01-01T00:00:24.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "from_model": "gpt-test",
+    "to_model": "gpt-small",
+    "reason": "overloaded",
+    "error_type": "APIError"
+   },
+   {
+    "type": "error",
+    "ts": "2026-01-01T00:00:25.000+00:00",
+    "run_id": "lead_run",
+    "agent": "lead",
+    "depth": 1,
+    "root_run_id": "root",
+    "error_type": "UsageLimitExceeded",
+    "message": "tool call limit reached for [REDACTED:email]",
+    "stop": {
+     "stop_reason": "usage_limit",
+     "category": "limit",
+     "bound": "tool_calls",
+     "value": 11,
+     "maximum": 10,
+     "last_steps": [
+      "search",
+      "send_mail"
+     ]
+    }
+   },
+   {
+    "type": "run_cancelled",
+    "ts": "2026-01-01T00:00:26.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "reason": "user",
+    "cancelled_by": "ops@example.com",
+    "elapsed_ms": 26000
+   },
+   {
+    "type": "agent_finished",
+    "ts": "2026-01-01T00:00:27.000+00:00",
+    "run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "root_run_id": "root",
+    "duration_ms": 27000,
+    "output": "Done"
+   },
+   null
+  ]
+ },
+ "otel": [
+  {
+   "name": "chat gpt-test",
+   "kind": "CLIENT",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "chat",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-test",
+    "gen_ai.response.model": "gpt-test",
+    "gen_ai.usage.input_tokens": 120,
+    "gen_ai.usage.output_tokens": 30,
+    "gen_ai.response.finish_reasons": [
+     "tool_calls"
+    ],
+    "gen_ai.usage.cache_read.input_tokens": 40,
+    "gen_ai.usage.cache_creation.input_tokens": 10,
+    "awa.usage.cache_hit_ratio": 0.3333,
+    "awa.context.cleared_tool_results": 2,
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.tool_call_names": [
+     "search",
+     "delegate_task"
+    ],
+    "awa.prompt.prefix_hash": "abc123",
+    "awa.model.duration_ms": 250
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool search",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.tool.name": "search",
+    "gen_ai.tool.type": "function",
+    "gen_ai.tool.call.id": "call_1",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.cache.hit": false
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool fetch",
+   "kind": "INTERNAL",
+   "status": "ERROR",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "writer",
+    "gen_ai.tool.name": "fetch",
+    "gen_ai.tool.type": "function",
+    "gen_ai.tool.call.id": "call_4",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "error.type": "tool_error"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool transfer_to_editor",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "writer",
+    "gen_ai.tool.name": "transfer_to_editor",
+    "gen_ai.tool.type": "function",
+    "gen_ai.tool.call.id": "call_3",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.incomplete": true
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "invoke_agent writer",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.agent.name": "writer",
+    "awa.run_kind": "agent",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.parent_run_id": "lead_run",
+    "awa.tool_call_id": "call_2",
+    "gen_ai.usage.input_tokens": 0,
+    "gen_ai.usage.output_tokens": 0
+   },
+   "events": [],
+   "links": [
+    {
+     "awa.link": "tool_call"
+    }
+   ]
+  },
+  {
+   "name": "execute_tool delegate_task",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.tool.name": "delegate_task",
+    "gen_ai.tool.type": "function",
+    "gen_ai.tool.call.id": "call_2",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.incomplete": true
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "invoke_agent lead",
+   "kind": "INTERNAL",
+   "status": "ERROR",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.agent.name": "lead",
+    "awa.run_kind": "agent",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.parent_run_id": "root",
+    "awa.agent_call_id": "call_lead",
+    "awa.branch": "b1",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-test",
+    "error.type": "UsageLimitExceeded",
+    "awa.stop.stop_reason": "usage_limit",
+    "awa.stop.category": "limit",
+    "awa.stop.bound": "tool_calls",
+    "awa.stop.value": 11.0,
+    "awa.stop.maximum": 10.0,
+    "awa.stop.last_steps": [
+     "search",
+     "send_mail"
+    ],
+    "gen_ai.usage.input_tokens": 120,
+    "gen_ai.usage.output_tokens": 30
+   },
+   "events": [
+    {
+     "name": "awa.delegation",
+     "attributes": {
+      "awa.target": "writer",
+      "awa.mode": "delegate",
+      "awa.correlation_id": "corr_1",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.delegation_result",
+     "attributes": {
+      "awa.target": "writer",
+      "awa.status": "ok",
+      "awa.correlation_id": "corr_1",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.delegation",
+     "attributes": {
+      "awa.target": "critic",
+      "awa.mode": "consult",
+      "awa.correlation_id": "corr_2",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.handoff",
+     "attributes": {
+      "awa.source": "lead",
+      "awa.target": "editor",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.agent_message",
+     "attributes": {
+      "awa.message.id": "msg_1",
+      "awa.message.kind": "request",
+      "awa.message.sender": "lead",
+      "awa.message.recipient": "writer",
+      "awa.message.topic": "drafts",
+      "messaging.message.conversation_id": "conv_1",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.approval_requested",
+     "attributes": {
+      "awa.tool": "send_mail",
+      "awa.interrupt_id": "int_1",
+      "gen_ai.conversation.id": "thread_1",
+      "awa.expires_at": "2026-01-01T01:00:00+00:00",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.approval_decided",
+     "attributes": {
+      "awa.tool": "send_mail",
+      "awa.decision": "approve",
+      "awa.remembered": true,
+      "awa.expired": true,
+      "awa.reviewer": "[REDACTED:email]",
+      "awa.latency_ms": 900,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.guardrail_blocked",
+     "attributes": {
+      "awa.guardrail": "pii",
+      "awa.stage": "tool",
+      "awa.tool": "send_mail",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.limit_exceeded",
+     "attributes": {
+      "awa.limit": "tool_calls",
+      "awa.value": 11.0,
+      "awa.maximum": 10.0,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.step",
+     "attributes": {
+      "awa.step": "check",
+      "awa.step.index": 1,
+      "awa.step.total": 3,
+      "awa.step.status": "failed",
+      "awa.step.attempt": 2,
+      "awa.step.case": "case_1",
+      "awa.step.checks_failed": 1,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.model_retry",
+     "attributes": {
+      "awa.model": "gpt-test",
+      "awa.attempt": 2,
+      "awa.delay": 1.5,
+      "awa.error_type": "RateLimitError",
+      "awa.kind": "rate_limit",
+      "awa.status": 429,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.output_retry",
+     "attributes": {
+      "awa.check": "schema",
+      "awa.attempt": 1,
+      "awa.max_retries": 3,
+      "awa.kind": "schema",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.model_fallback",
+     "attributes": {
+      "awa.from_model": "gpt-test",
+      "awa.to_model": "gpt-small",
+      "awa.reason": "overloaded",
+      "awa.error_type": "APIError",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "exception",
+     "attributes": {
+      "exception.type": "UsageLimitExceeded"
+     }
+    }
+   ],
+   "links": []
+  },
+  {
+   "name": "invoke_workflow lead",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "session_1",
+    "gen_ai.conversation.id": "session_1",
+    "gen_ai.operation.name": "invoke_workflow",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.workflow.name": "lead",
+    "awa.run_kind": "team",
+    "awa.run_id": "root",
+    "awa.root_run_id": "root",
+    "awa.depth": 0,
+    "awa.session_id": "session_1",
+    "awa.usage.requests": 1,
+    "awa.usage.input_tokens": 120,
+    "awa.usage.output_tokens": 30,
+    "awa.usage.total_tokens": 150,
+    "awa.usage.cache_read_tokens": 40,
+    "awa.usage.cache_write_tokens": 0,
+    "awa.usage.tool_calls": 0,
+    "gen_ai.usage.input_tokens": 120,
+    "gen_ai.usage.output_tokens": 30
+   },
+   "events": [
+    {
+     "name": "awa.run_cancelled",
+     "attributes": {
+      "awa.reason": "user",
+      "awa.elapsed_ms": 26000,
+      "awa.cancelled_by": "[REDACTED:email]",
+      "awa.agent": "lead"
+     }
+    }
+   ],
+   "links": []
+  }
+ ],
+ "otel_content_langfuse": [
+  {
+   "name": "chat gpt-test",
+   "kind": "CLIENT",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "chat",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-test",
+    "gen_ai.response.model": "gpt-test",
+    "gen_ai.usage.input_tokens": 120,
+    "gen_ai.usage.output_tokens": 30,
+    "gen_ai.response.finish_reasons": [
+     "tool_calls"
+    ],
+    "gen_ai.usage.cache_read.input_tokens": 40,
+    "gen_ai.usage.cache_creation.input_tokens": 10,
+    "awa.usage.cache_hit_ratio": 0.3333,
+    "awa.context.cleared_tool_results": 2,
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.tool_call_names": [
+     "search",
+     "delegate_task"
+    ],
+    "awa.prompt.prefix_hash": "abc123",
+    "awa.model.duration_ms": 250,
+    "langfuse.observation.type": "generation",
+    "awa.usage.cost": 0.00018,
+    "gen_ai.usage.cost": 0.00018,
+    "langfuse.observation.usage_details": "{\"input\": 70, \"output\": 30, \"input_cached_tokens\": 40, \"input_cache_creation\": 10}",
+    "langfuse.observation.metadata.cache_hit_ratio": 0.3333,
+    "langfuse.observation.cost_details": "{\"input\": 7e-05, \"output\": 6e-05, \"input_cached_tokens\": 4e-05, \"input_cache_creation\": 1e-05, \"total\": 0.00018}",
+    "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Calling the search tool\"}, {\"type\": \"tool_call\", \"name\": \"search\"}, {\"type\": \"tool_call\", \"name\": \"delegate_task\"}], \"finish_reason\": \"tool_calls\"}]"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool search",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.tool.name": "search",
+    "gen_ai.tool.type": "function",
+    "langfuse.observation.type": "tool",
+    "gen_ai.tool.call.id": "call_1",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "gen_ai.tool.call.arguments": "{\"query\": \"report for [REDACTED:email]\", \"token\": \"[REDACTED:secret]\"}",
+    "awa.cache.hit": false,
+    "gen_ai.tool.call.result": "<tool_output note=\"data\">{\"content\": \"found 3 hits\"}</tool_output>"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.delegation",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.target": "writer",
+    "awa.mode": "delegate",
+    "awa.correlation_id": "corr_1",
+    "awa.task": "Write it up for [REDACTED:email]",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"target\": \"writer\", \"mode\": \"delegate\", \"correlation_id\": \"corr_1\", \"task\": \"Write it up for [REDACTED:email]\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool fetch",
+   "kind": "INTERNAL",
+   "status": "ERROR",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "writer",
+    "gen_ai.tool.name": "fetch",
+    "gen_ai.tool.type": "function",
+    "langfuse.observation.type": "tool",
+    "gen_ai.tool.call.id": "call_4",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "error.type": "tool_error",
+    "langfuse.observation.level": "ERROR",
+    "langfuse.observation.status_message": "HTTP 500 from server"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool transfer_to_editor",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "writer",
+    "gen_ai.tool.name": "transfer_to_editor",
+    "gen_ai.tool.type": "function",
+    "langfuse.observation.type": "tool",
+    "gen_ai.tool.call.id": "call_3",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "gen_ai.tool.call.arguments": "{\"note\": \"hand over\"}",
+    "awa.incomplete": true
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "invoke_agent writer",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.agent.name": "writer",
+    "langfuse.observation.type": "agent",
+    "awa.run_kind": "agent",
+    "awa.run_id": "writer_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.parent_run_id": "lead_run",
+    "awa.tool_call_id": "call_2",
+    "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Write it up\"}]}]",
+    "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"The summary is done\"}], \"finish_reason\": \"stop\"}]",
+    "awa.subtree.input_tokens": 0,
+    "awa.subtree.output_tokens": 0
+   },
+   "events": [],
+   "links": [
+    {
+     "awa.link": "tool_call"
+    }
+   ]
+  },
+  {
+   "name": "awa.delegation_result",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.target": "writer",
+    "awa.status": "ok",
+    "awa.correlation_id": "corr_1",
+    "awa.content": "The summary is done",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"target\": \"writer\", \"status\": \"ok\", \"correlation_id\": \"corr_1\", \"content\": \"The summary is done\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.delegation",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.target": "critic",
+    "awa.mode": "consult",
+    "awa.correlation_id": "corr_2",
+    "awa.task": "Is it right?",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"target\": \"critic\", \"mode\": \"consult\", \"correlation_id\": \"corr_2\", \"task\": \"Is it right?\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.handoff",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.source": "lead",
+    "awa.target": "editor",
+    "awa.reason": "needs polish",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"source\": \"lead\", \"target\": \"editor\", \"reason\": \"needs polish\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.agent_message",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.message.id": "msg_1",
+    "awa.message.kind": "request",
+    "awa.message.sender": "lead",
+    "awa.message.recipient": "writer",
+    "awa.message.topic": "drafts",
+    "messaging.message.conversation_id": "conv_1",
+    "awa.message.subject": "Draft for [REDACTED:email]",
+    "awa.message.content": "Please write the summary.",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"message.id\": \"msg_1\", \"message.kind\": \"request\", \"message.sender\": \"lead\", \"message.recipient\": \"writer\", \"message.topic\": \"drafts\", \"messaging.message.conversation_id\": \"conv_1\", \"message.subject\": \"Draft for [REDACTED:email]\", \"message.content\": \"Please write the summary.\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.approval_requested",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "thread_1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.tool": "send_mail",
+    "awa.interrupt_id": "int_1",
+    "awa.expires_at": "2026-01-01T01:00:00+00:00",
+    "awa.args": "{\"to\": \"[REDACTED:email]\"}",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"tool\": \"send_mail\", \"interrupt_id\": \"int_1\", \"gen_ai.conversation.id\": \"thread_1\", \"expires_at\": \"2026-01-01T01:00:00+00:00\", \"args\": \"{\\\"to\\\": \\\"[REDACTED:email]\\\"}\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.approval_decided",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.tool": "send_mail",
+    "awa.decision": "approve",
+    "awa.remembered": true,
+    "awa.expired": true,
+    "awa.reviewer": "[REDACTED:email]",
+    "awa.latency_ms": 900,
+    "awa.note": "fine",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"tool\": \"send_mail\", \"decision\": \"approve\", \"remembered\": true, \"expired\": true, \"reviewer\": \"[REDACTED:email]\", \"latency_ms\": 900, \"note\": \"fine\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.guardrail_blocked",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.guardrail": "pii",
+    "awa.stage": "tool",
+    "awa.tool": "send_mail",
+    "awa.reason": "mail address [REDACTED:email]",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"guardrail\": \"pii\", \"stage\": \"tool\", \"tool\": \"send_mail\", \"reason\": \"mail address [REDACTED:email]\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.limit_exceeded",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.limit": "tool_calls",
+    "awa.value": 11.0,
+    "awa.maximum": 10.0,
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"limit\": \"tool_calls\", \"value\": 11.0, \"maximum\": 10.0, \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.step",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.step": "check",
+    "awa.step.index": 1,
+    "awa.step.total": 3,
+    "awa.step.status": "failed",
+    "awa.step.attempt": 2,
+    "awa.step.case": "case_1",
+    "awa.step.checks_failed": 1,
+    "awa.message": "totals differ",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"step\": \"check\", \"step.index\": 1, \"step.total\": 3, \"step.status\": \"failed\", \"step.attempt\": 2, \"step.case\": \"case_1\", \"step.checks_failed\": 1, \"message\": \"totals differ\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.model_retry",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.model": "gpt-test",
+    "awa.attempt": 2,
+    "awa.delay": 1.5,
+    "awa.error_type": "RateLimitError",
+    "awa.kind": "rate_limit",
+    "awa.status": 429,
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"model\": \"gpt-test\", \"attempt\": 2, \"delay\": 1.5, \"error_type\": \"RateLimitError\", \"kind\": \"rate_limit\", \"status\": 429, \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.output_retry",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.check": "schema",
+    "awa.attempt": 1,
+    "awa.max_retries": 3,
+    "awa.kind": "schema",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"check\": \"schema\", \"attempt\": 1, \"max_retries\": 3, \"kind\": \"schema\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "awa.model_fallback",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.from_model": "gpt-test",
+    "awa.to_model": "gpt-small",
+    "awa.reason": "overloaded",
+    "awa.error_type": "APIError",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"from_model\": \"gpt-test\", \"to_model\": \"gpt-small\", \"reason\": \"overloaded\", \"error_type\": \"APIError\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "execute_tool delegate_task",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "execute_tool",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.tool.name": "delegate_task",
+    "gen_ai.tool.type": "function",
+    "langfuse.observation.type": "tool",
+    "gen_ai.tool.call.id": "call_2",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "gen_ai.tool.call.arguments": "{\"agent\": \"writer\", \"task\": \"Write it up\"}",
+    "awa.incomplete": true
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "invoke_agent lead",
+   "kind": "INTERNAL",
+   "status": "ERROR",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.agent.name": "lead",
+    "langfuse.observation.type": "agent",
+    "awa.run_kind": "agent",
+    "awa.run_id": "lead_run",
+    "awa.root_run_id": "root",
+    "awa.depth": 1,
+    "awa.parent_run_id": "root",
+    "awa.agent_call_id": "call_lead",
+    "awa.branch": "b1",
+    "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Summarise the report\"}]}]",
+    "gen_ai.provider.name": "openai",
+    "gen_ai.request.model": "gpt-test",
+    "error.type": "UsageLimitExceeded",
+    "awa.stop.stop_reason": "usage_limit",
+    "awa.stop.category": "limit",
+    "awa.stop.bound": "tool_calls",
+    "awa.stop.value": 11.0,
+    "awa.stop.maximum": 10.0,
+    "awa.stop.last_steps": [
+     "search",
+     "send_mail"
+    ],
+    "langfuse.observation.level": "ERROR",
+    "langfuse.observation.status_message": "tool call limit reached for [REDACTED:email]",
+    "awa.subtree.input_tokens": 120,
+    "awa.subtree.output_tokens": 30
+   },
+   "events": [
+    {
+     "name": "awa.delegation",
+     "attributes": {
+      "awa.target": "writer",
+      "awa.mode": "delegate",
+      "awa.correlation_id": "corr_1",
+      "awa.task": "Write it up for [REDACTED:email]",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.delegation_result",
+     "attributes": {
+      "awa.target": "writer",
+      "awa.status": "ok",
+      "awa.correlation_id": "corr_1",
+      "awa.content": "The summary is done",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.delegation",
+     "attributes": {
+      "awa.target": "critic",
+      "awa.mode": "consult",
+      "awa.correlation_id": "corr_2",
+      "awa.task": "Is it right?",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.handoff",
+     "attributes": {
+      "awa.source": "lead",
+      "awa.target": "editor",
+      "awa.reason": "needs polish",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.agent_message",
+     "attributes": {
+      "awa.message.id": "msg_1",
+      "awa.message.kind": "request",
+      "awa.message.sender": "lead",
+      "awa.message.recipient": "writer",
+      "awa.message.topic": "drafts",
+      "messaging.message.conversation_id": "conv_1",
+      "awa.message.subject": "Draft for [REDACTED:email]",
+      "awa.message.content": "Please write the summary.",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.approval_requested",
+     "attributes": {
+      "awa.tool": "send_mail",
+      "awa.interrupt_id": "int_1",
+      "gen_ai.conversation.id": "thread_1",
+      "awa.expires_at": "2026-01-01T01:00:00+00:00",
+      "awa.args": "{\"to\": \"[REDACTED:email]\"}",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.approval_decided",
+     "attributes": {
+      "awa.tool": "send_mail",
+      "awa.decision": "approve",
+      "awa.remembered": true,
+      "awa.expired": true,
+      "awa.reviewer": "[REDACTED:email]",
+      "awa.latency_ms": 900,
+      "awa.note": "fine",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.guardrail_blocked",
+     "attributes": {
+      "awa.guardrail": "pii",
+      "awa.stage": "tool",
+      "awa.tool": "send_mail",
+      "awa.reason": "mail address [REDACTED:email]",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.limit_exceeded",
+     "attributes": {
+      "awa.limit": "tool_calls",
+      "awa.value": 11.0,
+      "awa.maximum": 10.0,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.step",
+     "attributes": {
+      "awa.step": "check",
+      "awa.step.index": 1,
+      "awa.step.total": 3,
+      "awa.step.status": "failed",
+      "awa.step.attempt": 2,
+      "awa.step.case": "case_1",
+      "awa.step.checks_failed": 1,
+      "awa.message": "totals differ",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.model_retry",
+     "attributes": {
+      "awa.model": "gpt-test",
+      "awa.attempt": 2,
+      "awa.delay": 1.5,
+      "awa.error_type": "RateLimitError",
+      "awa.kind": "rate_limit",
+      "awa.status": 429,
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.output_retry",
+     "attributes": {
+      "awa.check": "schema",
+      "awa.attempt": 1,
+      "awa.max_retries": 3,
+      "awa.kind": "schema",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "awa.model_fallback",
+     "attributes": {
+      "awa.from_model": "gpt-test",
+      "awa.to_model": "gpt-small",
+      "awa.reason": "overloaded",
+      "awa.error_type": "APIError",
+      "awa.agent": "lead"
+     }
+    },
+    {
+     "name": "exception",
+     "attributes": {
+      "exception.type": "UsageLimitExceeded",
+      "exception.message": "tool call limit reached for [REDACTED:email]"
+     }
+    }
+   ],
+   "links": []
+  },
+  {
+   "name": "awa.run_cancelled",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "awa.reason": "user",
+    "awa.elapsed_ms": 26000,
+    "awa.cancelled_by": "[REDACTED:email]",
+    "awa.agent": "lead",
+    "langfuse.observation.type": "event",
+    "langfuse.observation.input": "{\"reason\": \"user\", \"elapsed_ms\": 26000, \"cancelled_by\": \"[REDACTED:email]\", \"agent\": \"lead\"}"
+   },
+   "events": [],
+   "links": []
+  },
+  {
+   "name": "invoke_workflow lead",
+   "kind": "INTERNAL",
+   "status": "UNSET",
+   "attributes": {
+    "session.id": "s1",
+    "gen_ai.conversation.id": "s1",
+    "user.id": "u1",
+    "langfuse.trace.tags": [
+     "t"
+    ],
+    "langfuse.trace.name": "n",
+    "langfuse.trace.metadata.run_id": "root",
+    "gen_ai.operation.name": "invoke_workflow",
+    "gen_ai.agent.name": "lead",
+    "gen_ai.workflow.name": "lead",
+    "langfuse.observation.type": "chain",
+    "awa.run_kind": "team",
+    "awa.run_id": "root",
+    "awa.root_run_id": "root",
+    "awa.depth": 0,
+    "awa.session_id": "session_1",
+    "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Summarise the report for [REDACTED:email]\"}]}]",
+    "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Done\"}], \"finish_reason\": \"stop\"}]",
+    "awa.usage.requests": 1,
+    "awa.usage.input_tokens": 120,
+    "awa.usage.output_tokens": 30,
+    "awa.usage.total_tokens": 150,
+    "awa.usage.cache_read_tokens": 40,
+    "awa.usage.cache_write_tokens": 0,
+    "awa.usage.tool_calls": 0,
+    "awa.usage.cost": 0.00018,
+    "awa.subtree.input_tokens": 120,
+    "awa.subtree.output_tokens": 30
+   },
+   "events": [
+    {
+     "name": "awa.run_cancelled",
+     "attributes": {
+      "awa.reason": "user",
+      "awa.elapsed_ms": 26000,
+      "awa.cancelled_by": "[REDACTED:email]",
+      "awa.agent": "lead"
+     }
+    }
+   ],
+   "links": []
+  }
+ ],
+ "audit": [
+  {
+   "seq": 0,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:00Z",
+    "type": "agent_started",
+    "parent_run_id": null,
+    "input_preview": "[omitted: 41 chars]",
+    "kind": "team",
+    "session_id": "session_1",
+    "agent_call_id": null,
+    "tool_call_id": null,
+    "branch": null
+   },
+   "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+   "hash": "ed5974f7f388a6f4f4e74e38383c43f794a8df536ceed5bd6516ba89027b204c"
+  },
+  {
+   "seq": 1,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": "root",
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:01Z",
+    "type": "agent_started",
+    "parent_run_id": "root",
+    "input_preview": "[omitted: 20 chars]",
+    "kind": "agent",
+    "session_id": null,
+    "agent_call_id": "call_lead",
+    "tool_call_id": null,
+    "branch": "b1"
+   },
+   "prev_hash": "ed5974f7f388a6f4f4e74e38383c43f794a8df536ceed5bd6516ba89027b204c",
+   "hash": "eeea43354673d12e25aaef214ecacde3aa113276578bd0a4b7b177fafb283c2a"
+  },
+  {
+   "seq": 2,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "text_delta",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:02Z",
+    "type": "text_delta",
+    "delta": "[omitted: 3 chars]"
+   },
+   "prev_hash": "eeea43354673d12e25aaef214ecacde3aa113276578bd0a4b7b177fafb283c2a",
+   "hash": "c44c01a9900cbcaae56cc4cb488f72142748183047fd2fad1bf2a097b7e1d8e7"
+  },
+  {
+   "seq": 3,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_response",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:03Z",
+    "type": "model_response",
+    "content": "[omitted: 23 chars]",
+    "tool_call_names": [
+     "search",
+     "delegate_task"
+    ],
+    "input_tokens": 120,
+    "output_tokens": 30,
+    "cache_read_tokens": 40,
+    "cache_write_tokens": 10,
+    "model": "gpt-test",
+    "provider": "openai",
+    "finish_reason": "tool_calls",
+    "prefix_hash": "abc123",
+    "replayed": false,
+    "duration_ms": 250,
+    "cleared_tool_results": 2
+   },
+   "prev_hash": "c44c01a9900cbcaae56cc4cb488f72142748183047fd2fad1bf2a097b7e1d8e7",
+   "hash": "c1caf18588ab85e6a874808ce11a302517fae3c51dd4646edf1f24d5ade43b3c"
+  },
+  {
+   "seq": 4,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:04Z",
+    "type": "tool_call",
+    "tool_name": "search",
+    "call_id": "call_1",
+    "arguments": {
+     "query": "report for jane@example.com",
+     "token": "[REDACTED:secret]"
+    }
+   },
+   "prev_hash": "c1caf18588ab85e6a874808ce11a302517fae3c51dd4646edf1f24d5ade43b3c",
+   "hash": "9a869cfb6a6a74a27b4df5285c9db5fcd68adf484e7d2f8ddc9b3b7daa21215d"
+  },
+  {
+   "seq": 5,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_result",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:05Z",
+    "type": "tool_result",
+    "tool_name": "search",
+    "call_id": "call_1",
+    "content": "[omitted: 66 chars]",
+    "is_error": false,
+    "cache": "miss",
+    "arguments": null
+   },
+   "prev_hash": "9a869cfb6a6a74a27b4df5285c9db5fcd68adf484e7d2f8ddc9b3b7daa21215d",
+   "hash": "e3f5008868d9510eeb8d518df9b030125098c847e5153583ed535548665fe533"
+  },
+  {
+   "seq": 6,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:06Z",
+    "type": "tool_call",
+    "tool_name": "delegate_task",
+    "call_id": "call_2",
+    "arguments": {
+     "agent": "writer",
+     "task": "Write it up"
+    }
+   },
+   "prev_hash": "e3f5008868d9510eeb8d518df9b030125098c847e5153583ed535548665fe533",
+   "hash": "62b477bb4983f708bbbdc9a3288ddf05a7e41377154b2d7b88fe796606cd808e"
+  },
+  {
+   "seq": 7,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:07Z",
+    "type": "delegation",
+    "target": "writer",
+    "task": "[omitted: 32 chars]",
+    "mode": "delegate",
+    "correlation_id": "corr_1"
+   },
+   "prev_hash": "62b477bb4983f708bbbdc9a3288ddf05a7e41377154b2d7b88fe796606cd808e",
+   "hash": "ae35e8512e2e8deb2771b022260c553ed12be1eb2c203a681ac835edaa54da07"
+  },
+  {
+   "seq": 8,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": "lead_run",
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:08Z",
+    "type": "agent_started",
+    "parent_run_id": "lead_run",
+    "input_preview": "[omitted: 11 chars]",
+    "kind": "agent",
+    "session_id": null,
+    "agent_call_id": null,
+    "tool_call_id": "call_2",
+    "branch": null
+   },
+   "prev_hash": "ae35e8512e2e8deb2771b022260c553ed12be1eb2c203a681ac835edaa54da07",
+   "hash": "95dde1deda5c3f6056a762b993a3711f9092e58f1a492e128a2d1dbb95c7c831"
+  },
+  {
+   "seq": 9,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:09Z",
+    "type": "tool_call",
+    "tool_name": "transfer_to_editor",
+    "call_id": "call_3",
+    "arguments": {
+     "note": "hand over"
+    }
+   },
+   "prev_hash": "95dde1deda5c3f6056a762b993a3711f9092e58f1a492e128a2d1dbb95c7c831",
+   "hash": "1ae16e9ec7bc8d6f5470028ce9a1ae1321f34087691b42d7b06626fc31e29540"
+  },
+  {
+   "seq": 10,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_result",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:10Z",
+    "type": "tool_result",
+    "tool_name": "fetch",
+    "call_id": "call_4",
+    "content": "[omitted: 20 chars]",
+    "is_error": true,
+    "cache": null,
+    "arguments": null
+   },
+   "prev_hash": "1ae16e9ec7bc8d6f5470028ce9a1ae1321f34087691b42d7b06626fc31e29540",
+   "hash": "db27880c9b1c8e18887cc3b07f25be20288ce550decd33cc67ae018b3b998303"
+  },
+  {
+   "seq": 11,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_finished",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:11Z",
+    "type": "agent_finished",
+    "output_preview": "[omitted: 19 chars]",
+    "usage": {
+     "requests": 1,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "cache_read_tokens": 40,
+     "cache_write_tokens": 0,
+     "tool_calls": 0,
+     "by_agent": {
+      "lead": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     },
+     "by_model": {
+      "gpt-test": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     }
+    },
+    "duration_ms": 3000
+   },
+   "prev_hash": "db27880c9b1c8e18887cc3b07f25be20288ce550decd33cc67ae018b3b998303",
+   "hash": "0946bc0d3cef5858eb0a1057f3bdd1a133fa4fd2295020fdd1e280db442191c1"
+  },
+  {
+   "seq": 12,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation_result",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:12Z",
+    "type": "delegation_result",
+    "target": "writer",
+    "correlation_id": "corr_1",
+    "status": "ok",
+    "content_preview": "[omitted: 19 chars]"
+   },
+   "prev_hash": "0946bc0d3cef5858eb0a1057f3bdd1a133fa4fd2295020fdd1e280db442191c1",
+   "hash": "3a078dc8c2789c67dc14f874e24bc635256c36063350d4ed8f12f866dd50868f"
+  },
+  {
+   "seq": 13,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:13Z",
+    "type": "delegation",
+    "target": "critic",
+    "task": "[omitted: 12 chars]",
+    "mode": "consult",
+    "correlation_id": "corr_2"
+   },
+   "prev_hash": "3a078dc8c2789c67dc14f874e24bc635256c36063350d4ed8f12f866dd50868f",
+   "hash": "28270d874abe3f5dc74704a18770c1be51959e60b7d651e435c3c7ecadd543d1"
+  },
+  {
+   "seq": 14,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "handoff",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:14Z",
+    "type": "handoff",
+    "source": "lead",
+    "target": "editor",
+    "reason": "[omitted: 12 chars]"
+   },
+   "prev_hash": "28270d874abe3f5dc74704a18770c1be51959e60b7d651e435c3c7ecadd543d1",
+   "hash": "4ecf02b6cce2bc1f28cf27f98c4eaa3f3b138da9524dc9563d5fce2e04d6b694"
+  },
+  {
+   "seq": 15,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_message",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:15Z",
+    "type": "agent_message",
+    "message": {
+     "id": "msg_1",
+     "kind": "request",
+     "sender": "lead",
+     "recipient": "writer",
+     "topic": "drafts",
+     "conversation_id": "conv_1"
+    }
+   },
+   "prev_hash": "4ecf02b6cce2bc1f28cf27f98c4eaa3f3b138da9524dc9563d5fce2e04d6b694",
+   "hash": "42b59107f529cb50b33b8a947f700448fca52f4a89c0211f085ad60da42d42ad"
+  },
+  {
+   "seq": 16,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "message_undelivered",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:16Z",
+    "type": "message_undelivered",
+    "message": {
+     "id": "msg_1",
+     "kind": "request",
+     "sender": "lead",
+     "recipient": "writer",
+     "topic": "drafts",
+     "conversation_id": "conv_1"
+    },
+    "recipient": "writer",
+    "reason": "mailbox full"
+   },
+   "prev_hash": "42b59107f529cb50b33b8a947f700448fca52f4a89c0211f085ad60da42d42ad",
+   "hash": "bd16f0e88f8a0ff9da15dd775e44885ca7adc7bab420aa74b9ceb4e896b4b1db"
+  },
+  {
+   "seq": 17,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "approval_requested",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:17Z",
+    "type": "approval_requested",
+    "tool": "send_mail",
+    "interrupt_id": "int_1",
+    "args_preview": "{\"to\": \"jane@example.com\"}",
+    "reason": "[omitted: 14 chars]",
+    "thread_id": "thread_1",
+    "expires_at": "2026-01-01T01:00:00Z"
+   },
+   "prev_hash": "bd16f0e88f8a0ff9da15dd775e44885ca7adc7bab420aa74b9ceb4e896b4b1db",
+   "hash": "b30e237f36328f7c5eb2b3338742ac687bb54b30e7c4e113a12285ea285e7bee"
+  },
+  {
+   "seq": 18,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "approval_decided",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": "boss@example.com",
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:18Z",
+    "type": "approval_decided",
+    "tool": "send_mail",
+    "decision": "approve",
+    "interrupt_id": "int_1",
+    "reviewer": "boss@example.com",
+    "note": "[omitted: 4 chars]",
+    "latency_ms": 900,
+    "remembered": true,
+    "expired": true,
+    "thread_id": null
+   },
+   "prev_hash": "b30e237f36328f7c5eb2b3338742ac687bb54b30e7c4e113a12285ea285e7bee",
+   "hash": "aebf1e2e616b33147add7a7364c6272111f2e2a48ba882aaa4a59d6d92e8aebb"
+  },
+  {
+   "seq": 19,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "guardrail_blocked",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:19Z",
+    "type": "guardrail_blocked",
+    "guardrail": "pii",
+    "stage": "tool",
+    "reason": "[omitted: 29 chars]",
+    "tool": "send_mail"
+   },
+   "prev_hash": "aebf1e2e616b33147add7a7364c6272111f2e2a48ba882aaa4a59d6d92e8aebb",
+   "hash": "3c5743564eb63d7b0d54f348900d5391c48fd4481b3ed7298ad8188c8725f1cf"
+  },
+  {
+   "seq": 20,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "limit_exceeded",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:20Z",
+    "type": "limit_exceeded",
+    "limit": "tool_calls",
+    "value": 11.0,
+    "maximum": 10.0,
+    "message": "too many tool calls"
+   },
+   "prev_hash": "3c5743564eb63d7b0d54f348900d5391c48fd4481b3ed7298ad8188c8725f1cf",
+   "hash": "1e1c7cee612b91554946ebbe648d459e02d93dbe1d6787545c27694ba7a75b40"
+  },
+  {
+   "seq": 21,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "step",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:21Z",
+    "type": "step",
+    "step": "check",
+    "index": 1,
+    "total": 3,
+    "status": "failed",
+    "title": "Check the totals",
+    "checks": [
+     {
+      "id": "sum",
+      "kind": "rule",
+      "passed": false,
+      "message": "off by 2"
+     },
+     {
+      "id": "names",
+      "kind": "rule",
+      "passed": true
+     }
+    ],
+    "message": "totals differ",
+    "attempt": 2,
+    "case": "case_1"
+   },
+   "prev_hash": "1e1c7cee612b91554946ebbe648d459e02d93dbe1d6787545c27694ba7a75b40",
+   "hash": "3cf38af0e3478ce856ec8262c168bc1cb5994c973c87f464af102fc121f71a3b"
+  },
+  {
+   "seq": 22,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_retry",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:22Z",
+    "type": "model_retry",
+    "model": "gpt-test",
+    "attempt": 2,
+    "delay": 1.5,
+    "error_type": "RateLimitError",
+    "kind": "rate_limit",
+    "status": 429
+   },
+   "prev_hash": "3cf38af0e3478ce856ec8262c168bc1cb5994c973c87f464af102fc121f71a3b",
+   "hash": "a8f19ac408fa170719bf85f2ff9d4544555075d0cf0142ea3bb3ccbef52dd066"
+  },
+  {
+   "seq": 23,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "output_retry",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:23Z",
+    "type": "output_retry",
+    "check": "schema",
+    "attempt": 1,
+    "max_retries": 3,
+    "kind": "schema"
+   },
+   "prev_hash": "a8f19ac408fa170719bf85f2ff9d4544555075d0cf0142ea3bb3ccbef52dd066",
+   "hash": "38f73045a38789e15d6249823cac2529ff26d7c01687b9106361658d62d47a31"
+  },
+  {
+   "seq": 24,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_fallback",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:24Z",
+    "type": "model_fallback",
+    "from_model": "gpt-test",
+    "to_model": "gpt-small",
+    "reason": "overloaded",
+    "error_type": "APIError"
+   },
+   "prev_hash": "38f73045a38789e15d6249823cac2529ff26d7c01687b9106361658d62d47a31",
+   "hash": "a5aeac11801ab132b1f3d97ced93d10fd04e0a5bd03eb2b32cfa2684b3811ba6"
+  },
+  {
+   "seq": 25,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "error",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:25Z",
+    "type": "error",
+    "error_type": "UsageLimitExceeded",
+    "message": "[omitted: 44 chars]",
+    "stop": {
+     "stop_reason": "usage_limit",
+     "category": "limit",
+     "bound": "tool_calls",
+     "value": 11,
+     "maximum": 10,
+     "last_steps": [
+      "search",
+      "send_mail"
+     ]
+    }
+   },
+   "prev_hash": "a5aeac11801ab132b1f3d97ced93d10fd04e0a5bd03eb2b32cfa2684b3811ba6",
+   "hash": "4c74ce032a8abf3e9755167cdd039ac6020b2ee8b818eb2097613f725d48280c"
+  },
+  {
+   "seq": 26,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "run_cancelled",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:26Z",
+    "type": "run_cancelled",
+    "reason": "user",
+    "cancelled_by": "ops@example.com",
+    "elapsed_ms": 26000
+   },
+   "prev_hash": "4c74ce032a8abf3e9755167cdd039ac6020b2ee8b818eb2097613f725d48280c",
+   "hash": "dc51e51e66ee52fda592bd7287beeb7dc8a984f94adce998f58e1661c33d3a8d"
+  },
+  {
+   "seq": 27,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_finished",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:27Z",
+    "type": "agent_finished",
+    "output_preview": "[omitted: 4 chars]",
+    "usage": {
+     "requests": 1,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "cache_read_tokens": 40,
+     "cache_write_tokens": 0,
+     "tool_calls": 0,
+     "by_agent": {
+      "lead": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     },
+     "by_model": {
+      "gpt-test": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     }
+    },
+    "duration_ms": 27000
+   },
+   "prev_hash": "dc51e51e66ee52fda592bd7287beeb7dc8a984f94adce998f58e1661c33d3a8d",
+   "hash": "a39bfa11d258e81a90bdac5d647e25cd032521288bcadc32f9cfa1168059c729"
+  },
+  {
+   "seq": 28,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "run_completed",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:28Z",
+    "type": "run_completed"
+   },
+   "prev_hash": "a39bfa11d258e81a90bdac5d647e25cd032521288bcadc32f9cfa1168059c729",
+   "hash": "9bf8332f2ce3ffc073e68aa9fcddea7058c0778a43d48fbac9872d34a6aec5a8"
+  }
+ ],
+ "audit_content": [
+  {
+   "seq": 0,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:00Z",
+    "type": "agent_started",
+    "parent_run_id": null,
+    "input_preview": "Summarise the report for [REDACTED:email]",
+    "kind": "team",
+    "session_id": "session_1",
+    "agent_call_id": null,
+    "tool_call_id": null,
+    "branch": null
+   },
+   "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+   "hash": "6d8c74bc04175d740825a36b3c934bfc47e5037344946ead4a2870b0f66688f1"
+  },
+  {
+   "seq": 1,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": "root",
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:01Z",
+    "type": "agent_started",
+    "parent_run_id": "root",
+    "input_preview": "Summarise the report",
+    "kind": "agent",
+    "session_id": null,
+    "agent_call_id": "call_lead",
+    "tool_call_id": null,
+    "branch": "b1"
+   },
+   "prev_hash": "6d8c74bc04175d740825a36b3c934bfc47e5037344946ead4a2870b0f66688f1",
+   "hash": "d67e500e7bed7b33f74e0bfdc92dd8a95b401a099df373172d94421e97f9dec1"
+  },
+  {
+   "seq": 2,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "text_delta",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:02Z",
+    "type": "text_delta",
+    "delta": "Sum"
+   },
+   "prev_hash": "d67e500e7bed7b33f74e0bfdc92dd8a95b401a099df373172d94421e97f9dec1",
+   "hash": "58414f76e9e87e430d0d1c1497281a9a6f4bcdcee20431edaa73b07b2d0e69aa"
+  },
+  {
+   "seq": 3,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_response",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:03Z",
+    "type": "model_response",
+    "content": "Calling the search tool",
+    "tool_call_names": [
+     "search",
+     "delegate_task"
+    ],
+    "input_tokens": 120,
+    "output_tokens": 30,
+    "cache_read_tokens": 40,
+    "cache_write_tokens": 10,
+    "model": "gpt-test",
+    "provider": "openai",
+    "finish_reason": "tool_calls",
+    "prefix_hash": "abc123",
+    "replayed": false,
+    "duration_ms": 250,
+    "cleared_tool_results": 2
+   },
+   "prev_hash": "58414f76e9e87e430d0d1c1497281a9a6f4bcdcee20431edaa73b07b2d0e69aa",
+   "hash": "b3d21d1655658a0ac8a13346e8256a741c424bd426a9b267ba23c47c8c1538f1"
+  },
+  {
+   "seq": 4,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:04Z",
+    "type": "tool_call",
+    "tool_name": "search",
+    "call_id": "call_1",
+    "arguments": {
+     "query": "report for [REDACTED:email]",
+     "token": "[REDACTED:secret]"
+    }
+   },
+   "prev_hash": "b3d21d1655658a0ac8a13346e8256a741c424bd426a9b267ba23c47c8c1538f1",
+   "hash": "2d96a28e9cd76c43500bbaa85e2d1c1af069462d53869dc0c7e382a8b598529a"
+  },
+  {
+   "seq": 5,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_result",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:05Z",
+    "type": "tool_result",
+    "tool_name": "search",
+    "call_id": "call_1",
+    "content": "<tool_output note=\"data\">{\"content\": \"found 3 hits\"}</tool_output>",
+    "is_error": false,
+    "cache": "miss",
+    "arguments": null
+   },
+   "prev_hash": "2d96a28e9cd76c43500bbaa85e2d1c1af069462d53869dc0c7e382a8b598529a",
+   "hash": "16e7edbc7fee6620e0d0b3295299639bee1cf4d44e0af3b26d7779594639b934"
+  },
+  {
+   "seq": 6,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:06Z",
+    "type": "tool_call",
+    "tool_name": "delegate_task",
+    "call_id": "call_2",
+    "arguments": {
+     "agent": "writer",
+     "task": "Write it up"
+    }
+   },
+   "prev_hash": "16e7edbc7fee6620e0d0b3295299639bee1cf4d44e0af3b26d7779594639b934",
+   "hash": "5118757332655d00e202d94c04fe7926837d0e901280f263bd7352a9c926c52c"
+  },
+  {
+   "seq": 7,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:07Z",
+    "type": "delegation",
+    "target": "writer",
+    "task": "Write it up for [REDACTED:email]",
+    "mode": "delegate",
+    "correlation_id": "corr_1"
+   },
+   "prev_hash": "5118757332655d00e202d94c04fe7926837d0e901280f263bd7352a9c926c52c",
+   "hash": "af03ba8186506c1b72ba31d0610076970d774c678c485563e725eb250e6c4e32"
+  },
+  {
+   "seq": 8,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_started",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": "lead_run",
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:08Z",
+    "type": "agent_started",
+    "parent_run_id": "lead_run",
+    "input_preview": "Write it up",
+    "kind": "agent",
+    "session_id": null,
+    "agent_call_id": null,
+    "tool_call_id": "call_2",
+    "branch": null
+   },
+   "prev_hash": "af03ba8186506c1b72ba31d0610076970d774c678c485563e725eb250e6c4e32",
+   "hash": "5b38622889c6d7135cabbc7ec19b6b7e040e12d57573dc7ef9fb824e9e530b14"
+  },
+  {
+   "seq": 9,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_call",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:09Z",
+    "type": "tool_call",
+    "tool_name": "transfer_to_editor",
+    "call_id": "call_3",
+    "arguments": {
+     "note": "hand over"
+    }
+   },
+   "prev_hash": "5b38622889c6d7135cabbc7ec19b6b7e040e12d57573dc7ef9fb824e9e530b14",
+   "hash": "a5152d643d37b85e4d3f0ef4a6caa40b568581f32aa90f2468d76866786be841"
+  },
+  {
+   "seq": 10,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "tool_result",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:10Z",
+    "type": "tool_result",
+    "tool_name": "fetch",
+    "call_id": "call_4",
+    "content": "HTTP 500 from server",
+    "is_error": true,
+    "cache": null,
+    "arguments": null
+   },
+   "prev_hash": "a5152d643d37b85e4d3f0ef4a6caa40b568581f32aa90f2468d76866786be841",
+   "hash": "b111974a08620851b6db21daa3e7ac6c2cfd23d19f6319a7dd54f31f6279f786"
+  },
+  {
+   "seq": 11,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_finished",
+   "run_id": "writer_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "writer",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "writer_run",
+    "root_run_id": "root",
+    "agent": "writer",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:11Z",
+    "type": "agent_finished",
+    "output_preview": "The summary is done",
+    "usage": {
+     "requests": 1,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "cache_read_tokens": 40,
+     "cache_write_tokens": 0,
+     "tool_calls": 0,
+     "by_agent": {
+      "lead": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     },
+     "by_model": {
+      "gpt-test": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     }
+    },
+    "duration_ms": 3000
+   },
+   "prev_hash": "b111974a08620851b6db21daa3e7ac6c2cfd23d19f6319a7dd54f31f6279f786",
+   "hash": "83f5af8db4e27aba85a378350009cd4aacc1abb5a33fc143f914ef85a9fd1703"
+  },
+  {
+   "seq": 12,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation_result",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:12Z",
+    "type": "delegation_result",
+    "target": "writer",
+    "correlation_id": "corr_1",
+    "status": "ok",
+    "content_preview": "The summary is done"
+   },
+   "prev_hash": "83f5af8db4e27aba85a378350009cd4aacc1abb5a33fc143f914ef85a9fd1703",
+   "hash": "ea8e468293045bc4624606b1bc43f0986b34bc720f3fec199d4cd4d460bb8c7c"
+  },
+  {
+   "seq": 13,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "delegation",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:13Z",
+    "type": "delegation",
+    "target": "critic",
+    "task": "Is it right?",
+    "mode": "consult",
+    "correlation_id": "corr_2"
+   },
+   "prev_hash": "ea8e468293045bc4624606b1bc43f0986b34bc720f3fec199d4cd4d460bb8c7c",
+   "hash": "7cefd68744289f2529e030c24e1df75c844513080a4a13b0f7b2d92cb102b099"
+  },
+  {
+   "seq": 14,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "handoff",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:14Z",
+    "type": "handoff",
+    "source": "lead",
+    "target": "editor",
+    "reason": "needs polish"
+   },
+   "prev_hash": "7cefd68744289f2529e030c24e1df75c844513080a4a13b0f7b2d92cb102b099",
+   "hash": "8511c3539d69ca57cbdc8942eb75a54ffb2733a7a7e6485807c358261b36a03c"
+  },
+  {
+   "seq": 15,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_message",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:15Z",
+    "type": "agent_message",
+    "message": {
+     "id": "msg_1",
+     "kind": "request",
+     "sender": "lead",
+     "recipient": "writer",
+     "topic": "drafts",
+     "subject": "Draft for [REDACTED:email]",
+     "content": "Please write the summary.",
+     "data": {},
+     "conversation_id": "conv_1",
+     "correlation_id": null,
+     "reply_to": null,
+     "priority": 1,
+     "created_at": "2026-01-01T00:00:00Z",
+     "expires_at": null,
+     "headers": {},
+     "run_id": null
+    }
+   },
+   "prev_hash": "8511c3539d69ca57cbdc8942eb75a54ffb2733a7a7e6485807c358261b36a03c",
+   "hash": "5994c039891f9e276f0850617938015f8f08c8c90930fe36d4c63b2deb5baab7"
+  },
+  {
+   "seq": 16,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "message_undelivered",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:16Z",
+    "type": "message_undelivered",
+    "message": {
+     "id": "msg_1",
+     "kind": "request",
+     "sender": "lead",
+     "recipient": "writer",
+     "topic": "drafts",
+     "subject": "Draft for [REDACTED:email]",
+     "content": "Please write the summary.",
+     "data": {},
+     "conversation_id": "conv_1",
+     "correlation_id": null,
+     "reply_to": null,
+     "priority": 1,
+     "created_at": "2026-01-01T00:00:00Z",
+     "expires_at": null,
+     "headers": {},
+     "run_id": null
+    },
+    "recipient": "writer",
+    "reason": "mailbox full"
+   },
+   "prev_hash": "5994c039891f9e276f0850617938015f8f08c8c90930fe36d4c63b2deb5baab7",
+   "hash": "36bc49cdf2d9d570141bd6a7e3e8542f4b5947764d883552d9eabc8d9c9773e8"
+  },
+  {
+   "seq": 17,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "approval_requested",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:17Z",
+    "type": "approval_requested",
+    "tool": "send_mail",
+    "interrupt_id": "int_1",
+    "args_preview": "{\"to\": \"[REDACTED:email]\"}",
+    "reason": "needs a person",
+    "thread_id": "thread_1",
+    "expires_at": "2026-01-01T01:00:00Z"
+   },
+   "prev_hash": "36bc49cdf2d9d570141bd6a7e3e8542f4b5947764d883552d9eabc8d9c9773e8",
+   "hash": "6dc6a0ca150c1ca5ffc80c32d753b4ae17aca27534d7c2ffbf78b63f380c678a"
+  },
+  {
+   "seq": 18,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "approval_decided",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": "boss@example.com",
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:18Z",
+    "type": "approval_decided",
+    "tool": "send_mail",
+    "decision": "approve",
+    "interrupt_id": "int_1",
+    "reviewer": "[REDACTED:email]",
+    "note": "fine",
+    "latency_ms": 900,
+    "remembered": true,
+    "expired": true,
+    "thread_id": null
+   },
+   "prev_hash": "6dc6a0ca150c1ca5ffc80c32d753b4ae17aca27534d7c2ffbf78b63f380c678a",
+   "hash": "ab8780d56819f5c104701fd4435c65ebed10aec00aa8e95d81ca343c67ecfbd4"
+  },
+  {
+   "seq": 19,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "guardrail_blocked",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:19Z",
+    "type": "guardrail_blocked",
+    "guardrail": "pii",
+    "stage": "tool",
+    "reason": "mail address [REDACTED:email]",
+    "tool": "send_mail"
+   },
+   "prev_hash": "ab8780d56819f5c104701fd4435c65ebed10aec00aa8e95d81ca343c67ecfbd4",
+   "hash": "5e16faa4d89b134ef93c1944adb3d9b3ebbdaa2e1e420e72b77c8c6aeb44d9a8"
+  },
+  {
+   "seq": 20,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "limit_exceeded",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:20Z",
+    "type": "limit_exceeded",
+    "limit": "tool_calls",
+    "value": 11.0,
+    "maximum": 10.0,
+    "message": "too many tool calls"
+   },
+   "prev_hash": "5e16faa4d89b134ef93c1944adb3d9b3ebbdaa2e1e420e72b77c8c6aeb44d9a8",
+   "hash": "170207877bc5dfcb2be406c9fb9807592df0d86d84cfb6d8b47a5bd6877cb39c"
+  },
+  {
+   "seq": 21,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "step",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:21Z",
+    "type": "step",
+    "step": "check",
+    "index": 1,
+    "total": 3,
+    "status": "failed",
+    "title": "Check the totals",
+    "checks": [
+     {
+      "id": "sum",
+      "kind": "rule",
+      "passed": false,
+      "message": "off by 2"
+     },
+     {
+      "id": "names",
+      "kind": "rule",
+      "passed": true
+     }
+    ],
+    "message": "totals differ",
+    "attempt": 2,
+    "case": "case_1"
+   },
+   "prev_hash": "170207877bc5dfcb2be406c9fb9807592df0d86d84cfb6d8b47a5bd6877cb39c",
+   "hash": "0637fed4514d2260a7eee4682b268620efe14fe754b82d55164672f5eb54fcce"
+  },
+  {
+   "seq": 22,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_retry",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:22Z",
+    "type": "model_retry",
+    "model": "gpt-test",
+    "attempt": 2,
+    "delay": 1.5,
+    "error_type": "RateLimitError",
+    "kind": "rate_limit",
+    "status": 429
+   },
+   "prev_hash": "0637fed4514d2260a7eee4682b268620efe14fe754b82d55164672f5eb54fcce",
+   "hash": "a14114ebd0a3ff6f99c9605e0567e899a0073d5bd993543514e2f11829fc17a7"
+  },
+  {
+   "seq": 23,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "output_retry",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:23Z",
+    "type": "output_retry",
+    "check": "schema",
+    "attempt": 1,
+    "max_retries": 3,
+    "kind": "schema"
+   },
+   "prev_hash": "a14114ebd0a3ff6f99c9605e0567e899a0073d5bd993543514e2f11829fc17a7",
+   "hash": "f74fa1bd8189f6eb5201b80754dd1034a90653bb39a6cfec02c25089e6cfd4c6"
+  },
+  {
+   "seq": 24,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "model_fallback",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:24Z",
+    "type": "model_fallback",
+    "from_model": "gpt-test",
+    "to_model": "gpt-small",
+    "reason": "overloaded",
+    "error_type": "APIError"
+   },
+   "prev_hash": "f74fa1bd8189f6eb5201b80754dd1034a90653bb39a6cfec02c25089e6cfd4c6",
+   "hash": "a423e36da03c477686c16c715b293d7c1aaae1007fbee5b2634be257bd4f1940"
+  },
+  {
+   "seq": 25,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "error",
+   "run_id": "lead_run",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "lead_run",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 1,
+    "timestamp": "2026-01-01T00:00:25Z",
+    "type": "error",
+    "error_type": "UsageLimitExceeded",
+    "message": "tool call limit reached for [REDACTED:email]",
+    "stop": {
+     "stop_reason": "usage_limit",
+     "category": "limit",
+     "bound": "tool_calls",
+     "value": 11,
+     "maximum": 10,
+     "last_steps": [
+      "search",
+      "send_mail"
+     ]
+    }
+   },
+   "prev_hash": "a423e36da03c477686c16c715b293d7c1aaae1007fbee5b2634be257bd4f1940",
+   "hash": "413cab001e127dd410a954c728a1ba4fec5adb0700f15f235a2b91a7a16bf190"
+  },
+  {
+   "seq": 26,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "run_cancelled",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:26Z",
+    "type": "run_cancelled",
+    "reason": "user",
+    "cancelled_by": "[REDACTED:email]",
+    "elapsed_ms": 26000
+   },
+   "prev_hash": "413cab001e127dd410a954c728a1ba4fec5adb0700f15f235a2b91a7a16bf190",
+   "hash": "6e74670c86e4eb86031bbe3f216ef2e84f83c3f7777a389069a76d830771bdff"
+  },
+  {
+   "seq": 27,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "agent_finished",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:27Z",
+    "type": "agent_finished",
+    "output_preview": "Done",
+    "usage": {
+     "requests": 1,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "cache_read_tokens": 40,
+     "cache_write_tokens": 0,
+     "tool_calls": 0,
+     "by_agent": {
+      "lead": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     },
+     "by_model": {
+      "gpt-test": {
+       "requests": 1,
+       "input_tokens": 120,
+       "output_tokens": 30,
+       "cache_read_tokens": 40,
+       "cache_write_tokens": 0,
+       "tool_calls": 0,
+       "by_agent": {},
+       "by_model": {}
+      }
+     }
+    },
+    "duration_ms": 27000
+   },
+   "prev_hash": "6e74670c86e4eb86031bbe3f216ef2e84f83c3f7777a389069a76d830771bdff",
+   "hash": "05d5fd19b8b069bbbe9432c5aafa1f85d0d829fafd8828750b0bad4d5025e30a"
+  },
+  {
+   "seq": 28,
+   "recorded_at": "2026-01-01T00:00:00Z",
+   "event_type": "run_completed",
+   "run_id": "root",
+   "root_run_id": "root",
+   "parent_run_id": null,
+   "agent": "lead",
+   "actor": null,
+   "tenant": null,
+   "request_id": null,
+   "data": {
+    "run_id": "root",
+    "root_run_id": "root",
+    "agent": "lead",
+    "depth": 0,
+    "timestamp": "2026-01-01T00:00:28Z",
+    "type": "run_completed"
+   },
+   "prev_hash": "05d5fd19b8b069bbbe9432c5aafa1f85d0d829fafd8828750b0bad4d5025e30a",
+   "hash": "31ac9b0967c5a3d232bf2dc13659258b60f9e9d192017c39a62cffc39d4fd31e"
+  }
+ ],
+ "trace_view": {
+  "summary": {
+   "text": "Trace of run summary\n  file <file> (level summary)\nResult: paused, waiting for an approval\nTotals: 1 model call, 150 tokens (120 in, 30 out), time 27.0 s\n        agents 3, tool calls 3 (0 only hand work to other agents), delegations 1, consultations 1, handoffs 1, approvals 1 asked / 1 answered\n\nWhat went wrong:\n  - writer: tool fetch failed: HTTP 500 from server\n  - lead: guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]\n  - lead: limit tool_calls reached (11 > 10)\n  - lead: step check failed: totals differ\n  - lead: UsageLimitExceeded: tool call limit reached for [REDACTED:email]\n  - lead: run stopped: user after 26.0 s\n\nteam lead  [no model calls, 27.0 s]\n  agent lead  [1 model call, 150 tokens, 24.0 s]\n    tool search {\"query\": \"report for [REDACTED:email]\", \"token\": \"[REDACTED:secret]\"} -> ok (1.0 s)\n    delegates to writer -> ok\n      agent writer  [no model calls, 3.0 s]\n        tool transfer_to_editor {} -> no result recorded\n        tool fetch  -> error (after the approval)\n          error: HTTP 500 from server\n    consults critic -> no result recorded\n    hands over to editor\n    message request lead -> writer\n    ! message to writer never delivered (mailbox full)\n    approval for send_mail: expired, treated as rejected by [REDACTED:email] after 900 ms (fine) (remembered earlier decision)\n    ! BLOCKED guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]\n    ! LIMIT limit tool_calls reached (11 > 10)\n    step 2/3 check Check the totals (lead): failed (try 2) [case_1]\n      check sum failed: off by 2\n      totals differ\n    ! model gpt-test failed (rate_limit), retry 2 in 1.5 s\n    ! model gpt-test gave up (overloaded), using gpt-small\n    ! ERROR UsageLimitExceeded: tool call limit reached for [REDACTED:email]\n  ! STOPPED run stopped: user after 26.0 s\n\nNote: level summary keeps no message texts (prompts, replies, tool results). Record with level full to see them.\nNote: no prices, so no cost. Add `prices:` to the blueprint or pass --prices FILE.\n",
+   "tree": {
+    "format": "awa.trace.tree/v1",
+    "file": "<file>",
+    "level": "summary",
+    "meta": {},
+    "root_run_id": null,
+    "outcome": "ok",
+    "totals": {
+     "model_calls": 1,
+     "tool_calls": 3,
+     "delegations": 1,
+     "consults": 1,
+     "handoffs": 1,
+     "approvals_requested": 1,
+     "approvals_decided": 1,
+     "errors": 1,
+     "model_retries": 1,
+     "agents": 3,
+     "work_tool_calls": 3,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "tokens": 150,
+     "cost": null,
+     "cost_complete": true,
+     "duration_ms": 27000,
+     "models": [
+      "gpt-test"
+     ]
+    },
+    "problems": [
+     "writer: tool fetch failed: HTTP 500 from server",
+     "lead: guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]",
+     "lead: limit tool_calls reached (11 > 10)",
+     "lead: step check failed: totals differ",
+     "lead: UsageLimitExceeded: tool call limit reached for [REDACTED:email]",
+     "lead: run stopped: user after 26.0 s"
+    ],
+    "truncated": false,
+    "roots": [
+     {
+      "agent": "lead",
+      "kind": "team",
+      "run_ids": [
+       "root"
+      ],
+      "model_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "tokens": 0,
+      "cost": null,
+      "duration_ms": 27000,
+      "errors": [],
+      "items": [
+       {
+        "type": "run",
+        "agent": "lead",
+        "run": {
+         "agent": "lead",
+         "kind": "agent",
+         "run_ids": [
+          "lead_run"
+         ],
+         "model_calls": 1,
+         "input_tokens": 120,
+         "output_tokens": 30,
+         "tokens": 150,
+         "cost": null,
+         "duration_ms": 24000,
+         "errors": [
+          "UsageLimitExceeded: tool call limit reached for [REDACTED:email]"
+         ],
+         "items": [
+          {
+           "type": "tool",
+           "tool": "search",
+           "call_id": "call_1",
+           "arguments_preview": "{\"query\": \"report for [REDACTED:email]\", \"token\": \"[REDACTED:secret]\"}",
+           "status": "ok",
+           "result_chars": 66,
+           "latency_ms": 1000
+          },
+          {
+           "type": "tool",
+           "tool": "delegate_task",
+           "call_id": "call_2",
+           "arguments_preview": "{\"agent\": \"writer\"}",
+           "status": "no result recorded",
+           "coordination": true
+          },
+          {
+           "type": "delegation",
+           "mode": "delegate",
+           "target": "writer",
+           "status": "ok",
+           "run": {
+            "agent": "writer",
+            "kind": "agent",
+            "run_ids": [
+             "writer_run"
+            ],
+            "model_calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "tokens": 0,
+            "cost": null,
+            "duration_ms": 3000,
+            "errors": [],
+            "items": [
+             {
+              "type": "tool",
+              "tool": "transfer_to_editor",
+              "call_id": "call_3",
+              "arguments_preview": "{}",
+              "status": "no result recorded"
+             },
+             {
+              "type": "tool",
+              "tool": "fetch",
+              "call_id": "call_4",
+              "status": "error",
+              "error": "HTTP 500 from server",
+              "result_chars": 20,
+              "waited": true
+             }
+            ]
+           }
+          },
+          {
+           "type": "delegation",
+           "mode": "consult",
+           "target": "critic",
+           "status": "no result recorded"
+          },
+          {
+           "type": "handoff",
+           "source": "lead",
+           "target": "editor"
+          },
+          {
+           "type": "agent_message",
+           "ts": "2026-01-01T00:00:15.000+00:00",
+           "run_id": "lead_run",
+           "agent": "lead",
+           "depth": 1,
+           "root_run_id": "root",
+           "kind": "request",
+           "sender": "lead",
+           "recipient": "writer",
+           "topic": "drafts",
+           "message_id": "msg_1"
+          },
+          {
+           "type": "note",
+           "text": "message to writer never delivered (mailbox full)"
+          },
+          {
+           "type": "approval",
+           "tool": "send_mail",
+           "interrupt_id": "int_1",
+           "args_preview": "{\"to\": \"[REDACTED:email]\"}",
+           "decision": "approve",
+           "reviewer": "[REDACTED:email]",
+           "note": "fine",
+           "latency_ms": 900,
+           "remembered": true,
+           "expired": true
+          },
+          {
+           "type": "note",
+           "text": "BLOCKED guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]"
+          },
+          {
+           "type": "note",
+           "text": "LIMIT limit tool_calls reached (11 > 10)"
+          },
+          {
+           "type": "step",
+           "step": "check",
+           "index": 1,
+           "total": 3,
+           "title": "Check the totals",
+           "status": "failed",
+           "checks": [
+            {
+             "id": "sum",
+             "kind": "rule",
+             "passed": false,
+             "message": "off by 2"
+            },
+            {
+             "id": "names",
+             "kind": "rule",
+             "passed": true
+            }
+           ],
+           "message": "totals differ",
+           "attempt": 2,
+           "case": "case_1",
+           "step_agent": "lead"
+          },
+          {
+           "type": "note",
+           "text": "model gpt-test failed (rate_limit), retry 2 in 1.5 s"
+          },
+          {
+           "type": "note",
+           "text": "model gpt-test gave up (overloaded), using gpt-small"
+          },
+          {
+           "type": "note",
+           "text": "ERROR UsageLimitExceeded: tool call limit reached for [REDACTED:email]"
+          }
+         ]
+        }
+       },
+       {
+        "type": "note",
+        "text": "STOPPED run stopped: user after 26.0 s"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "full": {
+   "text": "Trace of run full\n  file <file> (level full)\nResult: paused, waiting for an approval\nTotals: 1 model call, 150 tokens (120 in, 30 out), time 27.0 s\n        agents 3, tool calls 3 (0 only hand work to other agents), delegations 1, consultations 1, handoffs 1, approvals 1 asked / 1 answered\n\nWhat went wrong:\n  - writer: tool fetch failed: HTTP 500 from server\n  - lead: guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]\n  - lead: limit tool_calls reached (11 > 10)\n  - lead: step check failed: totals differ\n  - lead: UsageLimitExceeded: tool call limit reached for [REDACTED:email]\n  - lead: run stopped: user after 26.0 s\n\nteam lead  [no model calls, 27.0 s]\n  input: Summarise the report for [REDACTED:email]\n  agent lead  [1 model call, 150 tokens, 24.0 s]\n    input: Summarise the report\n    said: Calling the search tool\n    tool search {\"query\": \"report for [REDACTED:email]\", \"token\": \"[REDACTED:secret]\"} -> ok (1.0 s)\n      result: <tool_output note=\"data\">{\"content\": \"found 3 hits\"}</tool_output>\n    delegates to writer - Write it up for [REDACTED:email] -> ok\n      agent writer  [no model calls, 3.0 s]\n        input: Write it up\n        tool transfer_to_editor {\"note\": \"hand over\"} -> no result recorded\n        tool fetch  -> error (after the approval)\n          error: HTTP 500 from server\n          result: HTTP 500 from server\n        output: The summary is done\n      answer: The summary is done\n    consults critic - Is it right? -> no result recorded\n    hands over to editor (needs polish)\n    message request lead -> writer: Draft for [REDACTED:email]\n    ! message to writer never delivered (mailbox full)\n    approval for send_mail: expired, treated as rejected by [REDACTED:email] after 900 ms (fine) (remembered earlier decision)\n    ! BLOCKED guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]\n    ! LIMIT limit tool_calls reached (11 > 10)\n    step 2/3 check Check the totals (lead): failed (try 2) [case_1]\n      check sum failed: off by 2\n      totals differ\n    ! model gpt-test failed (rate_limit), retry 2 in 1.5 s\n    ! model gpt-test gave up (overloaded), using gpt-small\n    ! ERROR UsageLimitExceeded: tool call limit reached for [REDACTED:email]\n  ! STOPPED run stopped: user after 26.0 s\n  output: Done\n\nNote: no prices, so no cost. Add `prices:` to the blueprint or pass --prices FILE.\n",
+   "tree": {
+    "format": "awa.trace.tree/v1",
+    "file": "<file>",
+    "level": "full",
+    "meta": {},
+    "root_run_id": null,
+    "outcome": "ok",
+    "totals": {
+     "model_calls": 1,
+     "tool_calls": 3,
+     "delegations": 1,
+     "consults": 1,
+     "handoffs": 1,
+     "approvals_requested": 1,
+     "approvals_decided": 1,
+     "errors": 1,
+     "model_retries": 1,
+     "agents": 3,
+     "work_tool_calls": 3,
+     "input_tokens": 120,
+     "output_tokens": 30,
+     "tokens": 150,
+     "cost": null,
+     "cost_complete": true,
+     "duration_ms": 27000,
+     "models": [
+      "gpt-test"
+     ]
+    },
+    "problems": [
+     "writer: tool fetch failed: HTTP 500 from server",
+     "lead: guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]",
+     "lead: limit tool_calls reached (11 > 10)",
+     "lead: step check failed: totals differ",
+     "lead: UsageLimitExceeded: tool call limit reached for [REDACTED:email]",
+     "lead: run stopped: user after 26.0 s"
+    ],
+    "truncated": false,
+    "roots": [
+     {
+      "agent": "lead",
+      "kind": "team",
+      "run_ids": [
+       "root"
+      ],
+      "model_calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "tokens": 0,
+      "cost": null,
+      "duration_ms": 27000,
+      "errors": [],
+      "items": [
+       {
+        "type": "input",
+        "text": "Summarise the report for [REDACTED:email]"
+       },
+       {
+        "type": "run",
+        "agent": "lead",
+        "run": {
+         "agent": "lead",
+         "kind": "agent",
+         "run_ids": [
+          "lead_run"
+         ],
+         "model_calls": 1,
+         "input_tokens": 120,
+         "output_tokens": 30,
+         "tokens": 150,
+         "cost": null,
+         "duration_ms": 24000,
+         "errors": [
+          "UsageLimitExceeded: tool call limit reached for [REDACTED:email]"
+         ],
+         "items": [
+          {
+           "type": "input",
+           "text": "Summarise the report"
+          },
+          {
+           "type": "said",
+           "text": "Calling the search tool"
+          },
+          {
+           "type": "tool",
+           "tool": "search",
+           "call_id": "call_1",
+           "arguments": {
+            "query": "report for [REDACTED:email]",
+            "token": "[REDACTED:secret]"
+           },
+           "status": "ok",
+           "result": "<tool_output note=\"data\">{\"content\": \"found 3 hits\"}</tool_output>",
+           "result_chars": 66,
+           "latency_ms": 1000
+          },
+          {
+           "type": "tool",
+           "tool": "delegate_task",
+           "call_id": "call_2",
+           "arguments": {
+            "agent": "writer",
+            "task": "Write it up"
+           },
+           "status": "no result recorded",
+           "coordination": true
+          },
+          {
+           "type": "delegation",
+           "mode": "delegate",
+           "target": "writer",
+           "task": "Write it up for [REDACTED:email]",
+           "status": "ok",
+           "result": "The summary is done",
+           "run": {
+            "agent": "writer",
+            "kind": "agent",
+            "run_ids": [
+             "writer_run"
+            ],
+            "model_calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "tokens": 0,
+            "cost": null,
+            "duration_ms": 3000,
+            "errors": [],
+            "items": [
+             {
+              "type": "input",
+              "text": "Write it up"
+             },
+             {
+              "type": "tool",
+              "tool": "transfer_to_editor",
+              "call_id": "call_3",
+              "arguments": {
+               "note": "hand over"
+              },
+              "status": "no result recorded"
+             },
+             {
+              "type": "tool",
+              "tool": "fetch",
+              "call_id": "call_4",
+              "status": "error",
+              "error": "HTTP 500 from server",
+              "result": "HTTP 500 from server",
+              "result_chars": 20,
+              "waited": true
+             },
+             {
+              "type": "output",
+              "text": "The summary is done"
+             }
+            ]
+           }
+          },
+          {
+           "type": "delegation",
+           "mode": "consult",
+           "target": "critic",
+           "task": "Is it right?",
+           "status": "no result recorded"
+          },
+          {
+           "type": "handoff",
+           "source": "lead",
+           "target": "editor",
+           "reason": "needs polish"
+          },
+          {
+           "type": "agent_message",
+           "ts": "2026-01-01T00:00:15.000+00:00",
+           "run_id": "lead_run",
+           "agent": "lead",
+           "depth": 1,
+           "root_run_id": "root",
+           "kind": "request",
+           "sender": "lead",
+           "recipient": "writer",
+           "topic": "drafts",
+           "message_id": "msg_1",
+           "subject": "Draft for [REDACTED:email]",
+           "content": "Please write the summary."
+          },
+          {
+           "type": "note",
+           "text": "message to writer never delivered (mailbox full)"
+          },
+          {
+           "type": "approval",
+           "tool": "send_mail",
+           "interrupt_id": "int_1",
+           "args_preview": "{\"to\": \"[REDACTED:email]\"}",
+           "decision": "approve",
+           "reviewer": "[REDACTED:email]",
+           "note": "fine",
+           "latency_ms": 900,
+           "remembered": true,
+           "expired": true
+          },
+          {
+           "type": "note",
+           "text": "BLOCKED guardrail pii blocked the tool on tool send_mail: mail address [REDACTED:email]"
+          },
+          {
+           "type": "note",
+           "text": "LIMIT limit tool_calls reached (11 > 10)"
+          },
+          {
+           "type": "step",
+           "step": "check",
+           "index": 1,
+           "total": 3,
+           "title": "Check the totals",
+           "status": "failed",
+           "checks": [
+            {
+             "id": "sum",
+             "kind": "rule",
+             "passed": false,
+             "message": "off by 2"
+            },
+            {
+             "id": "names",
+             "kind": "rule",
+             "passed": true
+            }
+           ],
+           "message": "totals differ",
+           "attempt": 2,
+           "case": "case_1",
+           "step_agent": "lead"
+          },
+          {
+           "type": "note",
+           "text": "model gpt-test failed (rate_limit), retry 2 in 1.5 s"
+          },
+          {
+           "type": "note",
+           "text": "model gpt-test gave up (overloaded), using gpt-small"
+          },
+          {
+           "type": "note",
+           "text": "ERROR UsageLimitExceeded: tool call limit reached for [REDACTED:email]"
+          }
+         ]
+        }
+       },
+       {
+        "type": "note",
+        "text": "STOPPED run stopped: user after 26.0 s"
+       },
+       {
+        "type": "output",
+        "text": "Done"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

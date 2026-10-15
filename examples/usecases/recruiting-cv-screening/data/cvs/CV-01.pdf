@@ -1,0 +1,32 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 841 >>
+stream
+BT /F1 11 Tf 72 740 Td (Lena Fischer) Tj ET BT /F1 11 Tf 72 722 Td (Email: lena.fischer@mail.example | Phone: +49 30 5550101) Tj ET BT /F1 11 Tf 72 704 Td (Date of birth: 12 April 1991 | Nationality: German | Marital status: married, 2 children) Tj ET BT /F1 11 Tf 72 686 Td ([photo attached]) Tj ET BT /F1 11 Tf 72 668 Td (Profile) Tj ET BT /F1 11 Tf 72 650 Td (Data engineer building batch and streaming pipelines.) Tj ET BT /F1 11 Tf 72 632 Td (Professional experience) Tj ET BT /F1 11 Tf 72 614 Td (2020 - present: Data Engineer, Fjord Logistics GmbH \(Berlin\)) Tj ET BT /F1 11 Tf 72 596 Td (Skills: Python, SQL, PostgreSQL, AWS \(S3, Glue, Redshift\), Airflow, dbt, Docker) Tj ET BT /F1 11 Tf 72 578 Td (Languages: German \(native\), English \(fluent\)) Tj ET BT /F1 11 Tf 72 560 Td (Education: M.Sc. Computer Science, TU Berlin) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001133 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1203
+%%EOF

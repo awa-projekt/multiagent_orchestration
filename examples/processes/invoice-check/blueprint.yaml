@@ -1,0 +1,111 @@
+format_version: awa/v1
+name: invoice-check
+description: >
+  Reads one supplier invoice, compares its lines with a price list and asks a person before an
+  invoice that is large or deviates from the list is passed on.
+version: 1.0.0
+limits:
+  max_requests: 40
+  max_duration: 10m
+toolkits:
+  files:
+    root: data/files
+agents:
+  - name: extractor
+    description: Reads one supplier invoice and returns its fields.
+    instructions: |
+      You extract the fields of one supplier invoice.
+      The request names the invoice file. Read it with the read_file tool and return the
+      supplier, the invoice number, the total and the lines (item, quantity, unit_price).
+      Return exactly what is printed. A value that is not printed stays empty; never guess one.
+    tools: [builtin:read_file]
+    output_schema:
+      type: object
+      properties:
+        supplier: {type: string}
+        invoice_number: {type: string}
+        total: {type: number}
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              item: {type: string}
+              quantity: {type: number}
+              unit_price: {type: number}
+      required: [supplier, invoice_number, total, lines]
+  - name: price_checker
+    description: Compares the invoice lines with the price list.
+    instructions: |
+      You compare invoice lines with the price list.
+      The invoice fields come from the previous step as JSON. Look every line up in the price
+      list (the document of this step, read with the read_file tool) and return ok, the largest
+      deviation of a unit price from the list in percent, and the deviating lines.
+    documents: [price_list]
+    tools: [builtin:read_file]
+    output_schema:
+      type: object
+      properties:
+        ok: {type: boolean}
+        total: {type: number}
+        max_deviation_pct: {type: number}
+        deviations:
+          type: array
+          items: {type: object}
+      required: [ok, total, max_deviation_pct]
+  - name: decider
+    description: Prepares the decision on the invoice for a person.
+    instructions: |
+      You prepare the decision on one invoice.
+      The result of the price comparison comes from the previous step as JSON. Return a
+      recommendation (approve, or hold when a line deviates), the total, the largest deviation in
+      percent and a one-sentence summary for the person who decides.
+    output_schema:
+      type: object
+      properties:
+        recommendation: {type: string, enum: [approve, hold]}
+        total: {type: number}
+        max_deviation_pct: {type: number}
+        summary: {type: string}
+      required: [recommendation, total, max_deviation_pct, summary]
+data:
+  - name: invoices
+    path: data/files/invoice_*.txt
+    role: input
+    description: Supplier invoices; the request names the one to check.
+  - name: price_list
+    path: data/files/price_list.csv
+    role: reference
+    description: The agreed unit price of every item.
+    handling: Look every invoice line up by its item code.
+    expect:
+      columns: [item, unit_price]
+      key: [item]
+      decimal: "."
+process:
+  carry: previous
+  steps:
+    - name: extract
+      title: Read the invoice
+      agent: extractor
+      checks:
+        - kind: schema
+        - kind: rule
+          fail_when: "empty(supplier) or empty(invoice_number) or total <= 0"
+          message: The invoice has no supplier, no invoice number, or a total of zero or less.
+    - name: validate
+      title: Compare with the price list
+      agent: price_checker
+      checks:
+        - kind: schema
+        - kind: rule
+          fail_when: "max_deviation_pct > 25"
+          message: A line is more than 25 percent away from the list price. This is likely a wrong item, not a price change.
+    - name: decide
+      title: Decide on the invoice
+      agent: decider
+      checks:
+        - kind: schema
+        - kind: approval
+          when: "total >= 5000 or max_deviation_pct > 2"
+          reason: Large invoices, and invoices that deviate from the price list, are decided by a person.

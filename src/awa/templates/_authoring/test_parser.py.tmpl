@@ -1,0 +1,27 @@
+"""Tests for the own {{kind}} parser: the awa contract suite and one sample of your own."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from awa.testing.plugin_contract import verify  # noqa: E402
+from awa.data import parsers_override, profile  # noqa: E402
+
+from {{kind}}_parser import profile_{{kind}}  # noqa: E402
+
+
+def test_it_passes_the_contract_of_parser_{{kind}}() -> None:
+    result = verify("parser.{{kind}}", profile_{{kind}})
+    assert result.passed, result.summary()
+
+
+def test_it_reads_a_sample(tmp_path: Path) -> None:
+    sample = tmp_path / "sample.txt"
+    sample.write_text("first\nsecond\n", encoding="utf-8")
+    with parsers_override({"{{kind}}": profile_{{kind}}}):
+        found = profile([sample]).files[0]
+    if found.kind == "{{kind}}":
+        assert found.text is not None and found.text.lines == 2

@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. What starts the run: a file that appears in a folder.
+2. The folder to watch.
+3. Which files count.
+4. What each run is asked. {payload.name} and {payload.text} come from the file.
+5. Writes the trigger into blueprint.yaml.

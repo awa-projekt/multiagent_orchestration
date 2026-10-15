@@ -1,0 +1,54 @@
+# Automation end to end: a webhook, a dropped file and a weekly schedule start the same clerk.
+#
+# Invoices arrive over a web request (shared token) or as files dropped into inbox/; the clerk
+# books each one in ledger.csv, and bookings from 1,000 EUR on wait for a person: the run
+# pauses, survives a restart, and `awa runs decide` releases it. A weekly schedule summarizes
+# the ledger. The benchmark serves it in process (the server runs the worker) with the runs in
+# a local .awa/ folder, the same way `awa serve` does.
+#
+#   cd examples/benchmarks/core/06_automation
+#   awa serve blueprint.yaml --tools tools.py
+#   awa runs list --status waiting
+#   awa runs decide RUN_ID --approve
+name: ledger-desk
+description: Books supplier invoices from webhooks and dropped files; large ones wait for approval.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 6
+
+agents:
+  - name: clerk
+    description: Books supplier invoices in the ledger.
+    instructions: |
+      You receive one supplier invoice. Book it with book_invoice using its invoice number,
+      supplier and gross amount in EUR (for a file, read these from its text). If one of them is
+      missing, do not book: answer with what is missing. If the booking is rejected, answer with
+      the reviewer's note and say that nothing was booked. For a weekly summary, call
+      ledger_summary and report its count and total.
+    tools: [book_invoice, ledger_summary]
+
+approvals:
+  - tool: book_invoice
+    when: "amount >= 1000"
+
+# What one run may use at most; a run that reaches a limit stops and fails.
+limits: {max_requests: 40, max_duration: 5m}
+
+triggers:
+  - name: portal
+    webhook: {scheme: token, secret_env: BENCH_WEBHOOK_TOKEN}
+    input: "Book invoice {payload.invoice_no} from {payload.supplier} over {payload.amount} EUR."
+    dedup: "{payload.invoice_no}"
+  - name: inbox
+    file_drop: {directory: inbox}
+    input: "Book the invoice in the file {payload.name}:\n{payload.text|\"(no text)\"}"
+  - name: weekly-summary
+    schedule: {cron: "0 7 * * MON", timezone: Europe/Berlin}
+    input: "Summarize the bookings of the week before {payload.date}."
+
+automation:
+  retry: {max_attempts: 2, initial: 5s}
+  sla: {approval_within: 1d, remind_every: 4h}
+  run_timeout: 5m

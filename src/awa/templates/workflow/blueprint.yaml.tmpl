@@ -1,0 +1,74 @@
+# {{name}}: a fixed review workflow.
+#
+# intake fetches and summarizes the document; policy_checker and risk_checker
+# review it in parallel; reviewer merges their findings into a structured verdict.
+# The steps always run in this order, so this is a workflow, not a team.
+#
+# To gate an action (for example sending the verdict), list its tool under
+# `approvals:`: a step that calls it pauses the whole workflow until a person
+# decides (`awa run` asks in the terminal), then the workflow continues.
+#
+#   awa validate blueprint.yaml
+#   awa show blueprint.yaml --mermaid
+#   awa run blueprint.yaml "Review document DOC-7." --stream
+name: {{name}}
+description: Reviews a document against policy and risk and returns a verdict.
+version: 0.1.0
+
+defaults:
+  model: {{model}}
+  max_steps: 8
+
+agents:
+  - name: intake
+    description: Fetches the document and summarizes the passages that need review.
+    instructions: |
+      Fetch the document with fetch_document. Summarize it in at most five sentences,
+      then quote every passage about personal data, payments or deadlines.
+    tools: [fetch_document]
+
+  - name: policy_checker
+    description: Checks the document against the company policies.
+    instructions: |
+      Look up the relevant policies with lookup_policy. For each passage that breaks a
+      policy, quote it and name the policy. Say "no findings" if there are none.
+    tools: [lookup_policy]
+    capabilities: [compliance]
+
+  - name: risk_checker
+    description: Rates the business risk of the document.
+    instructions: |
+      Rate the risk of the document as low, medium or high and give the two main reasons.
+
+  - name: reviewer
+    description: Merges all findings into one verdict.
+    instructions: |
+      You receive the request, the summary and both reviews. Decide "approve" when no
+      policy is broken and the risk is not high, otherwise "revise".
+    output_schema:
+      type: object
+      properties:
+        verdict:
+          enum: [approve, revise]
+        summary:
+          type: string
+          description: Two sentences for the document owner.
+        findings:
+          type: array
+          items: {type: string}
+      required: [verdict, summary, findings]
+
+workflow:
+  sequential:
+    - intake
+    - parallel: [policy_checker, risk_checker]
+      name: checks
+    - reviewer
+  carry: all
+
+# The most one run may use, also a run a trigger starts. Options such as
+# `awa run --max-requests` can only tighten it.
+limits:
+  max_requests: 50
+  max_total_tokens: 200000
+  max_duration: 5m

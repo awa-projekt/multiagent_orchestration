@@ -1,0 +1,179 @@
+# Invoice processing: from the AP inbox to a booked (or held) invoice.
+#
+# The AP coordinator has each invoice extracted, validated against the purchase order,
+# goods receipt and vendor master, and checked against the AP policy. Clean invoices are
+# booked in the ERP (above 10,000 EUR only after an AP manager approves) and the vendor is
+# told; everything else goes to the AP exception queue with the reasons.
+#
+#   awa validate examples/recipes/invoice-processing/blueprint.yaml
+#   awa run examples/recipes/invoice-processing/blueprint.yaml "Process invoice document DOC-1002." --stream
+name: invoice-processing
+description: Extracts, validates, policy-checks and books incoming supplier invoices.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 12
+
+agents:
+  - name: ap_coordinator
+    description: Runs each invoice through extraction, validation and the policy check, then books or holds it.
+    instructions: |
+      You process one supplier invoice per request for accounts payable (AP).
+      1. Delegate extraction to extractor with the document id. If it reports
+         missing_fields, skip the checks: put the invoice on hold and name each missing
+         field, so AP asks the vendor instead of anyone guessing.
+      2. Send the extracted fields (the complete JSON) to validator and policy_checker in
+         the same turn, so both checks run in parallel.
+      3. Book the invoice with book_invoice only if validator reports status "match" and
+         policy_checker reports compliant true. A match confirms the extracted fields: book
+         the extracted amounts and due date with the validator's vendor id. Invoices above
+         10,000.00 EUR are booked the same way: the book_invoice call itself waits for the AP
+         manager's approval, so never hold an invoice because it needs approval. If the
+         approval is rejected, put the invoice on hold with the reviewer's note.
+      4. Otherwise put it on hold with hold_invoice and list every reason (rule id + one
+         sentence each: what differs and what the rule says must happen next).
+      5. Notify the vendor with notify_vendor: template "booked" after a booking; template
+         "on_hold" with a short note only when the vendor must act (for example issue a
+         credit note for a price difference). Never contact the vendor about duplicates or
+         changed bank details; AP handles those through the contact on file.
+      Never book an invoice twice and never change amounts yourself.
+    tools: [book_invoice, hold_invoice, notify_vendor]
+    skills: [delegation-briefs, approval-requests]
+    output_schema:
+      type: object
+      description: The outcome for the AP ledger and the audit trail.
+      properties:
+        document_id: {type: string}
+        invoice_number: {type: string}
+        vendor_id: {type: ["string", "null"]}
+        decision: {enum: [booked, on_hold]}
+        booking_reference: {type: ["string", "null"]}
+        hold_case: {type: ["string", "null"]}
+        gross_amount: {type: number}
+        currency: {type: string}
+        reasons:
+          type: array
+          items: {type: string}
+          description: Rule ids and one-sentence explanations; empty when booked cleanly.
+        vendor_notified: {type: boolean}
+      required: [document_id, invoice_number, decision, gross_amount, currency, reasons, vendor_notified]
+
+  - name: extractor
+    description: Reads an invoice document and extracts its fields exactly as printed.
+    instructions: |
+      Fetch the document with fetch_invoice_document and extract its fields exactly as
+      printed. Amounts are numbers without thousands separators; dates are YYYY-MM-DD.
+      Put every field you cannot find in missing_fields instead of guessing.
+    tools: [fetch_invoice_document]
+    skills: [document-extraction, structured-output]
+    capabilities: [extraction]
+    output_schema:
+      type: object
+      properties:
+        document_id: {type: string}
+        vendor_name: {type: string}
+        vendor_vat_id: {type: string}
+        invoice_number: {type: string}
+        invoice_date: {type: string}
+        due_date: {type: string}
+        po_number: {type: string}
+        currency: {type: string}
+        net_amount: {type: number}
+        tax_amount: {type: number}
+        gross_amount: {type: number}
+        iban: {type: string}
+        lines:
+          type: array
+          items:
+            type: object
+            properties:
+              description: {type: string}
+              quantity: {type: number}
+              unit_price: {type: number}
+              amount: {type: number}
+            required: [description, quantity, unit_price, amount]
+        missing_fields:
+          type: array
+          items: {type: string}
+      required: [document_id, invoice_number, gross_amount, currency, lines, missing_fields]
+
+  - name: validator
+    description: Matches invoice fields against the vendor master, purchase order and goods receipt.
+    instructions: |
+      Validate the extracted invoice (three-way match, AP-1 and AP-5):
+      - the vendor exists in the vendor master (look it up by VAT id) and is active;
+      - the purchase order exists, belongs to that vendor and has the same currency;
+      - each line's quantity does not exceed the goods receipt, and its unit price is
+        within 2% of the purchase order;
+      - net amount plus VAT equals the gross amount (AP-6).
+      Report every difference with the invoice value and the expected value.
+    tools: [get_vendor, get_purchase_order, get_goods_receipt]
+    skills: [data-validation]
+    capabilities: [validation]
+    output_schema:
+      type: object
+      properties:
+        status: {enum: [match, mismatch, unknown_vendor, unknown_po]}
+        vendor_id: {type: ["string", "null"]}
+        differences:
+          type: array
+          items:
+            type: object
+            properties:
+              field: {type: string}
+              invoice_value: {type: string}
+              expected_value: {type: string}
+            required: [field, invoice_value, expected_value]
+      required: [status, differences]
+
+  - name: policy_checker
+    description: Checks an invoice against the AP policy (duplicates, bank details, approval limits).
+    instructions: |
+      Check the extracted invoice against the AP policy from get_ap_policy. Always check
+      AP-2 (search booked invoices of the vendor for the same invoice number) and AP-3
+      (compare the invoice IBAN with the vendor master). Cite the rule id for every
+      finding, and say in its detail what differs and what the rule says must happen next.
+      compliant is false when any finding has severity "block".
+      The validator checks AP-1 and AP-5 (three-way match, vendor status) at the same time:
+      leave them out, and never block an invoice because you cannot see the purchase order
+      or the goods receipt. AP-4 is never a finding: set needs_manager_approval instead (the
+      booking waits for the manager). List only rules you checked; a rule that passes is no
+      finding.
+    tools: [get_ap_policy, get_vendor, find_booked_invoices]
+    skills: [policy-compliance-check]
+    capabilities: [compliance]
+    output_schema:
+      type: object
+      properties:
+        compliant: {type: boolean}
+        needs_manager_approval: {type: boolean}
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              rule: {type: string}
+              severity: {enum: [block, warn]}
+              detail: {type: string}
+            required: [rule, severity, detail]
+      required: [compliant, needs_manager_approval, findings]
+
+team:
+  orchestrator: ap_coordinator
+  members: [extractor, validator, policy_checker]
+  messaging: false
+  limits:
+    max_delegation_depth: 1
+    max_parallel_delegations: 2
+    max_calls_per_member: 2
+    delegation_timeout: 120
+
+approvals:
+  - tool: book_invoice
+    when: tools:booking_needs_approval       # above 10,000 EUR or not in EUR (AP-4)
+  - tool: notify_vendor
+    when: tools:vendor_note_needs_approval   # free text to a vendor; templates are pre-approved
+
+tool_risks:
+  get_purchase_order: {external_action: false}  # reads the order; 'purchase' is its object

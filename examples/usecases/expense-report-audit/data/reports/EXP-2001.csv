@@ -1,0 +1,4 @@
+line,date,category,merchant,description,quantity,amount_eur,receipt
+1,2026-09-22,train,Nordwind Rail,Berlin-Hamburg return,1,89.90,EXP-2001-1.pdf
+2,2026-09-22,taxi,Hamburg Taxi,Station to customer,1,32.40,EXP-2001-2.pdf
+3,2026-09-22,meals,Cafe Elbblick,Lunch with the customer,1,41.80,EXP-2001-3.pdf

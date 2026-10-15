@@ -1,0 +1,6 @@
+Invoice RE-1042
+Supplier: ACME GmbH
+Date: 2026-09-30
+Lines:
+- A-300 Pallet of copy paper, quantity 700, unit price 9.90
+Total: 6930.00

@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. The waiting run and the trigger that started it.
+2. What it wants to do, with the exact values.
+3. Approve. The decision is saved in the project folder.

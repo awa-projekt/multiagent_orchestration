@@ -1,0 +1,6 @@
+email,name,company,plan,owner_team
+anna.keller@brauhaus-keller.example,Anna Keller,Brauhaus Keller GmbH,business,billing
+t.novak@novak-logistik.example,Tomas Novak,Novak Logistik s.r.o.,enterprise,support
+m.rossi@rossi-design.example,Marta Rossi,Rossi Design,starter,support
+purchasing@nordwind-energie.example,Purchasing,Nordwind Energie AG,enterprise,billing
+j.weber@weber-bau.example,Jonas Weber,Weber Bau GmbH,business,support

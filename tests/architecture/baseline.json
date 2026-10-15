@@ -1,0 +1,35 @@
+{
+  "counts": {
+    "GT1.adapter_inherits_adapter": 0,
+    "GT1.adapter_to_adapter": 16,
+    "GT1.adapters_built_in_domain": 7,
+    "GT1.domain_to_adapter": 29,
+    "GT1.domain_to_mixed": 8,
+    "GT1.mixed_modules": 13,
+    "GT1.ports_outside_ports_modules": 28,
+    "GT1.table_problems": 0,
+    "GT10.awa_names_outside_settings": 9,
+    "GT10.dynamic_env_reads": 10,
+    "GT2.driver_in_domain": 1,
+    "GT3.behavioral": 12,
+    "GT3.docstring_wording": 8,
+    "GT3.test_doubles_outside_homes": 18,
+    "GT4.outside_allowlist": 0,
+    "GT6.modules_with_import_effects": 0,
+    "GT7.class_singletons": 2,
+    "GT7.global_statements": 3,
+    "GT7.mutated_containers": 4,
+    "GT8.clock_calls_domain": 19,
+    "GT8.env_files_http_domain": 52,
+    "GT8.id_calls_domain": 10
+  },
+  "report_only": [
+    "GT1.adapter_inherits_adapter",
+    "GT1.adapter_to_adapter",
+    "GT1.adapters_built_in_domain",
+    "GT1.domain_to_adapter",
+    "GT1.domain_to_mixed",
+    "GT1.mixed_modules",
+    "GT1.ports_outside_ports_modules"
+  ]
+}

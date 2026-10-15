@@ -1,0 +1,110 @@
+# Contract review: parallel legal, compliance and commercial reviews, one prioritized verdict.
+#
+# Intake prepares a fact sheet of the contract; legal, compliance and commercial reviewers
+# check it against their playbooks at the same time; the editor merges their findings into
+# a structured verdict with prioritized findings and suggested redlines.
+#
+#   awa validate examples/recipes/contract-review/blueprint.yaml
+#   awa run examples/recipes/contract-review/blueprint.yaml "Review contract CT-102." --json
+name: contract-review
+description: Reviews a contract against the legal, compliance and commercial playbooks.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 6
+
+agents:
+  - name: intake
+    description: Prepares a fact sheet of the contract for the reviewers.
+    instructions: |
+      Prepare the fact sheet for one contract review. Fetch the contract with get_contract
+      and the counterparty with get_counterparty. Answer with: contract id, title,
+      counterparty (relationship and risk rating), annual value in EUR, and one line per
+      clause (number and a summary of at most 15 words). If the contract does not exist,
+      say "CONTRACT NOT FOUND" and nothing else.
+    tools: [get_contract, get_counterparty]
+    skills: [document-extraction]
+
+  - name: legal_reviewer
+    description: Reviews liability, indemnity, termination and governing law.
+    instructions: |
+      First read the fact sheet: if it says CONTRACT NOT FOUND, answer "LEGAL | not reviewed"
+      at once and call no tool. Otherwise review the contract against the legal playbook
+      (get_playbook "legal"; the contract text via get_contract). One line per finding:
+      "LEGAL | <high|medium|low> | clause <n> | <issue> | <playbook rule id, e.g. L1> | <redline or 'no fallback'>".
+      Quote the playbook's fallback redline when there is one. Answer "LEGAL | no findings"
+      if the contract meets the playbook.
+    tools: [get_contract, get_playbook]
+    skills: [policy-compliance-check]
+    capabilities: [legal]
+
+  - name: compliance_reviewer
+    description: Reviews data protection, data location, subcontractors and audit rights.
+    instructions: |
+      First read the fact sheet: if it says CONTRACT NOT FOUND, answer "COMPLIANCE | not reviewed"
+      at once and call no tool. Otherwise review the contract against the compliance playbook
+      (get_playbook "compliance"; the contract text via get_contract). One line per finding:
+      "COMPLIANCE | <high|medium|low> | clause <n> | <issue> | <playbook rule id, e.g. C1> | <redline or 'no fallback'>".
+      Processing personal data without a DPA, or outside the EU/EEA without safeguards, is
+      high. Answer "COMPLIANCE | no findings" if the contract meets the playbook.
+    tools: [get_contract, get_playbook]
+    skills: [policy-compliance-check]
+    capabilities: [compliance]
+
+  - name: commercial_reviewer
+    description: Reviews payment terms, price changes, renewal and contract value.
+    instructions: |
+      First read the fact sheet: if it says CONTRACT NOT FOUND, answer "COMMERCIAL | not reviewed"
+      at once and call no tool. Otherwise review the contract against the commercial playbook
+      (get_playbook "commercial"; the contract text via get_contract). One line per finding:
+      "COMMERCIAL | <high|medium|low> | clause <n> | <issue> | <playbook rule id, e.g. M1> | <redline or 'no fallback'>".
+      Contract value above 250,000 EUR a year is high. Answer "COMMERCIAL | no findings" if
+      the contract meets the playbook.
+    tools: [get_contract, get_playbook]
+    skills: [policy-compliance-check]
+    capabilities: [commercial]
+
+  - name: editor
+    description: Merges the reviews into one prioritized verdict with redlines.
+    instructions: |
+      Merge the fact sheet and the three reviews into one verdict for the contract owner.
+      Remove duplicates, keep every distinct finding, and number them by priority: high
+      before medium before low, legal before compliance before commercial, and then in
+      playbook rule order (L1 before L2).
+      Verdict: "cannot_review" when the fact sheet says CONTRACT NOT FOUND; "sign" when no
+      finding is above low; "escalate_to_legal" when any finding has no fallback redline or
+      liability is unlimited for us; otherwise "sign_with_changes". Risk is the highest severity
+      found ("low" when there are no findings).
+    skills: [quality-review, structured-output]
+    output_schema:
+      type: object
+      description: The review verdict.
+      properties:
+        contract_id: {type: string}
+        verdict: {enum: [sign, sign_with_changes, escalate_to_legal, cannot_review]}
+        risk: {enum: [low, medium, high]}
+        summary: {type: string, description: "At most three sentences, for the contract owner."}
+        findings:
+          type: array
+          items:
+            type: object
+            properties:
+              priority: {type: integer, minimum: 1}
+              severity: {enum: [high, medium, low]}
+              area: {enum: [legal, compliance, commercial]}
+              clause: {type: string}
+              issue: {type: string}
+              playbook_rule: {type: string, description: "The rule id only, e.g. L1, C1 or M1."}
+              suggested_redline: {type: ["string", "null"]}
+            required: [priority, severity, area, clause, issue, playbook_rule]
+      required: [contract_id, verdict, risk, summary, findings]
+
+workflow:
+  sequential:
+    - intake
+    - parallel: [legal_reviewer, compliance_reviewer, commercial_reviewer]
+      name: reviews
+      fail_fast: false
+    - editor
+  carry: all

@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. Example requests from your eval cases. A click fills the box.
+2. Every step the system takes, in plain words.
+3. What will happen, the exact values, and why you are asked.
+4. Approve: lets it go ahead.
+5. Say no: stops the step. You can leave a note.

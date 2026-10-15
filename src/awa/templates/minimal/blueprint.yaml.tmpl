@@ -1,0 +1,32 @@
+# {{name}}: one agent with a lookup tool and an approval-gated action.
+#
+#   awa validate blueprint.yaml
+#   awa chat blueprint.yaml
+name: {{name}}
+description: Answers questions about customer accounts and opens follow-up tickets.
+version: 0.1.0
+
+defaults:
+  model: {{model}}
+  max_steps: 10
+
+agents:
+  - name: assistant
+    description: Answers account questions and opens follow-up tickets.
+    instructions: |
+      You help colleagues with questions about customer accounts.
+      1. Look the account up with lookup_account before you answer.
+      2. When follow-up work is requested, open a ticket with create_ticket. A human
+         approves every ticket; if one is rejected, say so and give the reason.
+      3. Answer in at most three sentences, using only facts from your tools.
+    tools: [lookup_account, create_ticket]
+
+approvals:
+  - tool: create_ticket         # every ticket waits for a human
+
+# The most one run may use, also a run a trigger starts. Options such as
+# `awa run --max-requests` can only tighten it.
+limits:
+  max_requests: 50
+  max_total_tokens: 200000
+  max_duration: 5m

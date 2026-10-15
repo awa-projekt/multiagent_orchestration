@@ -1,0 +1,25 @@
+Trace of run desk
+  file <file> (level summary)
+Result: finished
+Totals: 12 model calls, 3,524 tokens (3,446 in, 78 out), time <time>
+        agents 6, tool calls 8 (4 only hand work to other agents), delegations 2, consultations 1, handoffs 1, approvals 2 asked / 2 answered
+
+team desk  [no model calls, <time>]
+  agent lead  [3 model calls, 1,224 tokens, <time>]
+    delegates to researcher -> ok
+      agent researcher  [3 model calls, 783 tokens, <time>]
+        tool web_search {"query": "debian first release"} -> ok (<time>)
+        tool publish {"title": "Debian 1993", "api_key": "[REDACTED:secret]"} -> ok (after the approval)
+        approval for publish: approved by alice after <time> (no reason given)
+    delegates to analyst -> ok
+      agent analyst  [2 model calls, 544 tokens, <time>]
+        consults researcher -> ok
+          agent researcher  [3 model calls, 785 tokens, <time>]
+            tool web_search {"query": "debian first release"} -> ok (<time>)
+            tool publish {"title": "Debian 1993", "api_key": "[REDACTED:secret]"} -> ok (after the approval)
+            approval for publish: approved by alice after <time> (no reason given)
+  hands over to writer
+    agent writer  [1 model call, 188 tokens, <time>]
+
+Note: level summary keeps no message texts (prompts, replies, tool results). Record with level full to see them.
+Note: no prices, so no cost. Add `prices:` to the blueprint or pass --prices FILE.

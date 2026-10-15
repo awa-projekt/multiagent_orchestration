@@ -1,0 +1,53 @@
+"""Run the agent once: `python run.py "your task"`.
+
+Approvals ask on the terminal. Variables from `.env` are loaded; the model needs its key there.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import uuid
+from pathlib import Path
+
+from dotenv import load_dotenv
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
+
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+load_dotenv()
+
+from ${package}.graph import build_graph  # noqa: E402
+
+
+def decide(request: dict) -> dict:
+    """Ask on the terminal what to do with one gated tool call."""
+
+    print(f"Approval needed: {request['name']} {json.dumps(request['args'], default=str)}")
+    answer = input("approve, reject or edit [approve]: ").strip().lower() or "approve"
+    if answer == "reject":
+        return {"type": "reject", "message": input("reason: ").strip() or "rejected"}
+    if answer == "edit":
+        args = json.loads(input("new arguments as JSON: "))
+        return {"type": "edit", "edited_action": {"name": request["name"], "args": args}}
+    return {"type": "approve"}
+
+
+def main(task: str) -> None:
+    graph = build_graph(checkpointer=InMemorySaver())
+    config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+    result = graph.invoke({"messages": [("user", task)]}, config)
+    while result.get("__interrupt__"):
+        requests = result["__interrupt__"][0].value["action_requests"]
+        decisions = [decide(request) for request in requests]
+        result = graph.invoke(Command(resume={"decisions": decisions}), config)
+    if "structured_response" in result:
+        print(json.dumps(result["structured_response"], default=lambda o: o.model_dump()))
+    else:
+        print(result["messages"][-1].content)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit('usage: python run.py "your task"')
+    main(" ".join(sys.argv[1:]))

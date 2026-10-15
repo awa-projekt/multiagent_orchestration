@@ -1,0 +1,81 @@
+"""Offline tests for blueprint.yaml: scripted models, no API key needed."""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+from awa import Blueprint
+from awa.testing import tool_call
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+
+@pytest.fixture(autouse=True)
+def _fresh_data() -> Iterator[None]:
+    tools.PUBLISHED.clear()
+    yield
+    tools.PUBLISHED.clear()
+
+
+def test_blueprint_is_valid() -> None:
+    issues = Blueprint.from_yaml(BLUEPRINT).check(tools=TOOLS)
+    assert [issue for issue in issues if issue.severity == "error"] == []
+
+
+def test_search_finds_articles() -> None:
+    assert "KB-2" in tools.search_knowledge_base("heat pump costs")
+    assert tools.search_knowledge_base("volcanoes").startswith("No articles")
+
+
+def scripts() -> dict[str, list]:
+    return {
+        "lead": [
+            tool_call("delegate_task", {"agent": "researcher", "task": "Facts on heat pumps."}),
+            tool_call("delegate_task", {"agent": "writer", "task": "Brief from: KB-1, KB-2."}),
+            "Published the heat pump brief.",
+        ],
+        "researcher": [
+            tool_call("search_knowledge_base", {"query": "heat pumps"}),
+            "Heat pumps move heat (KB-1) and cost 30% less to run (KB-2).",
+        ],
+        "writer": [
+            tool_call("publish_brief", {"title": "Heat pumps", "body": "They save 30%."}),
+            "Published 'Heat pumps'.",
+        ],
+    }
+
+
+def test_lead_delegates_and_publishing_waits_for_approval(build_offline) -> None:
+    offline = build_offline(scripts())
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Write a brief on heat pumps.")
+        assert paused.is_interrupted
+        assert paused.interrupts[0]["value"]["tool"] == "publish_brief"
+        assert tools.PUBLISHED == []  # nothing is published before a human decides
+
+        done = await offline.system.resume(paused.thread_id, {"action": "approve"})
+        assert done.output == "Published the heat pump brief."
+        assert offline.models["researcher"].call_count == 2  # searched, then answered
+
+    asyncio.run(scenario())
+    assert [brief["title"] for brief in tools.PUBLISHED] == ["Heat pumps"]
+
+
+def test_a_rejected_brief_is_not_published(build_offline) -> None:
+    offline = build_offline(scripts())
+
+    async def scenario() -> None:
+        paused = await offline.system.run("Write a brief on heat pumps.")
+        await offline.system.resume(paused.thread_id, {"action": "reject", "note": "Too short."})
+
+    asyncio.run(scenario())
+    assert tools.PUBLISHED == []
+    # The writer saw the rejection as its tool result.
+    assert "Too short." in str(offline.models["writer"].calls[1].last_message.content)

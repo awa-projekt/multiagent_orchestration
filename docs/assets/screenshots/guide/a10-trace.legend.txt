@@ -1,0 +1,5 @@
+*In the picture:*
+
+1. What the whole run used.
+2. The checker looked the invoice up in the ledger.
+3. Who approved, and how long the run waited.

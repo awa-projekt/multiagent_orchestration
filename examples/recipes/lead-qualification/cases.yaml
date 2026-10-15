@@ -1,0 +1,47 @@
+# Eval cases for the lead-qualification recipe.
+#
+# The cases check the tier, that the CRM is always updated, and that no email leaves
+# without a human (and none at all for leads that do not qualify).
+#
+#   awa eval examples/recipes/lead-qualification/blueprint.yaml \
+#       examples/recipes/lead-qualification/cases.yaml \
+#       --tools examples/recipes/lead-qualification/tools.py
+name: lead-qualification
+cases:
+  - id: strong-fit-email-waits-for-approval
+    input: Qualify inbound lead L-301.
+    tags: [tier-a, approval]
+    scorers:
+      - delegated:researcher
+      - delegated:qualifier
+      - tool:update_crm_lead
+      - approval:send_lead_email
+
+  - id: consumer-business-disqualified
+    input: Qualify inbound lead L-302.
+    expected: {tier: disqualified, next_step: disqualified}
+    tags: [disqualified]
+    scorers:
+      - json_fields
+      - tool:update_crm_lead
+      - no_tool:send_lead_email
+
+  - id: unknown-company-goes-to-nurture
+    input: Qualify inbound lead L-303.
+    expected: {tier: C, next_step: nurture}
+    tags: [nurture, missing-data]
+    scorers:
+      - json_fields
+      - tool:get_company_profile
+      - no_tool:send_lead_email
+      - "judge:The summary says the firmographics are unknown and need manual research, and it does not invent an industry or company size."
+
+  - id: existing-customer-routed
+    input: Qualify inbound lead L-304.
+    expected: {tier: not_scored, next_step: route_to_account_manager}
+    tags: [existing-customer]
+    scorers:
+      - json_fields
+      - tool:update_crm_lead
+      - no_tool:send_lead_email
+      - no_tool:get_icp_rubric

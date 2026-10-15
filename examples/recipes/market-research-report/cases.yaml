@@ -1,0 +1,50 @@
+# Eval cases for the market-research-report recipe.
+#
+# The cases check that the report is sourced (every figure cites a source id), that the
+# review loop removes unsourced claims, that the scope is respected, and that missing data
+# is reported as a gap instead of being invented.
+#
+#   awa eval examples/recipes/market-research-report/blueprint.yaml \
+#       examples/recipes/market-research-report/cases.yaml \
+#       --tools examples/recipes/market-research-report/tools.py
+name: market-research-report
+cases:
+  - id: full-report-with-sources
+    input: "Market research report: predictive maintenance software for mid-sized manufacturers in DACH."
+    expected: ["## Executive summary", "[S-1]", "[S-2]", "[S-4]", "kb://reports/"]
+    tags: [full]
+    scorers:
+      - contains
+      - tool:get_market_statistics
+      - tool:get_competitor_profiles
+      - delegated:reviewer
+      - tool:save_report_to_knowledge_base
+      - "judge:The report has an executive summary, a source id for every figure, a labeled projection and a risks section."
+
+  - id: review-removes-unsourced-claims
+    input: "Market research report: predictive maintenance software for mid-sized manufacturers in DACH."
+    tags: [quality]
+    metadata:
+      why: The first draft extrapolates beyond the sources; the reviewer must catch it.
+    scorers:
+      - 'regex:^(?![\s\S]*double by 2028)[\s\S]*## Sources'   # the claim is gone, the report is there
+      - delegated:writer
+      - tool:read_source
+
+  - id: competitors-only
+    input: "Market research report, competitors only: predictive maintenance software in DACH."
+    expected: ["Vendor C", "[S-4]"]
+    tags: [scope]
+    scorers:
+      - contains
+      - delegated:competitor_researcher
+      - no_tool:get_market_statistics
+
+  - id: unknown-market-reports-gaps
+    input: "Market research report: underwater drone insurance in Antarctica."
+    expected: ["no reliable data"]
+    tags: [missing-data]
+    scorers:
+      - contains
+      - no_tool:read_source
+      - tool:save_report_to_knowledge_base

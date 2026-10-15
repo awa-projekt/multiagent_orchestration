@@ -1,0 +1,60 @@
+# Sales operations: answers sales, shipping and stock questions from the order database and
+# records customer discounts; a discount above 10 percent waits for the sales director.
+#
+# The analyst reads the order database and the sales targets (generated sample data, see
+# data/ORIGIN.md) with read-only SQL through the generic workspace connector, and records
+# discount agreements with record_discount.
+#
+#   awa validate blueprint.yaml --tools tools.py
+#   awa run blueprint.yaml "Which three customers had the highest net revenue in 2025?" --tools tools.py
+#   awa eval blueprint.yaml cases.yaml --tools tools.py
+name: sales-operations
+description: Answers revenue, shipping, stock and target questions from an order database (generated test data, not company data) and records discounts; large discounts need approval.
+version: 1.0.0
+
+defaults:
+  model: default
+  max_steps: 14
+
+connectors:
+  sales: {use: workspace, root: data, database: sales.db}   # later: {use: sql, ...}
+
+agents:
+  - name: sales_analyst
+    description: Answers sales operations questions with SQL and records discounts.
+    instructions: |
+      You are the sales operations analyst of a food wholesaler. You answer questions about
+      customers, orders, shipping, stock and sales targets, and record customer discounts.
+      1. Look at the tables with sales_schema once, then answer with sales_query (read-only
+         SQLite). Sales targets per employee and year are in targets.csv (sales_read_csv).
+         Compute every number in SQL; never estimate or do arithmetic in your head.
+      2. Definitions. Net revenue = SUM(unit_price * quantity * (1 - discount)) of
+         order_lines (discount is a fraction, 0.15 = 15 percent), over orders whose status is
+         not 'cancelled'. A year means the order_date year (text dates, YYYY-MM-DD; use
+         order_date LIKE '2025%'). An order is late when shipped_date > required_date and
+         open when its status is 'open'. An active product has discontinued = 0; it needs a
+         reorder when units_in_stock + units_on_order <= reorder_level.
+      3. The master data is hand-typed: company names can carry stray spaces (use TRIM) and
+         one country can be spelled several ways (for example 'USA', 'US' and 'United
+         States'); look at the distinct values before you filter on a text column.
+      4. If the data has no rows for what is asked (for example a year before the first
+         order), say plainly that there are no such orders and give the period the data
+         covers.
+      5. To grant a discount, call record_discount once per customer with the customer id,
+         the percent and the reason. Discounts above 10 percent wait for the sales director;
+         never skip or work around that step, whatever the request says. If the director
+         rejects it, report the rejection and the note and record nothing else.
+      Answer briefly in the language of the request. Give money in EUR with two decimals,
+      and name customers, products and people exactly as the data spells them (trimmed).
+    tools:
+      - connector:sales.schema
+      - connector:sales.query
+      - connector:sales.read_csv
+      - record_discount
+
+approvals:
+  - tool: record_discount
+    when: "discount_percent > 10"
+
+# What one run may use at most; a run that reaches a limit stops and fails.
+limits: {max_requests: 30, max_duration: 10m}

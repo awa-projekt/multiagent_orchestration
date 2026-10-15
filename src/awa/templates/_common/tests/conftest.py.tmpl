@@ -1,0 +1,73 @@
+"""Offline test helpers for the blueprint.
+
+`build_offline` builds `blueprint.yaml` with the tools from `tools.py` and gives
+every agent its own scripted model, so a test states exactly what each agent
+does. Real model requests are blocked for every test.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import pytest
+from awa import Blueprint
+from awa.models import ModelRegistry, allow_model_requests
+from awa.testing import FakeChatModel, FunctionChatModel, ModelCall, ScriptItem
+from langgraph.checkpoint.memory import InMemorySaver
+
+import tools
+
+BLUEPRINT = Path(__file__).resolve().parents[1] / "blueprint.yaml"
+TOOLS = [getattr(tools, name) for name in tools.__all__]
+
+
+@dataclass
+class OfflineSystem:
+    """The built system and the scripted model of each agent."""
+
+    system: Any
+    models: dict[str, Any]
+
+
+@pytest.fixture(autouse=True)
+def _no_real_model_requests() -> Iterator[None]:
+    with allow_model_requests(False):
+        yield
+
+
+@pytest.fixture
+def build_offline() -> Callable[[Mapping[str, Sequence[ScriptItem]]], OfflineSystem]:
+    """Return a builder: `build_offline({"agent": [response, ...], ...})`.
+
+    Agents without a script fail the test if they are called.
+    """
+
+    def build(scripts: Mapping[str, Sequence[ScriptItem]]) -> OfflineSystem:
+        blueprint = Blueprint.from_yaml(BLUEPRINT)
+        unknown = set(scripts) - {spec.name for spec in blueprint.agents}
+        assert not unknown, f"scripts for unknown agents: {sorted(unknown)}"
+        registry = ModelRegistry()
+        models: dict[str, Any] = {}
+        agents = []
+        for spec in blueprint.agents:
+            script = scripts.get(spec.name)
+            model = FakeChatModel(script) if script else FunctionChatModel(_unexpected(spec.name))
+            registry.register(f"offline-{spec.name}", model)
+            models[spec.name] = model
+            agents.append(spec.model_copy(update={"model": f"offline-{spec.name}"}))
+        offline = blueprint.model_copy(update={"agents": agents})
+        # Every entrypoint (agent, team, workflow, network) pauses for approvals.
+        system = offline.build(tools=TOOLS, model_registry=registry, checkpointer=InMemorySaver())
+        return OfflineSystem(system, models)
+
+    return build
+
+
+def _unexpected(agent: str) -> Callable[[ModelCall], str]:
+    def respond(call: ModelCall) -> str:
+        raise AssertionError(f"agent {agent!r} has no script but was called")
+
+    return respond

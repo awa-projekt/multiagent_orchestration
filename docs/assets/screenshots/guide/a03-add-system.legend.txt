@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. The question. What you type stays hidden.
+2. awa made one small, read-only call to the ledger.
+3. The structure awa read: the table and its columns, no rows.
+4. The tools the agents get: they can read the ledger, not change it.

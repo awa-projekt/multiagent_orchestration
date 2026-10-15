@@ -1,0 +1,65 @@
+# {{name}}
+
+{{summary}}
+
+This project was created with `awa init`. The whole process lives in
+`blueprint.yaml` (roles, tools, collaboration and approvals); the tools it
+calls are plain Python functions in `tools.py`.
+
+| File | What it is |
+| --- | --- |
+| `blueprint.yaml` | The process: agents, instructions, team or workflow, approvals. |
+| `tools.py` | The tools the agents call. Replace the sample data with your external systems. |
+| `tests/test_blueprint.py` | Offline tests: scripted models, no API key, no network. |
+| `evals/cases.yaml` | Eval cases for `awa eval`, run against a real model. |
+| `.env.example` | The settings awa reads. `awa setup` writes your `.env`, or copy this file to `.env`. |
+
+## Set up
+
+awa is already installed (you ran `awa init`); this project does not install it again and
+asks no package index for it. Work in the same environment (`awa doctor` shows which one).
+
+```bash
+pip install pytest      # for the offline tests, if it is missing
+pytest                  # offline tests, no key
+awa setup               # set your provider's key in .env (or: awa ui, then Set up)
+```
+
+## Run
+
+```bash
+awa validate blueprint.yaml                         # check the blueprint and its tools
+awa show blueprint.yaml --mermaid                   # draw the topology
+awa chat blueprint.yaml                             # talk to the system
+awa run blueprint.yaml "{{example_request}}" --stream
+```
+
+In `awa chat`, approval-gated tool calls are asked for inline; `/help` lists
+the commands (`/reset`, `/usage`, `/history`, `/exit`).
+
+## Serve it as an HTTP API
+
+Install the `server` extra into awa once; `awa doctor` prints the exact command for your install.
+
+```bash
+awa serve blueprint.yaml
+```
+
+## Test and evaluate
+
+```bash
+pytest                                              # offline, deterministic
+awa eval blueprint.yaml evals/cases.yaml
+```
+
+The tests give every agent its own scripted model (`awa.testing.FakeChatModel`),
+so they check the wiring of the process (who delegates to whom, which tools
+run, which calls wait for approval) without calling a provider. The
+evaluation runs the real model on `evals/cases.yaml` and exits with code 1
+when a case fails, so it can gate a deployment in CI.
+
+## Next steps
+
+1. Replace the sample data in `tools.py` with calls to your external systems.
+2. Adjust the instructions in `blueprint.yaml` and re-run `awa validate`.
+3. Add a test per rule that matters and an eval case per typical request.

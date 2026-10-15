@@ -1,0 +1,5 @@
+Expense policy (synthetic sample), version 3
+
+Travel expenses are refunded within 10 working days after the report is complete.
+Receipts are required for every item above 25 EUR.
+Hotel stays above 150 EUR per night need approval from the department head.

@@ -1,0 +1,6 @@
+*In the picture:*
+
+1. The system, and whether it is set up.
+2. Opens the fields. Fill in only the systems your process uses.
+3. The address of the system.
+4. The key. What you type is hidden.

@@ -1,0 +1,38 @@
+# Cases of benchmark scenario 3 (GraphQL lookup). Exact answers from data/suppliers.json and the
+# Countries API: DE and FR use EUR; JP, CA and US lie outside Europe; the capital of CH is Bern.
+name: graphql-lookup
+cases:
+  - id: euro-suppliers
+    input: Which suppliers are located in countries that use the euro, and how much do we spend with them per year in total?
+    expected:
+      supplier_ids: [S-02, S-03, S-07]
+      count: 3
+      total_annual_spend_eur: 88130
+    tags: [graphql, json]
+    scorers:
+      - json_fields
+      - tool:json_query
+      - tool:countries_query
+
+  - id: suppliers-outside-europe
+    input: Which suppliers are located outside Europe, and what is their annual spend in total?
+    expected:
+      supplier_ids: [S-04, S-06, S-08]
+      count: 3
+      total_annual_spend_eur: 117350
+    tags: [graphql, json]
+    scorers:
+      - json_fields
+      - tool:countries_query
+      - "judge:The summary names the three countries (Japan, Canada, United States) of the suppliers outside Europe."
+
+  - id: capital-and-currency
+    input: Supplier S-05 - what is the capital of its country, and does that country use the euro?
+    expected:
+      supplier_ids: [S-05]
+      capital: Bern
+      uses_euro: false
+    tags: [graphql, json]
+    scorers:
+      - json_fields
+      - tool:countries_query

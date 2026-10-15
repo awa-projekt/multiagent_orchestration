@@ -1,0 +1,35 @@
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "examples"]
+
+[format]
+exclude = ["*.md"]  # documentation examples are wrapped for reading
+skip-magic-trailing-comma = true
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "TID251"]
+ignore = ["E501"]
+
+[lint.isort]
+known-first-party = ["awa"]
+split-on-trailing-comma = false
+
+# The upstream seam (docs/about/stability.md, Python, LangChain and LangGraph). Tests, examples and scripts
+# may import LangChain/LangGraph directly, but not the modules and names that
+# are private, internal or separately versioned. `src/ruff.toml` bans every
+# direct upstream import inside the package: there, only `awa._compat` imports
+# upstream.
+[lint.flake8-tidy-imports.banned-api]
+"langgraph.prebuilt".msg = "Separately versioned (patch releases have broken callers). Import from awa._internal.upstream.agents, or the public langchain.agents.middleware export."
+"langgraph._internal".msg = "Private LangGraph module; use the public API through awa._compat."
+"langchain_core._api".msg = "Private langchain_core module; use the public API through awa._compat."
+"langchain_core._import_utils".msg = "Private langchain_core module."
+"langchain.agents.middleware.types".msg = "Internal module; import from langchain.agents.middleware (or awa._internal.upstream.agents)."
+"langchain.agents.middleware._retry".msg = "Private module."
+"langchain.agents.middleware._execution".msg = "Private module."
+"langchain_core.runnables.config.var_child_runnable_config".msg = "Not exported upstream; use awa._internal.upstream.runnables."
+"langchain_community".msg = "Archived in June 2026; use a partner package, an MCP server or awa.tools.importing."
+
+[lint.per-file-ignores]
+# Contract tests pin exactly these upstream locations.
+"tests/upstream/**" = ["TID251"]

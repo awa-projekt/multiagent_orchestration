@@ -1,0 +1,51 @@
+# ${title}
+
+${description}
+
+This folder is a standalone LangChain and LangGraph project, exported from the awa blueprint
+`${blueprint}`. It runs without awa installed. The export is one-way: nothing syncs back, so
+from here on you change the code in this folder, with LangChain and LangGraph only. If you want
+to keep the awa project as the source of truth, keep working in the blueprint and export again
+into a new folder.
+
+## Run
+
+```console
+$$ python -m venv .venv && .venv/bin/pip install -e ".[dev]"      # Windows: .venv\Scripts\pip
+$$ cp .env.example .env                                           # then add the model's key
+$$ python run.py "your task"
+```
+
+`run.py` runs the agent once with an in-memory checkpointer and asks on the terminal when a tool
+call needs approval. `langgraph dev` serves the graph in LangGraph Studio (`langgraph.json`).
+
+## Test
+
+```console
+$$ pytest
+```
+
+The tests are offline: a scripted chat model (`tests/fakes.py`) stands in for the real one.
+
+## Where things are
+
+| File | What it holds |
+|---|---|
+| `src/${package}/graph.py` | the agent, built with `create_agent`; `build_graph(model, checkpointer)` and `graph` |
+| `src/${package}/settings.py` | the model id (override with the variable `MODEL`), its settings and the run limits |
+| `src/${package}/prompts/${agent}.md` | the system prompt, frozen as awa rendered it at export |
+${files}
+
+## Approvals
+
+${approvals}
+
+## What the export changes
+
+The export reads the validated blueprint and writes what awa decided at build time: the final
+system prompt, the model, the tools and the limits. It re-expresses them with LangChain built-ins,
+so the behavior matches (same tool calls, same approvals, same output schema) but the code is
+not awa's internal stack. awa's own extras are not reproduced: tool timeouts, retries,
+idempotency and result framing, prompt and result caches, run records, redaction and the
+output and tool guards.
+${warnings}

@@ -1,0 +1,4 @@
+id,time,service,change,by
+D-881,2026-10-02T08:41:00Z,gateway,release 4.12.1,release-bot
+D-882,2026-10-02T09:05:00Z,payments-db,config change: max_connections 100 -> 20,deploy-bot
+D-883,2026-10-02T09:48:00Z,payments-db,rollback of D-882,deploy-bot

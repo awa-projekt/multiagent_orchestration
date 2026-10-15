@@ -1,0 +1,5 @@
+From: omar.haddad@company.example
+Subject: 4 laptops for new sales hires
+
+Hi, please order 4 laptops for the new sales hires, CC-400. Kern IT quoted 4,800 EUR in
+total (1,200 each). Start date is the 1st of December.

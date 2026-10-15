@@ -1,0 +1,8 @@
+*In the picture:*
+
+1. The kind of system: here a SQL database. The list comes from awa's catalog.
+2. Your name for it. The design and the data map use this name.
+3. Which database. For a file: SQLite.
+4. Where it is: for a file its path, for a server its address. Hidden.
+5. One small, read-only call. Nothing is saved yet.
+6. The result of the test, in plain words.

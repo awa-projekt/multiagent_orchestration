@@ -1,0 +1,161 @@
+{
+ "init/minimal": [],
+ "init/network": [
+  "network"
+ ],
+ "init/support": [
+  "team"
+ ],
+ "init/team": [
+  "team"
+ ],
+ "init/workflow": [
+  "workflow"
+ ],
+ "processes/invoice-check": [
+  "agents.extractor.tools.builtin:read_file",
+  "agents.price_checker.documents",
+  "agents.price_checker.tools.builtin:read_file",
+  "data",
+  "process"
+ ],
+ "recipes/content-production": [
+  "workflow"
+ ],
+ "recipes/contract-review": [
+  "workflow"
+ ],
+ "recipes/customer-support-desk": [
+  "agents.billing_specialist.memory",
+  "agents.returns_specialist.memory",
+  "agents.technical_specialist.memory",
+  "agents.triage.memory",
+  "approvals[0].when",
+  "team"
+ ],
+ "recipes/deep-research": [
+  "agents.citation_agent.tools.builtin:verify_quote",
+  "agents.research_lead.tools.connector:workspace.write_file",
+  "agents.researcher.tools.builtin:fetch_url",
+  "agents.researcher.tools.builtin:web_search",
+  "connectors",
+  "team"
+ ],
+ "recipes/employee-onboarding": [
+  "network"
+ ],
+ "recipes/invoice-processing": [
+  "approvals[0].when",
+  "approvals[1].when",
+  "team"
+ ],
+ "recipes/it-incident-triage": [
+  "approvals[0].when",
+  "approvals[1].when",
+  "team"
+ ],
+ "recipes/lead-qualification": [
+  "team"
+ ],
+ "recipes/market-research-report": [
+  "network"
+ ],
+ "usecases/compliance-news-watch": [
+  "agents.researcher.tools.connector:web",
+  "connectors",
+  "team",
+  "tools.py:18"
+ ],
+ "usecases/data-quality-reconciliation": [
+  "agents.reconciler.tools.connector:warehouse.execute",
+  "agents.reconciler.tools.connector:warehouse.query",
+  "connectors",
+  "tools.py:24"
+ ],
+ "usecases/email-inbox-triage": [
+  "agents.drafter.tools.connector:kb.read_file",
+  "agents.drafter.tools.connector:kb.search",
+  "connectors",
+  "team",
+  "tools.py:18"
+ ],
+ "usecases/expense-report-audit": [
+  "agents.auditor.tools.connector:workspace.read_csv",
+  "agents.auditor.tools.connector:workspace.read_file",
+  "agents.auditor.tools.connector:workspace.read_pdf",
+  "approvals[0].when",
+  "connectors",
+  "tools.py:26"
+ ],
+ "usecases/incident-postmortem": [
+  "agents.timeline_builder.tools.connector:incident_data.read_csv",
+  "connectors",
+  "tools.py:17",
+  "workflow"
+ ],
+ "usecases/inventory-replenishment": [
+  "agents.replenishment_planner.tools.connector:erp.create_purchase_order",
+  "agents.replenishment_planner.tools.connector:erp.list_stock",
+  "agents.replenishment_planner.tools.connector:inventory.query",
+  "connectors"
+ ],
+ "usecases/meeting-notes-to-tasks": [
+  "agents.meeting_secretary.tools.connector:workspace.list_files",
+  "agents.meeting_secretary.tools.connector:workspace.read_csv",
+  "agents.meeting_secretary.tools.connector:workspace.read_docx",
+  "agents.meeting_secretary.tools.connector:workspace.read_file",
+  "connectors",
+  "tools.py:22"
+ ],
+ "usecases/order-to-cash-exceptions": [
+  "agents.ar_analyst.tools.connector:workspace.list_files",
+  "agents.ar_analyst.tools.connector:workspace.query",
+  "agents.ar_analyst.tools.connector:workspace.query_excel",
+  "agents.ar_analyst.tools.connector:workspace.read_csv",
+  "agents.ar_analyst.tools.connector:workspace.read_file",
+  "connectors",
+  "tools.py:22",
+  "tools.py:24"
+ ],
+ "usecases/purchase-requisition": [
+  "agents.buyer.tools.connector:workspace.read_csv",
+  "agents.buyer.tools.connector:workspace.read_file",
+  "agents.buyer.tools.connector:workspace.write_file",
+  "approvals[0].when",
+  "connectors",
+  "tools.py:21"
+ ],
+ "usecases/recruiting-cv-screening": [
+  "agents.cv_reader.tools.connector:workspace.read_docx",
+  "agents.cv_reader.tools.connector:workspace.read_pdf",
+  "agents.recruiter.tools.connector:workspace.list_files",
+  "agents.recruiter.tools.connector:workspace.read_csv",
+  "agents.recruiter.tools.connector:workspace.read_file",
+  "connectors",
+  "team",
+  "tools.py:19",
+  "tools.py:21"
+ ],
+ "usecases/sales-operations": [
+  "agents.sales_analyst.tools.connector:sales.query",
+  "agents.sales_analyst.tools.connector:sales.read_csv",
+  "agents.sales_analyst.tools.connector:sales.schema",
+  "connectors",
+  "tools.py:16"
+ ],
+ "usecases/supplier-due-diligence": [
+  "agents.dd_lead.tools.connector:workspace.read_csv",
+  "agents.dd_lead.tools.connector:workspace.read_file",
+  "agents.web_researcher.tools.builtin:fetch_url",
+  "agents.web_researcher.tools.builtin:web_search",
+  "connectors",
+  "team",
+  "tools.py:21"
+ ],
+ "usecases/weekly-management-report": [
+  "agents.kpi_analyst.tools.connector:finance.query",
+  "connectors",
+  "tools.py:17",
+  "workflow"
+ ]
+}

@@ -1,0 +1,53 @@
+# Eval cases for the employee-onboarding recipe.
+#
+# The cases check that every department did its part, and that the plan fits the hire:
+# no desk for remote hires, no payroll record for contractors.
+#
+#   awa eval examples/recipes/employee-onboarding/blueprint.yaml \
+#       examples/recipes/employee-onboarding/cases.yaml \
+#       --tools examples/recipes/employee-onboarding/tools.py
+name: employee-onboarding
+cases:
+  - id: office-employee
+    input: Onboard new hire H-2001.
+    expected: ["maria.sample@company.example", "PR-2001", "BD-2001", "Lena Mentor"]
+    tags: [employee, office]
+    scorers:
+      - contains
+      - delegated:it_specialist
+      - delegated:hr_specialist
+      - delegated:facilities_coordinator
+      - tool:create_payroll_record
+      - tool:schedule_first_week
+      - tool:send_manager_summary
+
+  - id: remote-employee
+    input: Onboard new hire H-2002.
+    expected: ["tom.example@company.example", "PR-2002"]
+    tags: [employee, remote]
+    scorers:
+      - contains
+      - tool:order_hardware
+      - tool:create_payroll_record
+      - no_tool:assign_desk
+      - no_tool:issue_badge
+
+  - id: contractor-not-on-payroll
+    input: Onboard new hire H-2003.
+    expected: ["ava.placeholder@company.example"]
+    tags: [contractor]
+    scorers:
+      - contains
+      - tool:create_accounts
+      - tool:assign_desk
+      - no_tool:create_payroll_record
+      - "judge:The checklist covers accounts, hardware, buddy, desk, badge and the first week, and neither creates nor plans a payroll record for the contractor (saying that payroll does not apply to a contractor is fine)."
+
+  - id: unknown-hire
+    input: Onboard new hire H-9999.
+    expected: ["H-9999"]
+    tags: [edge-case]
+    scorers:
+      - contains
+      - no_tool:create_accounts
+      - no_tool:create_tasks

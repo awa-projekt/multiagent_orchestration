@@ -1,0 +1,7 @@
+*In the picture:*
+
+1. awa writes the tests first and then designs the system.
+2. It runs every eval case on sample data.
+3. Where each source of data comes from, in plain words.
+4. Your ledger: live, read through the SQL connector, read-only.
+5. The exact technical names, for your IT team.
